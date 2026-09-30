@@ -124,6 +124,10 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <button class="btn-o" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
 <button class="btn-o" id="speedBtn" onclick="toggleSpeed()">🚀 1x</button>
 <button class="btn-fs" id="fsBtn" onclick="toggleFullscreen()">⛶ Full Screen</button>
+<button class="btn-o" onclick="zoomBy(1.25)">🔍+</button>
+<button class="btn-o" onclick="zoomBy(0.8)">🔍−</button>
+<button class="btn-o" id="zoomBtn" onclick="resetZoom()">🔍 <span id="zoomT">100%</span></button>
+<button class="btn-o" id="followBtn" onclick="toggleFollow()">📷 Follow: ON</button>
 <button class="btn-o" onclick="toggleSettings()">⚙ Settings</button>
 <button class="btn-dl" onclick="downloadPhoto()">📸 Photo</button>
 <button class="btn-dl" onclick="downloadGame()">⬇ Download Game</button>
@@ -182,6 +186,7 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 💣 <b>Bomb:</b> Rally point par dhamaka (pehle goliyan, phir DHAMAKA)! 🍬 <b>Cheeni:</b> 8 dane. ⚡ <b>Josh:</b> 8 sec speed.<br>
 🗡 <b>Talwar:</b> Soldier/Raja ki har takkar par talwar ki jhanjhanahat! 🔫 <b>Goli:</b> Fort par hamle + Bomb me goliyon ki thain-thain! <kbd>T</kbd>/<kbd>G</kbd> dabakar test karo.<br>
 📱 <b>Mobile:</b> Canvas par TAP = hamla, joystick = Raja move. <b>⛶ Full Screen</b> dabao (ya canvas double-tap / <kbd>M</kbd>) — phone tedha (landscape) karo, game sabse bada dikhega! ✕ se wapas.<br>
+🔍 <b>Zoom:</b> 🔍+ / 🔍− button, mouse wheel, ya 2-ungli pinch se <b>zoom in/out</b>! <kbd>+</kbd>/<kbd>−</kbd> keys bhi, 📷 Follow se camera Raja ke saath chalega. <kbd>V</kbd> se follow on/off.<br>
 ⬇ <b>Download:</b> Upar <b>Download Game</b> dabao - ek html file milegi. Usko WhatsApp se bhejo, dost bina net ke bhi khelega! 📲 <b>Share</b> se link bhejo.
 </div>
 </div>
@@ -328,6 +333,9 @@ for(let i=0;i<90;i++)pebbles.push({x:rnd(0,W),y:rnd(0,H),r:rnd(1.5,5),s:rnd(0,6.
 for(let i=0;i<70;i++)grassTufts.push({x:rnd(0,W),y:rnd(0,H),s:rnd(0.6,1.4),ph:rnd(0,6.28),dark:Math.random()<0.4});
 for(let i=0;i<14;i++)flowers.push({x:rnd(20,W-20),y:rnd(20,H-20),c:['#ff6b9d','#ffd93d','#ffffff','#c084fc'][i%4],ph:rnd(0,6.28)});
 for(let i=0;i<26;i++)leafPatches.push({x:rnd(0,W),y:rnd(0,H),r:rnd(8,26),a:rnd(0.04,0.1)});
+let shrooms=[],clovers=[];
+for(let i=0;i<10;i++)shrooms.push({x:rnd(30,W-30),y:rnd(60,H-20),s:rnd(0.7,1.3),ph:rnd(0,6.28)});
+for(let i=0;i<22;i++)clovers.push({x:rnd(0,W),y:rnd(0,H),s:rnd(0.7,1.2),ph:rnd(0,6.28)});
 for(let i=0;i<28;i++)motes.push({x:rnd(0,W),y:rnd(0,H),vx:rnd(-0.2,0.3),vy:rnd(-0.15,0.15),r:rnd(1,2.5),ph:rnd(0,6.28)});
 for(let i=0;i<3;i++)cloudShadows.push({x:rnd(0,W),y:rnd(0,H),rx:rnd(150,260),ry:rnd(50,80),vx:rnd(0.2,0.5)});
 
@@ -683,6 +691,15 @@ function orderAll(cmd){
 function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ Chalao':'⏸ Pause';S.click()}
 function toggleSpeed(){speed=speed===1?2:1;document.getElementById('speedBtn').textContent='🚀 '+speed+'x';S.click()}
 // ===== FULLSCREEN GAMEPLAY (mobile + PC) =====
+let zoom=1,camX=W/2,camY=H/2,followCam=true,activeTouches=0;
+function zoomBy(f){zoom=Math.max(0.7,Math.min(2.5,zoom*f));clampCam();S.click()}
+function resetZoom(){zoom=1;camX=W/2;camY=H/2;S.click()}
+function toggleFollow(){followCam=!followCam;document.getElementById('followBtn').textContent=followCam?'📷 Follow: ON':'📷 Follow: OFF';S.click();flash(followCam?'📷 Camera Raja ke saath chalegi!':'📷 Camera beech me rahega')}
+function clampCam(){
+ const hw=W/2/zoom,hh=H/2/zoom;
+ camX=(W<=hw*2)?W/2:Math.max(hw,Math.min(W-hw,camX));
+ camY=(H<=hh*2)?H/2:Math.max(hh,Math.min(H-hh,camY));
+}
 function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
 function updateFsBtn(){const b=document.getElementById('fsBtn');if(b)b.textContent=isFs()?'🗗 Exit Full':'⛶ Full Screen';document.body.classList.toggle('fs-mode',isFs()||document.body.classList.contains('fs-sticky'));const f=document.getElementById('fsFloat');if(f)f.textContent=isFs()?'🗗':'⛶'}
 async function toggleFullscreen(){
@@ -723,7 +740,14 @@ function exitGame(){
 function resumeGame(){document.getElementById('exitScreen').style.display='none';paused=false;document.getElementById('pauseBtn').textContent='⏸ Pause';S.click()}
 function closeTab(){S.click();document.getElementById('exitScore').innerHTML+='<br><span style="color:#f88">Tab band karne ke liye browser ka X dabao — browser ne auto-close block kiya hai.</span>';try{window.close()}catch(e){}setTimeout(()=>{try{window.open('','_self');window.close()}catch(e){}},300)}
 let flashT=0;function flash(t){const m=document.getElementById('msg');m.textContent=t;m.style.animation='none';void m.offsetWidth;m.style.animation='';flashT=150}
-cv.addEventListener('pointerdown',e=>{ac();if(!started||paused)return;const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;rally={x,y};ants.forEach(a=>{if(a.team==='kali'&&FIGHTERS.includes(a.type)){a.tx=x;a.ty=y}});if(hero&&hero.hp>0){hero.tx=x;hero.ty=y}spark(x,y,'#ffffff',6);S.click()});
+function screenToWorld(cx,cy){const r=cv.getBoundingClientRect();const bx=(cx-r.left)*W/r.width,by=(cy-r.top)*H/r.height;return {x:camX+(bx-W/2)/zoom,y:camY+(by-H/2)/zoom}}
+cv.addEventListener('pointerdown',e=>{ac();if(!started||paused)return;if(activeTouches>1)return;const p=screenToWorld(e.clientX,e.clientY);rally={x:p.x,y:p.y};ants.forEach(a=>{if(a.team==='kali'&&FIGHTERS.includes(a.type)){a.tx=p.x;a.ty=p.y}});if(hero&&hero.hp>0){hero.tx=p.x;hero.ty=p.y}spark(p.x,p.y,'#ffffff',6);S.click()});
+// mouse wheel zoom (PC) + pinch zoom (mobile)
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(e.deltaY<0?1.12:1/1.12)},{passive:false});
+let pinchD=0;
+cv.addEventListener('touchstart',e=>{activeTouches=e.touches.length;if(e.touches.length===2){pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}},{passive:true});
+cv.addEventListener('touchmove',e=>{activeTouches=e.touches.length;if(e.touches.length===2){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinchD>0&&d>0)zoomBy(d/pinchD);pinchD=d}},{passive:false});
+cv.addEventListener('touchend',e=>{activeTouches=e.touches.length},{passive:true});
 document.addEventListener('keydown',e=>{
  keys[e.code]=true;
  if(e.code==='Escape'){const ex=document.getElementById('exitScreen');if(ex.style.display==='flex')resumeGame();else exitGame();return}
@@ -743,6 +767,9 @@ document.addEventListener('keydown',e=>{
  if(e.code==='KeyT'){S.swing();S.clash(true)}
  if(e.code==='KeyG')S.goliBurst(4);
  if(e.code==='KeyM')toggleFullscreen();
+ if(e.code==='KeyV')toggleFollow();
+ if(e.key==='+'||e.key==='=')zoomBy(1.2);
+ if(e.key==='-'||e.key==='_')zoomBy(1/1.2);
  if(e.code==='Space'){e.preventDefault();togglePause()}
 });
 document.addEventListener('keyup',e=>keys[e.code]=false);
@@ -978,7 +1005,13 @@ function endByFood(){gameOver=true;let k=Math.floor(G.kali.food),l=Math.floor(G.
 function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function draw(){
  ctx.save();if(shakeAll>0){ctx.translate(rnd(-shakeAll,shakeAll)/2,rnd(-shakeAll,shakeAll)/2);shakeAll--}
- ctx.clearRect(-20,-20,W+40,H+40);
+ ctx.clearRect(-30,-30,W+60,H+60);
+ // 📷 camera: Raja follow ya beech me
+ if(followCam&&hero&&hero.hp>0&&started&&!gameOver&&!paused){camX+=(hero.x-camX)*0.12;camY+=(hero.y-camY)*0.12}
+ else{camX+=(W/2-camX)*0.08;camY+=(H/2-camY)*0.08}
+ clampCam();
+ ctx.fillStyle='#3d5c22';ctx.fillRect(-30,-30,W+60,H+60);
+ ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-camX,-camY);
  // cached ground
  ctx.drawImage(bgC,0,0);
  // cloud shadows drifting
@@ -994,7 +1027,29 @@ function draw(){
   ctx.moveTo(g.x,g.y);ctx.quadraticCurveTo(g.x+sway,g.y-8*g.s,g.x+sway*1.4,g.y-12*g.s);
   ctx.moveTo(g.x+4,g.y);ctx.quadraticCurveTo(g.x+4+sway,g.y-6*g.s,g.x+4+sway*1.3,g.y-10*g.s);
   ctx.moveTo(g.x-4,g.y);ctx.quadraticCurveTo(g.x-4+sway,g.y-7*g.s,g.x-4+sway*1.2,g.y-11*g.s);
+  ctx.moveTo(g.x+8,g.y);ctx.quadraticCurveTo(g.x+8+sway*0.7,g.y-4*g.s,g.x+8+sway,g.y-7*g.s);
+  ctx.moveTo(g.x-8,g.y);ctx.quadraticCurveTo(g.x-8+sway*0.7,g.y-5*g.s,g.x-8+sway,g.y-8*g.s);
   ctx.stroke();
+  // beej ka dana (sirf halki ghaas par)
+  if(!g.dark){ctx.fillStyle='#d9c27a';ctx.beginPath();ctx.arc(g.x+sway*1.4,g.y-12*g.s,1.8,0,7);ctx.fill()}
+  // subah ki os (din me chamak)
+  if(nightF<0.25&&((g.x*7+g.y*13)|0)%5===0){ctx.fillStyle='rgba(200,240,255,0.85)';ctx.beginPath();ctx.arc(g.x+2,g.y-6*g.s,1.2,0,7);ctx.fill()}
+ }
+ // clover (teen-patti) + khumbhi
+ for(let c of clovers){
+  const cb=Math.sin(frame/35+c.ph)*1;
+  ctx.strokeStyle='#2d5a15';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+cb,c.y-5*c.s);ctx.stroke();
+  ctx.fillStyle='#3f9e2f';
+  for(let k=0;k<3;k++){const aa=k/3*6.28+c.ph;ctx.beginPath();ctx.arc(c.x+cb+Math.cos(aa)*2.5*c.s,c.y-6*c.s+Math.sin(aa)*2.5*c.s,2.2*c.s,0,7);ctx.fill()}
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.beginPath();ctx.arc(c.x+cb-1,c.y-7*c.s,0.8,0,7);ctx.fill();
+ }
+ for(let s of shrooms){
+  const sw2=Math.sin(frame/40+s.ph)*1;
+  ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(s.x,s.y+1,6*s.s,2.4,0,0,7);ctx.fill();
+  ctx.fillStyle='#e8dcc0';ctx.fillRect(s.x-2*s.s,s.y-8*s.s,4*s.s,8*s.s);
+  ctx.fillStyle='#d43d3d';ctx.beginPath();ctx.arc(s.x+sw2,s.y-8*s.s,6*s.s,Math.PI,0);ctx.fill();
+  ctx.fillStyle='#a82e2e';ctx.beginPath();ctx.arc(s.x+sw2,s.y-8*s.s,6*s.s,Math.PI*1.15,Math.PI*1.85);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x-2*s.s+sw2,s.y-10*s.s,1.4,0,7);ctx.arc(s.x+2*s.s+sw2,s.y-9*s.s,1.2,0,7);ctx.arc(s.x+sw2,s.y-12*s.s,1,0,7);ctx.fill();
  }
  for(let f of flowers){
   const bob=Math.sin(frame/30+f.ph)*1.5;
@@ -1002,7 +1057,8 @@ function draw(){
   ctx.fillStyle=f.c;for(let p=0;p<5;p++){const a=p/5*6.28+frame/60;ctx.beginPath();ctx.arc(f.x+Math.cos(a)*4,f.y-12+bob+Math.sin(a)*4,3,0,7);ctx.fill()}
   ctx.fillStyle='#ffef00';ctx.beginPath();ctx.arc(f.x,f.y-12+bob,3,0,7);ctx.fill();
  }
- // josh banner + rally
+ // josh banner + status pills (screen-space UI, camera se bahar)
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);
  if(joshT>0){ctx.save();ctx.shadowColor='#ffea00';ctx.shadowBlur=18;ctx.fillStyle='#3a2a00';rr(370,74,180,28,10);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ff0';ctx.font='bold 16px sans-serif';ctx.fillText('⚡ JOSH ON! '+(joshT/60).toFixed(0)+'s',382,93);ctx.restore()}
  // active effects + wave + weather pills
  {let px=300,py=112;ctx.font='bold 13px sans-serif';
@@ -1017,6 +1073,7 @@ function draw(){
   pill(nightF>0.5?'🌙 Raat':'☀ Din',nightF>0.5?'#818cf8':'#fde047');
   if(rainT>0)pill('🌧 Barish','#a5f3fc');
  }
+ ctx.restore();
  drawRally();
  // foods + powerups HQ
  for(let f of foods)drawFood(f);
@@ -1065,20 +1122,21 @@ function draw(){
   ctx.restore();f.y-=1;f.life--;
  }
  floats=floats.filter(f=>f.life>0);
+ // barish ki boondein (world me — zoom ke saath)
+ if(rainT>0){ctx.save();ctx.strokeStyle='rgba(170,210,255,0.55)';ctx.lineWidth=2;ctx.lineCap='round';for(let rd of rainDrops){ctx.beginPath();ctx.moveTo(rd.x,rd.y);ctx.lineTo(rd.x-3,rd.y+14);ctx.stroke()}ctx.restore()}
+ ctx.restore();
+ // ---- screen-space overlays (zoom se bahar) ----
  // raat ka andhera (mashaalon ki roshni me jung!)
  if(nightF>0.01){ctx.fillStyle=`rgba(8,8,35,${0.45*nightF})`;ctx.fillRect(0,0,W,H)}
  // tension: fort tootne wala ho to laal dhak-dhak kinari
  if(!gameOver&&started&&(G.kali.fort/G.kali.maxFort<0.2||G.laal.fort/G.laal.maxFort<0.2)){ctx.save();ctx.strokeStyle=`rgba(255,0,0,${0.35+0.25*Math.sin(frame/8)})`;ctx.lineWidth=16;ctx.strokeRect(6,6,W-12,H-12);ctx.restore()}
- // combo banner (bada center text — raat ke upar)
- if(bannerT>0){bannerT--;const bk=Math.min(1,bannerT/20,(160-bannerT)/15+0.3);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,bk));ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(bannerTxt,W/2,240);const bg2=ctx.createLinearGradient(0,200,0,250);bg2.addColorStop(0,'#fff7cc');bg2.addColorStop(1,'#ff9d00');ctx.fillStyle=bg2;ctx.fillText(bannerTxt,W/2,240);ctx.textAlign='left';ctx.restore()}
- // barish ki boondein
- if(rainT>0){ctx.save();ctx.strokeStyle='rgba(170,210,255,0.55)';ctx.lineWidth=2;ctx.lineCap='round';for(let rd of rainDrops){ctx.beginPath();ctx.moveTo(rd.x,rd.y);ctx.lineTo(rd.x-3,rd.y+14);ctx.stroke()}ctx.restore()}
  // vignette + cinematic top light
  const vg=ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.85);
  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.38)');
  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
  ctx.fillStyle='rgba(255,255,200,0.05)';ctx.fillRect(0,0,W,60);
- ctx.restore();
+ // combo banner (sabse upar, hamesha saaf)
+ if(bannerT>0){bannerT--;const bk=Math.min(1,bannerT/20,(160-bannerT)/15+0.3);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,bk));ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(bannerTxt,W/2,240);const bg2=ctx.createLinearGradient(0,200,0,250);bg2.addColorStop(0,'#fff7cc');bg2.addColorStop(1,'#ff9d00');ctx.fillStyle=bg2;ctx.fillText(bannerTxt,W/2,240);ctx.textAlign='left';ctx.restore()}
  if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillText('⏸ PAUSED',340,260);ctx.shadowBlur=0}
  if(flashT>0)flashT--;else if(!gameOver)document.getElementById('msg').textContent='';
  let tt=mode==='food'?Math.max(0,timeLeft):elapsed;
@@ -1344,8 +1402,16 @@ function drawAnt(a){
  // stripes
  ctx.strokeStyle=kali?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.35)';ctx.lineWidth=1.2;
  ctx.beginPath();ctx.moveTo(-12,-4);ctx.quadraticCurveTo(-9,0,-12,4);ctx.moveTo(-7,-5);ctx.quadraticCurveTo(-4,0,-7,5);ctx.stroke();
+ // worker: peeth par gehri dhaari
+ if(a.type==='worker'){ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-15,0);ctx.quadraticCurveTo(-9,-2.5,-3,0);ctx.stroke()}
+ // runner: bijli ka nishan
+ if(a.type==='runner'){ctx.fillStyle='#fef08a';ctx.beginPath();ctx.moveTo(-8,-3.5);ctx.lineTo(-5,-3.5);ctx.lineTo(-7,-0.5);ctx.lineTo(-4,-0.5);ctx.lineTo(-8.5,3);ctx.lineTo(-6.5,-0.2);ctx.lineTo(-9.5,-0.2);ctx.closePath();ctx.fill()}
+ // healer: chakkar kaatti pattiyan
+ if(a.type==='healer'){for(let oi=0;oi<2;oi++){const oa=frame/20+oi*Math.PI+(a.ph||0);const lx=Math.cos(oa)*12,ly=Math.sin(oa)*9;ctx.fillStyle='#4ade80';ctx.beginPath();ctx.ellipse(lx,ly,3,1.8,oa,0,7);ctx.fill();ctx.fillStyle='#166534';ctx.beginPath();ctx.arc(lx,ly,0.8,0,7);ctx.fill()}}
  // tank armor plate + rivets
- if(a.type==='tank'){ctx.fillStyle=kali?'#6b7280':'#f87171';ctx.beginPath();ctx.ellipse(-9,-4,7,3.5,-0.2,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#111';for(let rv=-2;rv<=1;rv++){ctx.beginPath();ctx.arc(-9+rv*4,-5,1.1,0,7);ctx.fill()}}
+ if(a.type==='tank'){ctx.fillStyle=kali?'#6b7280':'#f87171';ctx.beginPath();ctx.ellipse(-9,-4,7,3.5,-0.2,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#111';for(let rv=-2;rv<=1;rv++){ctx.beginPath();ctx.arc(-9+rv*4,-5,1.1,0,7);ctx.fill()}
+  // saamne takkar-mar (battering wedge)
+  ctx.fillStyle=kali?'#374151':'#991b1b';ctx.beginPath();ctx.moveTo(5,-6.5);ctx.lineTo(14,0);ctx.lineTo(5,6.5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.moveTo(5,-6.5);ctx.lineTo(14,0);ctx.lineTo(9,0);ctx.closePath();ctx.fill()}
  // thorax
  ctx.fillStyle=kali?'#232328':(vil?'#6b4a1f':'#b91c1c');ctx.beginPath();ctx.arc(0,0,heroA?6.5:4.5,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=1;ctx.stroke();
@@ -1354,6 +1420,10 @@ function drawAnt(a){
  if(kali){headG.addColorStop(0,'#3d3d46');headG.addColorStop(1,'#0a0a0c')}else if(vil){headG.addColorStop(0,'#c09a5c');headG.addColorStop(1,'#5a3a15')}else{headG.addColorStop(0,'#ff7b7b');headG.addColorStop(1,'#7a0d0d')}
  ctx.fillStyle=headG;ctx.beginPath();ctx.arc(heroA?11:8,0,heroA?7:5,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=heroA?2:1;ctx.stroke();
+ // soldier: lohe ka top + kalgi
+ if(a.type==='soldier'){const hx=8,hr=5;ctx.fillStyle=kali?'#4b5563':'#7f1d1d';ctx.beginPath();ctx.arc(hx,0,hr+0.6,Math.PI*1.02,Math.PI*1.98);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#e11d1d';ctx.beginPath();ctx.moveTo(hx-2,-hr);ctx.lineTo(hx+2,-hr);ctx.lineTo(hx,-hr-4);ctx.closePath();ctx.fill()}
+ // hero: sunehre kandhe (pauldrons)
+ if(heroA){ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(1,-7,2.6,0,7);ctx.arc(1,7,2.6,0,7);ctx.fill();ctx.strokeStyle='#7a4a00';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#b45309';ctx.beginPath();ctx.arc(1,-7,1,0,7);ctx.arc(1,7,1,0,7);ctx.fill()}
  // mandibles / jaws
  ctx.strokeStyle=kali?'#d1d5db':'#fecaca';ctx.lineWidth=heroA?2.2:1.6;
  const jaw=Math.sin(frame/8)*1+(a.cool>0?2:0);
@@ -1381,6 +1451,8 @@ function drawAnt(a){
   const cb=Math.sin(frame/12)*2;
   ctx.save();ctx.translate(a.x,a.y-13+cb);
   ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,8,6,2.5,0,0,7);ctx.fill();
+  // gaon-wale ki tokri
+  if(a.type==='villager'){ctx.fillStyle='#8b5a2b';ctx.beginPath();ctx.moveTo(-5,1);ctx.lineTo(5,1);ctx.lineTo(3,7);ctx.lineTo(-3,7);ctx.closePath();ctx.fill();ctx.strokeStyle='#4a2e0e';ctx.lineWidth=1;ctx.stroke()}
   if(a.carryGolden){ctx.shadowColor='#FFD700';ctx.shadowBlur=12;ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(0,0,5.5,0,7);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#5a3a00';ctx.font='bold 8px sans-serif';ctx.fillText('★',-3,3)}
   else{const g2=ctx.createRadialGradient(-1,-1,0.5,0,0,6);g2.addColorStop(0,'#d8ffb0');g2.addColorStop(1,'#2e7d32');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(0,0,5,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(-1.5,-1.5,1.4,0,7);ctx.fill()}
   // tiny hands
@@ -1464,6 +1536,7 @@ function updateHUD(){
  document.getElementById('scoreT').textContent=score;
  document.getElementById('bestT').textContent=high;
  document.getElementById('lvlT').textContent=level;
+ document.getElementById('zoomT').textContent=Math.round(zoom*100)+'%';
  const ub=document.getElementById('ultBtn');
  if(ub){if(ultCD>0){ub.innerHTML='🌀 '+Math.ceil(ultCD/60)+'s';ub.classList.remove('ready');ub.style.opacity=0.6}else{ub.innerHTML='🌀 Chakravat <kbd>U</kbd>';ub.classList.add('ready');ub.style.opacity=1}}
 }
