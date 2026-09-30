@@ -61,25 +61,36 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 .opt{padding:8px 12px;border-radius:8px;background:#3a2d16;color:#fff;border:1px solid #666}
 .opt.sel{background:linear-gradient(180deg,#4ade80,#16a34a);color:#000;border-color:#fff;box-shadow:0 0 12px rgba(34,197,94,.6)}
 #startBtn{width:100%;font-size:19px;background:linear-gradient(180deg,#fde047,#f59e0b);margin-top:12px;padding:14px}
-/* ===== FULLSCREEN GAMEPLAY (mobile) ===== */
+/* ===== REAL FULLSCREEN GAMEPLAY (canvas poori screen, HUD floating) ===== */
 .btn-fs{background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff}
-#fsExit{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:50;display:none;width:52px;height:52px;border-radius:50%;font-size:22px;font-weight:900;background:rgba(0,0,0,.65);color:#fff;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.6)}
+#fsExit{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:60;display:none;width:52px;height:52px;border-radius:50%;font-size:22px;font-weight:900;background:rgba(0,0,0,.65);color:#fff;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.6)}
 #fsFloat{position:fixed;right:10px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:40;display:none;width:56px;height:56px;border-radius:50%;font-size:24px;background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.55)}
 @media(pointer:coarse){#fsFloat{display:block}}
+#rotateHint{position:fixed;inset:0;z-index:59;display:none;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+#rotateHint span{background:rgba(0,0,0,.78);border:2px solid #FFD700;border-radius:16px;padding:18px 22px;font-size:20px;font-weight:900;color:#fde68a;animation:msgPop .6s infinite alternate}
+@media(orientation:portrait){body.fs-mode #rotateHint{display:flex}}
 body.fs-mode #fsFloat{display:none}
 body.fs-mode #fsExit{display:block}
-body.fs-mode{background:#000}
+body.fs-mode{background:#000;overflow:hidden}
 body.fs-mode #wrap{width:100vw;max-width:none;padding:0;margin:0}
 body.fs-mode h1,body.fs-mode .guide,body.fs-mode #joyLabel{display:none}
-body.fs-mode #topInfo{margin:0;border-radius:0;font-size:12px;padding:6px 60px 6px 8px;position:sticky;top:0;z-index:45}
-body.fs-mode #hud{margin:0;gap:6px;padding:6px 8px}
-body.fs-mode .team{font-size:12px;padding:6px 8px;min-width:0}
-body.fs-mode #msg{font-size:15px;min-height:24px;margin:2px}
-body.fs-mode canvas{width:100vw;height:auto;max-height:52vh;object-fit:contain;border-radius:0;border-left:none;border-right:none;display:block;margin:0 auto;background:#7aa744}
-body.fs-mode #controls{position:sticky;bottom:0;z-index:44;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(10,8,3,.92);backdrop-filter:blur(6px);border-top:1px solid #5a451a;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-body.fs-mode #controls button{flex:0 0 auto;font-size:13px;padding:12px 12px;min-height:48px;min-width:86px}
-body.fs-mode #joyBase{width:132px;height:132px;bottom:calc(96px + env(safe-area-inset-bottom));opacity:.85}
-body.fs-mode:fullscreen canvas,body.fs-mode:-webkit-full-screen canvas{max-height:56vh}
+/* canvas = poori screen */
+body.fs-mode canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-height:none;border:none;border-radius:0;margin:0;z-index:1;background:#000}
+/* upar floating HUD */
+body.fs-mode #topInfo{position:fixed;top:0;left:0;right:0;z-index:55;margin:0;border-radius:0;font-size:12px;padding:6px 70px 6px 8px;background:rgba(16,12,6,.82)}
+body.fs-mode #hud{position:fixed;top:34px;left:0;right:0;z-index:55;margin:0;gap:6px;padding:4px 8px;pointer-events:none}
+body.fs-mode .team{font-size:11px;padding:5px 8px;min-width:0;background:rgba(20,16,8,.82)}
+body.fs-mode .bar{height:8px}
+/* beech me floating msg toast */
+body.fs-mode #msg{position:fixed;top:118px;left:0;right:0;z-index:56;font-size:16px;min-height:0;margin:0;padding:6px 14px;text-align:center;pointer-events:none;text-shadow:1px 1px 0 #000,0 0 14px rgba(255,180,0,.5)}
+body.fs-mode #menu{z-index:70}
+body.fs-mode #exitScreen{z-index:70}
+/* neeche floating buttons */
+body.fs-mode #controls{position:fixed;bottom:0;left:0;right:0;z-index:55;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(10,8,3,.85);backdrop-filter:blur(6px);border-top:1px solid #5a451a;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+body.fs-mode #controls button{flex:0 0 auto;font-size:13px;padding:12px 12px;min-height:50px;min-width:88px}
+body.fs-mode #p2row,body.fs-mode #setPanel{position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:55;margin:0;border-radius:0;max-height:30vh;overflow:auto}
+body.fs-mode #joyBase{width:136px;height:136px;bottom:calc(160px + env(safe-area-inset-bottom));opacity:.9;z-index:56}
+body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:.9;z-index:56}
 :fullscreen #wrap{width:100vw;max-width:none}
 </style>
 </head>
@@ -156,6 +167,7 @@ body.fs-mode:fullscreen canvas,body.fs-mode:-webkit-full-screen canvas{max-heigh
 <div id="joyLabel">👑 Joystick se Raja chalao 👇</div>
 <button id="fsExit" onclick="toggleFullscreen()" title="Exit fullscreen">✕</button>
 <button id="fsFloat" onclick="toggleFullscreen()" title="Fullscreen khelo">⛶</button>
+<div id="rotateHint"><span>📱 Phone TEDHA karo 🔄<br>Landscape me sabse bada mazaa!</span></div>
 <div id="joyBase"><div id="joyStick"></div></div>
 <div id="joyBase2"><div id="joyStick2"></div></div>
 <div id="msg"></div>
