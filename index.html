@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kali vs Laal Chunti - Dhamaka Edition 🔊</title>
+<link rel="icon" type="image/svg+xml" href="ant-icon.svg">
+<link rel="apple-touch-icon" href="ant-icon.svg">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#1a1207">
+<meta name="description" content="🐜 Kali vs Laal Chunti - Khana aur Fort ki Jung! Hero, Bomb, Sound ke sath. Mobile + PC game.">
+<style>
+*{box-sizing:border-box;font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#1a1207;color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;overscroll-behavior:none}
+h1{margin:10px 0 2px;font-size:22px;text-align:center}
+#wrap{width:95%;max-width:960px;padding-bottom:110px}
+#hud{display:flex;gap:10px;margin:8px 0;flex-wrap:wrap}
+.team{flex:1;min-width:220px;background:#2a2113;border:1px solid #555;border-radius:10px;padding:8px 12px}
+.team.kali{border-left:6px solid #000;background:#222}
+.team.laal{border-left:6px solid #e11d1d}
+.bar{height:10px;background:#444;border-radius:5px;overflow:hidden;margin:4px 0}
+.bar>i{display:block;height:100%}
+#controls{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button{cursor:pointer;border:none;border-radius:10px;padding:12px 14px;font-weight:bold;font-size:14px;min-height:44px}
+.btn-w{background:#22c55e;color:#06240f}
+.btn-s{background:#000;color:#fff;border:1px solid #fff}
+.btn-r{background:#eab308;color:#000}
+.btn-b{background:#3b82f6;color:#fff}
+.btn-o{background:#7c3aed;color:#fff}
+.btn-fun{background:#ef4444;color:#fff;border:2px solid #fde68a}
+.btn-dl{background:#06b6d4;color:#00141a;border:2px solid #fff}
+.btn-restart{background:#555;color:#fff}
+/* mobile */
+@media(max-width:640px){
+ h1{font-size:17px}
+ #controls button{flex:1 1 30%;font-size:13px;padding:12px 8px}
+ #wrap{width:98%;padding-bottom:150px}
+ .team{min-width:140px;font-size:13px}
+}
+#joyBase{position:fixed;left:14px;bottom:14px;width:120px;height:120px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.4);border-radius:50%;display:none;z-index:20;touch-action:none}
+#joyStick{position:absolute;left:35px;top:35px;width:50px;height:50px;background:#FFD700;border-radius:50%;box-shadow:0 2px 8px #000}
+#joyLabel{position:fixed;left:14px;bottom:140px;font-size:12px;background:#000a;padding:4px 8px;border-radius:6px;display:none;z-index:20}
+@media(pointer:coarse){#joyBase{display:block}#joyLabel{display:block}}
+canvas{width:100%;height:auto;background:radial-gradient(circle at 50% 40%,#b5dd7a,#7aa744 70%);border-radius:12px;border:3px solid #4a3311;touch-action:none}
+#msg{text-align:center;font-size:19px;font-weight:bold;min-height:30px;margin:6px;color:#fde68a;text-shadow:1px 1px 0 #000}
+#topInfo{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;font-size:14px;background:#100c06;padding:6px 10px;border-radius:8px}
+.guide{background:#100c06;border-radius:10px;padding:10px;font-size:13px;line-height:1.6;margin-top:10px;color:#f0e2c0}
+kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font-size:12px}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:10;padding:15px}
+#menuCard{background:#241b0e;border:2px solid #8b5a2b;border-radius:14px;padding:20px;max-width:580px;width:100%;max-height:92vh;overflow:auto}
+.opt-btns{display:flex;gap:8px;flex-wrap:wrap}
+.opt{padding:8px 12px;border-radius:8px;background:#3a2d16;color:#fff;border:1px solid #666}
+.opt.sel{background:#22c55e;color:#000;border-color:#fff}
+#startBtn{width:100%;font-size:19px;background:#eab308;margin-top:12px;padding:14px}
+</style>
+</head>
+<body>
+<div id="wrap">
+<h1><img src="ant-icon.svg" alt="ant" width="40" height="40" style="vertical-align:middle;border-radius:10px"> Kali vs Laal — DHAMAKA Edition 💥🔊</h1>
+<div id="topInfo">
+<div>🎮 <b id="modeT">-</b> | ⚡ <b id="diffT">-</b> | ⏱ <b id="timeT">0:00</b> | ☠️ Kills: <b id="killT">0</b></div>
+<div>👑 Kali Raja HP: <b id="heroT">-</b></div>
+</div>
+<div id="hud">
+<div class="team kali"><div>⬛ Kali Fort: <span id="kaliHpT">500</span> | 🍚 <span id="kaliFood">50</span></div><div class="bar"><i id="kaliHpB" style="width:100%;background:#000;border:1px solid #fff"></i></div><div>W:<span id="kaliW">0</span> S:<span id="kaliS">0</span></div></div>
+<div class="team laal"><div>🟥 Laal Fort: <span id="laalHpT">500</span> | 🍚 <span id="laalFood">50</span></div><div class="bar"><i id="laalHpB" style="width:100%;background:#e11d1d"></i></div><div>W:<span id="laalW">0</span> S:<span id="laalS">0</span></div></div>
+</div>
+<div id="controls">
+<button class="btn-w" onclick="spawn('kali','worker')">+Worker <kbd>W</kbd> 10🍚</button>
+<button class="btn-s" onclick="spawn('kali','soldier')">+Soldier <kbd>S</kbd> 20🍚</button>
+<button class="btn-r" onclick="repair('kali')">🔧 <kbd>R</kbd> 30🍚</button>
+<button class="btn-fun" onclick="dropBomb()">💣 Bomb <kbd>B</kbd> 40🍚</button>
+<button class="btn-fun" onclick="sugarRain()">🍬 Cheeni <kbd>C</kbd> 30🍚</button>
+<button class="btn-fun" onclick="josh()">⚡ Josh <kbd>J</kbd> 20🍚</button>
+<button class="btn-b" onclick="orderAll('attack')">⚔ Hamla <kbd>F</kbd></button>
+<button class="btn-b" onclick="orderAll('defend')">🛡 Wapas <kbd>D</kbd></button>
+<button class="btn-o" id="soundBtn" onclick="toggleSound()">🔊 Sound: ON</button>
+<button class="btn-o" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+<button class="btn-o" id="speedBtn" onclick="toggleSpeed()">🚀 1x</button>
+<button class="btn-dl" onclick="downloadGame()">⬇ Download Game</button>
+<button class="btn-dl" onclick="shareGame()">📲 Share / WhatsApp</button>
+<button class="btn-restart" onclick="location.reload()">↻ Naya</button>
+<button class="btn-restart" style="background:#991b1b" onclick="exitGame()">❌ Exit <kbd>Esc</kbd></button>
+</div>
+<div id="exitScreen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:30;align-items:center;justify-content:center;padding:15px">
+<div style="background:#241b0e;border:2px solid #8b5a2b;border-radius:14px;padding:24px;max-width:420px;width:100%;text-align:center">
+<h2 style="margin:0 0 8px">🐜 Khel Khatm!</h2>
+<div style="color:#d8c49a;margin-bottom:6px">Thanks for playing Kali vs Laal!</div>
+<div id="exitScore" style="font-size:15px;margin:8px 0"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">
+<button class="btn-w" onclick="resumeGame()">▶ Wapas Khelo</button>
+<button class="btn-dl" onclick="downloadGame()">⬇ Download</button>
+<button class="btn-o" onclick="location.reload()">↻ Naya Khel</button>
+<button class="btn-restart" style="background:#991b1b" onclick="closeTab()">❌ Tab Band Karo</button>
+</div>
+<div style="font-size:12px;color:#999;margin-top:10px">Esc dabakar bhi exit / wapas kar sakte ho</div>
+</div>
+</div>
+<div id="joyLabel">👑 Joystick se Raja chalao 👇</div>
+<div id="joyBase"><div id="joyStick"></div></div>
+<div id="msg"></div>
+<canvas id="c" width="900" height="500"></canvas>
+<div class="guide">
+<b>🔥 NAYA MAZA:</b> 👑 <b>Kali Raja</b> ko PC par <kbd>Arrow</kbd> se, <b>mobile par neeche joystick</b> se chalao! Raja 1vs5 lad sakta hai. Mar gaya to 10 sec me wapas!<br>
+💣 <b>Bomb:</b> Rally point par dhamaka! 🍬 <b>Cheeni:</b> 8 dane. ⚡ <b>Josh:</b> 8 sec speed.<br>
+📱 <b>Mobile:</b> Canvas par TAP = hamla, joystick = Raja move, sare buttons bade kar diye. Landscape (phone tedha) me best chalega.<br>
+⬇ <b>Download:</b> Upar <b>Download Game</b> dabao - ek html file milegi. Usko WhatsApp se bhejo, dost bina net ke bhi khelega! 📲 <b>Share</b> se link bhejo.
+</div>
+</div>
+<div id="menu"><div id="menuCard">
+<h2>🐜 Kali vs Laal - DHAMAKA Edition</h2>
+<div>Hero + Bomb + Sound ke sath! Pehle sound ON karne ke liye kahin click karna padega (browser rule).</div>
+<div class="opt-row"><b>1. Mode:</b><div class="opt-btns" id="modeBtns">
+<button class="opt sel" data-m="fort">🏰 Fort Todo</button>
+<button class="opt" data-m="food">🍚 3 Min Khana Race</button>
+<button class="opt" data-m="endless">♾ Endless</button></div></div>
+<div class="opt-row"><b>2. Mushkil:</b><div class="opt-btns" id="diffBtns">
+<button class="opt" data-d="easy">😊 Easy</button>
+<button class="opt sel" data-d="medium">😐 Medium</button>
+<button class="opt" data-d="hard">😈 Hard + Laal Raja!</button></div></div>
+<button id="startBtn" onclick="startGame()">▶ KHEL SHURU 🔊💥</button>
+</div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=900,H=500;
+let rally={x:650,y:250},foods=[],ants=[],parts=[],floats=[];
+let gameOver=false,started=false,paused=false,speed=1,auto=true,muted=false;
+let mode='fort',difficulty='medium',timeLeft=180,elapsed=0,frame=0,kills=0,killStreak=0,streakT=0;
+let joshT=0, shakeAll=0;
+let G={kali:{food:50,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:50,fort:600,maxFort:600,base:{x:820,y:250}}};
+let DIFF={easy:{ai:0.012,dmg:0.8},medium:{ai:0.02,dmg:1.0},hard:{ai:0.034,dmg:1.3}};
+let hero=null, laalRaja=null, heroRespawn=0;
+let keys={};
+
+// ===== SOUND =====
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,d,type='square',v=0.15,slide=0){
+ if(muted)return;const c=ac();if(!c)return;
+ const o=c.createOscillator(),g=c.createGain();
+ o.type=type;o.frequency.setValueAtTime(f,c.currentTime);
+ if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),c.currentTime+d);
+ g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+ o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);
+}
+function noise(d=0.3,v=0.3){
+ if(muted)return;const c=ac();if(!c)return;
+ const b=c.createBuffer(1,c.sampleRate*d,c.sampleRate),dt=b.getChannelData(0);
+ for(let i=0;i<dt.length;i++)dt[i]=(Math.random()*2-1)*(1-i/dt.length);
+ const s=c.createBufferSource(),g=c.createGain();s.buffer=b;g.gain.value=v;
+ const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=800;
+ s.connect(f);f.connect(g);g.connect(c.destination);s.start();
+}
+const S={
+ click(){tone(600,0.07,'square',0.08)},
+ spawn(){tone(300,0.12,'square',0.12,200)},
+ eat(){tone(880,0.08,'sine',0.15,-300);setTimeout(()=>tone(1200,0.08,'sine',0.12,-400),70)},
+ hit(){tone(200,0.08,'sawtooth',0.1,-100)},
+ die(){tone(400,0.2,'sawtooth',0.12,-350)},
+ boom(){noise(0.5,0.5);tone(80,0.5,'sine',0.3,-40)},
+ power(){tone(500,0.1,'square',0.12,500);setTimeout(()=>tone(750,0.12,'square',0.12,500),100)},
+ heal(){tone(400,0.2,'sine',0.12,400)},
+ win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.15),i*150))},
+ lose(){[400,300,200,120].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.14),i*180))},
+ drum(){tone(70,0.12,'sine',0.07,-20)}
+};
+setInterval(()=>{if(started&&!paused&&!gameOver&&!muted)S.drum()},500);
+function toggleSound(){muted=!muted;document.getElementById('soundBtn').textContent=muted?'🔇 Sound: OFF':'🔊 Sound: ON';if(!muted)S.click()}
+// ===== DOWNLOAD + SHARE (mobile ke liye) =====
+function downloadGame(){
+ try{
+  S.click();
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='kali-laal-chunti-game.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);
+  flash('⬇ Download ho gaya! File ko WhatsApp par bhejo, offline bhi chalega!');
+ }catch(e){flash('Download me error, browser alag try karo')}
+}
+async function shareGame(){
+ const data={title:'Kali vs Laal Chunti Game',text:'🐜 Mera game khelo! Kali vs Laal Chunti - Bomb + Raja + Sound! ',url:location.href};
+ try{
+  if(navigator.share){await navigator.share(data);S.power()}
+  else if(navigator.clipboard){await navigator.clipboard.writeText(data.text+data.url);flash('📋 Link copy ho gaya! WhatsApp me paste karke bhejo!');S.power()}
+  else{prompt('Ye link copy karke bhejo:',location.href)}
+ }catch(e){}
+}
+// ===== MOBILE JOYSTICK (Raja chalane ke liye) =====
+let joyDX=0,joyDY=0;
+(function(){
+ const base=document.getElementById('joyBase'),st=document.getElementById('joyStick');
+ if(!base)return;
+ let tid=null;
+ function setStick(dx,dy){st.style.left=(35+dx*30)+'px';st.style.top=(35+dy*30)+'px'}
+ function handle(e){
+  const r=base.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const t=e.touches?e.touches[0]:e;
+  let dx=(t.clientX-cx)/(r.width/2),dy=(t.clientY-cy)/(r.height/2);
+  let l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
+  joyDX=dx;joyDY=dy;setStick(dx,dy);
+ }
+ base.addEventListener('touchstart',e=>{e.preventDefault();ac();handle(e)},{passive:false});
+ base.addEventListener('touchmove',e=>{e.preventDefault();handle(e)},{passive:false});
+ base.addEventListener('touchend',e=>{e.preventDefault();joyDX=0;joyDY=0;setStick(0,0)});
+ base.addEventListener('mousedown',e=>{tid='m';handle(e)});
+ window.addEventListener('mousemove',e=>{if(tid)handle(e)});
+ window.addEventListener('mouseup',()=>{tid=null;joyDX=0;joyDY=0;setStick(0,0)});
+})();
+// ===== MENU =====
+document.querySelectorAll('#modeBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');mode=b.dataset.m;S.click()});
+document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
+function startGame(){ac();S.power();started=true;document.getElementById('menu').style.display='none';document.getElementById('modeT').textContent=mode==='fort'?'Fort Todo':mode==='food'?'Khana Race':'Endless';document.getElementById('diffT').textContent=difficulty;flash('⚔ JUNGG SHURU! Kali Raja ko WASD se chalao!')}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function spawnFood(n,golden=false){for(let i=0;i<n;i++)foods.push({x:rnd(300,600),y:rnd(60,440),r:golden?9:6,golden:golden||Math.random()<0.08,mirchi:Math.random()<0.1})}
+spawnFood(14);
+function float(x,y,t,c='#fff'){floats.push({x,y,t,c,life:60})}
+function burst(x,y,c,n=8){for(let i=0;i<n;i++)parts.push({x,y,vx:rnd(-3,3),vy:rnd(-3,3),life:rnd(15,35),c})}
+
+function makeHero(team){
+ const b=G[team].base;
+ return {team,type:'hero',x:b.x,y:b.y,hp:350,maxHp:350,dmg:35,speed:2.6,carry:false,carryN:0,cool:0,tx:null,ty:null,boost:0};
+}
+hero=makeHero('kali');
+ants.push(hero);
+for(let i=0;i<3;i++){spawn('kali','worker',true);spawn('laal','worker',true)}
+spawn('kali','soldier',true);spawn('laal','soldier',true);
+if(difficulty==='hard'){/* laal raja start me banega */}
+
+function spawn(team,type,free){
+ if(gameOver||!started&&!free)return;
+ const cost=type==='worker'?10:20;
+ if(!free){if(G[team].food<cost){flash('🍚 Khana kam! Worker bhejo!');S.click();return}G[team].food-=cost;S.spawn()}
+ const b=G[team].base;
+ ants.push({team,type,x:b.x+rnd(-20,20),y:b.y+rnd(-70,70),hp:type==='worker'?45:110,maxHp:type==='worker'?45:110,dmg:(type==='worker'?6:20)*(team==='laal'?DIFF[difficulty].dmg:1),speed:(type==='worker'?1.5:1.9)*(joshT>0&&team==='kali'?1.8:1),carry:false,cool:0,tx:null,ty:null,boost:0});
+}
+function repair(team){if(G[team].food>=30&&G[team].fort<G[team].maxFort){G[team].food-=30;G[team].fort=Math.min(G[team].maxFort,G[team].fort+90);S.heal();float(G[team].base.x,G[team].base.y-70,'+REPAIR','#0f0')}else{flash('Repair=30 🍚');S.click()}}
+function dropBomb(){
+ if(G.kali.food<40){flash('Bomb ke liye 40 🍚!');return}
+ G.kali.food-=40;S.boom();shakeAll=14;
+ burst(rally.x,rally.y,'orange',30);burst(rally.x,rally.y,'red',20);burst(rally.x,rally.y,'yellow',15);
+ float(rally.x,rally.y-20,'💥 DHAMAKA!','#ff0');
+ ants.forEach(a=>{if(a.team==='laal'&&Math.hypot(a.x-rally.x,a.y-rally.y)<110){a.hp-=95;if(a.hp<=0)onKill('bomb')}});
+ if(Math.hypot(G.laal.base.x-rally.x,G.laal.base.y-rally.y)<110){G.laal.fort-=70;shakeL=10;float(G.laal.base.x,G.laal.base.y-80,'-70 FORT!','orange')}
+}
+function sugarRain(){if(G.kali.food<30){flash('Cheeni ke liye 30 🍚!');return}G.kali.food-=30;S.power();for(let i=0;i<8;i++)foods.push({x:rnd(320,580),y:rnd(80,420),r:6});float(450,150,'🍬 CHEENI BARISH!','#0ff');burst(450,250,'pink',20)}
+function josh(){if(G.kali.food<20){flash('Josh ke liye 20 🍚!');return}if(joshT>0){flash('Josh pehle se ON hai!');return}G.kali.food-=20;joshT=8*60;S.power();float(G.kali.base.x,G.kali.base.y-80,'⚡ JOSH! 2x SPEED','#ff0')}
+function orderAll(cmd){
+ if(cmd==='attack'){rally={x:G.laal.base.x-70,y:G.laal.base.y};ants.forEach(a=>{if(a.team==='kali'&&a.type!=='worker'){a.tx=rally.x;a.ty=rally.y}});hero.tx=rally.x;hero.ty=rally.y;flash('⚔ SAB HAMLA!');S.power()}
+ else{rally={x:G.kali.base.x+90,y:G.kali.base.y};ants.forEach(a=>{if(a.team==='kali'&&a.type!=='worker'){a.tx=rally.x;a.ty=rally.y}});flash('🛡 Wapas! Fort bachao!');S.click()}
+}
+function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ Chalao':'⏸ Pause';S.click()}
+function toggleSpeed(){speed=speed===1?2:1;document.getElementById('speedBtn').textContent='🚀 '+speed+'x';S.click()}
+function exitGame(){
+ if(!started){flash('Pehle khel shuru karo!');return}
+ paused=true;document.getElementById('pauseBtn').textContent='▶ Chalao';S.click();
+ document.getElementById('exitScore').innerHTML='☠️ Kills: '+kills+' | 🍚 Khana: '+Math.floor(G.kali.food)+' | 🏰 Fort: '+Math.max(0,Math.round(G.kali.fort));
+ document.getElementById('exitScreen').style.display='flex';
+}
+function resumeGame(){document.getElementById('exitScreen').style.display='none';paused=false;document.getElementById('pauseBtn').textContent='⏸ Pause';S.click()}
+function closeTab(){S.click();document.getElementById('exitScore').innerHTML+='<br><span style="color:#f88">Tab band karne ke liye browser ka X dabao — browser ne auto-close block kiya hai.</span>';try{window.close()}catch(e){}setTimeout(()=>{try{window.open('','_self');window.close()}catch(e){}},300)}
+let flashT=0;function flash(t){document.getElementById('msg').textContent=t;flashT=150}
+cv.addEventListener('pointerdown',e=>{ac();if(!started||paused)return;const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;rally={x,y};ants.forEach(a=>{if(a.team==='kali'&&a.type==='soldier'){a.tx=x;a.ty=y}});if(hero&&hero.hp>0){hero.tx=x;hero.ty=y}S.click()});
+document.addEventListener('keydown',e=>{
+ keys[e.code]=true;
+ if(e.code==='Escape'){const ex=document.getElementById('exitScreen');if(ex.style.display==='flex')resumeGame();else exitGame();return}
+ if(!started)return;
+ if(e.code==='KeyW')spawn('kali','worker');
+ if(e.code==='KeyS')spawn('kali','soldier');
+ if(e.code==='KeyR')repair('kali');
+ if(e.code==='KeyB')dropBomb();
+ if(e.code==='KeyC')sugarRain();
+ if(e.code==='KeyJ')josh();
+ if(e.code==='KeyF')orderAll('attack');
+ if(e.code==='KeyD')orderAll('defend');
+ if(e.code==='Space'){e.preventDefault();togglePause()}
+});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+function moveTo(a,x,y){let d=Math.hypot(x-a.x,y-a.y);if(d<2)return;let s=a.speed*(a.boost>0?1.7:1)*(joshT>0&&a.team==='kali'?1.7:1);a.x+=(x-a.x)/d*s;a.y+=(y-a.y)/d*s}
+function nearestEnemy(a,range){let best=null,bd=range;for(let b of ants){if(b.team===a.team||b.hp<=0)continue;let d=Math.hypot(a.x-b.x,a.y-b.y);if(d<bd){bd=d;best=b}}return best}
+function onKill(how){kills++;killStreak++;streakT=120;S.die();document.getElementById('killT').textContent=kills;if(killStreak===3)float(450,200,'🔥 TRIPLE KILL!','#ff0');else if(killStreak===5){float(450,200,'💥 PANCH KA DHAMAKA!','#f0f');S.boom()}}
+
+let shakeK=0,shakeL=0;
+function step(){
+ if(gameOver||!started||paused)return;
+ for(let s=0;s<speed;s++){
+ frame++;if(joshT>0)joshT--;if(streakT>0)streakT--;else killStreak=0;
+ if(mode==='food'){timeLeft-=1/60;if(timeLeft<=0){endByFood();break}}else elapsed+=1/60;
+ if(foods.length<9&&Math.random()<0.04)spawnFood(1);
+ if(Math.random()<0.008)spawnFood(1,true); // golden
+ // hero move - keyboard + mobile joystick
+ if(hero&&hero.hp>0){
+  let dx=joyDX,dy=joyDY;
+  if(keys['KeyA']||keys['ArrowLeft'])dx-=1;if(keys['KeyD']||keys['ArrowRight'])dx+=1;
+  // Hero ke liye Arrow keys + joystick + mouse click.
+  if(keys['ArrowUp'])dy-=1;if(keys['ArrowDown'])dy+=1;
+  // extra: I K L se bhi hero (J Josh ke liye reserve)
+  if(keys['KeyI'])dy-=1;if(keys['KeyK'])dy+=1;if(keys['KeyL'])dx+=1;
+  if(dx||dy){let l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}hero.x+=dx*hero.speed*1.4;hero.y+=dy*hero.speed*1.4;hero.tx=null;hero.ty=null}
+  hero.x=Math.max(10,Math.min(W-10,hero.x));hero.y=Math.max(10,Math.min(H-10,hero.y));
+ } else if(hero&&hero.hp<=0){heroRespawn--;if(heroRespawn<=0){hero.hp=hero.maxHp;hero.x=G.kali.base.x;hero.y=G.kali.base.y;ants.push(hero);float(hero.x,hero.y,'👑 RAJA WAPAS!','#ff0');S.power()}}
+ // auto + AI
+ const d=DIFF[difficulty];
+ if(auto&&frame%100===0){const kw=ants.filter(a=>a.team==='kali'&&a.type==='worker').length;if(kw<4&&G.kali.food>=10)spawn('kali','worker')}
+ if(Math.random()<d.ai){
+  const lw=ants.filter(a=>a.team==='laal'&&a.type==='worker').length,ls=ants.filter(a=>a.team==='laal'&&a.type==='soldier').length;
+  if(G.laal.food>=20&&(ls<lw+1||Math.random()<0.45))spawn('laal','soldier');else if(G.laal.food>=10)spawn('laal','worker');
+  if(G.laal.food>90&&G.laal.fort<450)repair('laal');
+  if(difficulty==='hard'&&!laalRaja&&frame>600){laalRaja=makeHero('laal');laalRaja.x=G.laal.base.x;ants.push(laalRaja);float(laalRaja.x,laalRaja.y,'😈 LAAL RAJA AAYA!','red')}
+ }
+ for(let a of ants){
+  if(a.hp<=0)continue;a.cool--;
+  if(a.boost>0)a.boost--;
+  if(a.type==='worker'){
+   if(!a.carry){
+    let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
+    if(best){moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;if(best.mirchi){a.boost=600;float(a.x,a.y,'🌶 SPEED!','red')}foods.splice(foods.indexOf(best),1)}}
+   }else{const b=G[a.team].base;moveTo(a,b.x,b.y);if(Math.hypot(a.x-b.x,a.y-b.y)<32){a.carry=false;let v=a.carryGolden?30:10;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}
+   let en=nearestEnemy(a,42);if(en&&a.cool<=0){en.hp-=a.dmg;S.hit();a.cool=32;if(en.hp<=0)onKill()}
+  }else{
+   // hero + soldier
+   let en=nearestEnemy(a,a.type==='hero'?260:230);
+   let ebase=a.team==='kali'?G.laal.base:G.kali.base,eTeam=a.team==='kali'?'laal':'kali';
+   let tx=a.tx??(a.team==='kali'?rally.x:ebase.x),ty=a.ty??(a.team==='kali'?rally.y:ebase.y);
+   if(a.team==='laal'&&a.type!=='hero'){if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130){tx=en.x;ty=en.y}else{tx=ebase.x;ty=ebase.y}}
+   if(a===hero&&a.tx==null&&en&&Math.hypot(a.x-en.x,a.y-en.y)<200){tx=en.x;ty=en.y}
+   // hero khana bhi uthaye
+   if((a.type==='hero')&&!en){
+    let best=null,bd=90;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
+    if(best){moveTo(a,best.x,best.y);if(bd<14){let v=best.golden?30:10;G[a.team].food+=v;S.eat();foods.splice(foods.indexOf(best),1);burst(a.x,a.y,'green',5)}continue}
+   }
+   if(en&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
+    if(a.cool<=0){en.hp-=a.dmg;a.cool=a.type==='hero'?14:26;S.hit();burst(en.x,en.y,'#ff0',3);if(en.hp<=0){onKill();burst(en.x,en.y,'red',10);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0')}}
+   }else if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx)){moveTo(a,en.x,en.y)}
+   else{moveTo(a,tx,ty);if(Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){G[eTeam].fort-=a.dmg*(a.type==='hero'?0.9:0.6);a.cool=30;S.hit();burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
+  }
+ }
+ let before=ants.length;
+ ants=ants.filter(a=>a.hp>0);
+ if(hero&&hero.hp<=0&&ants.includes(hero)===false){heroRespawn=600;float(G.kali.base.x,G.kali.base.y,'Raja gir gaya! 10s...','red')}
+ if(G.kali.fort<=0||G.laal.fort<=0){
+  gameOver=true;
+  if(G.kali.fort<=0){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose()}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';S.win();burst(G.laal.base.x,G.laal.base.y,'gold',50)}
+ }
+ }
+ updateHUD();
+}
+function endByFood(){gameOver=true;let k=G.kali.food,l=G.laal.food;document.getElementById('msg').textContent=k>l?`🎉 JEET! ${k} vs ${l} khana!`:k<l?`💔 HAAR! ${l} vs ${k}`:'🤝 DRAW!';k>=l?S.win():S.lose()}
+function draw(){
+ ctx.save();if(shakeAll>0){ctx.translate(rnd(-shakeAll,shakeAll)/2,rnd(-shakeAll,shakeAll)/2);shakeAll--}
+ ctx.clearRect(-20,-20,W+40,H+40);
+ ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(0,200,W,100);
+ ctx.strokeStyle='#5a7a2a';ctx.setLineDash([8,6]);ctx.strokeRect(290,40,320,420);ctx.setLineDash([]);
+ ctx.fillStyle='#3d5a1a';ctx.font='14px sans-serif';ctx.fillText('🍚 KHANA ZONE',380,60);
+ if(joshT>0){ctx.fillStyle='#ff0';ctx.font='bold 16px sans-serif';ctx.fillText('⚡ JOSH ON! '+(joshT/60).toFixed(0)+'s',400,90)}
+ ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rally.x,rally.y,13+Math.sin(frame/10)*2,0,7);ctx.stroke();
+ ctx.fillStyle='#000';ctx.fillText('⚔',rally.x-7,rally.y+5);
+ for(let f of foods){
+  if(f.golden){ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(f.x,f.y,9+Math.sin(frame/8)*1.5,0,7);ctx.fill();ctx.fillStyle='#000';ctx.font='10px sans-serif';ctx.fillText('★',f.x-4,f.y+3)}
+  else if(f.mirchi){ctx.fillStyle='#ff2200';ctx.beginPath();ctx.arc(f.x,f.y,6,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillText('🌶',f.x-7,f.y-8)}
+  else{ctx.fillStyle='#2e7d32';ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,7);ctx.fill();ctx.fillStyle='#c8ff8a';ctx.beginPath();ctx.arc(f.x-2,f.y-2,2,0,7);ctx.fill()}
+ }
+ drawFort(G.kali.base.x,G.kali.base.y,'#111','#000',shakeK,'KALI FORT');
+ drawFort(G.laal.base.x,G.laal.base.y,'#7a1010','#e11d1d',shakeL,'LAAL FORT');
+ if(shakeK>0)shakeK--;if(shakeL>0)shakeL--;
+ let t=frame/12;
+ for(let a of ants){
+  let wig=Math.sin(t+a.x)*2;
+  let big=a.type==='hero'?15:0;
+  let r=(a.type==='worker'?6:a.type==='hero'?14:8);
+  ctx.fillStyle=a.team==='kali'?'#0a0a0a':'#d61f1f';
+  ctx.strokeStyle=a.type==='hero'?'#FFD700':'#fff';ctx.lineWidth=a.type==='hero'?3:1;
+  ctx.beginPath();ctx.arc(a.x,a.y+wig*0.3,r,0,7);ctx.fill();ctx.stroke();
+  // legs animated
+  ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=2;ctx.beginPath();
+  for(let l=-1;l<=1;l++){ctx.moveTo(a.x-5,a.y+l*4);ctx.lineTo(a.x-9,a.y+l*4+wig);ctx.moveTo(a.x+5,a.y+l*4);ctx.lineTo(a.x+9,a.y+l*4-wig)}ctx.stroke();
+  // crown for hero
+  if(a.type==='hero'){ctx.fillStyle='#FFD700';ctx.font='16px sans-serif';ctx.fillText('👑',a.x-9,a.y-16)}
+  if(a.carry){ctx.fillStyle='#2e7d32';ctx.beginPath();ctx.arc(a.x,a.y-11,4,0,7);ctx.fill()}
+  if(a.boost>0){ctx.fillStyle='red';ctx.font='10px sans-serif';ctx.fillText('🌶',a.x+8,a.y-8)}
+  let w=a.type==='hero'?30:16;
+  ctx.fillStyle='red';ctx.fillRect(a.x-w/2,a.y-r-9,w,4);
+  ctx.fillStyle='lime';ctx.fillRect(a.x-w/2,a.y-r-9,w*Math.max(0,a.hp/a.maxHp),4);
+  if(a.type==='soldier'){ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText('⚔',a.x-5,a.y+3)}
+ }
+ for(let p of parts){ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,4,4);p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.life--}
+ parts=parts.filter(p=>p.life>0);
+ ctx.font='bold 15px sans-serif';
+ for(let f of floats){ctx.fillStyle=f.c;ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(f.t,f.x-20,f.y);ctx.fillText(f.t,f.x-20,f.y);f.y-=1;f.life--}
+ floats=floats.filter(f=>f.life>0);
+ ctx.restore();
+ if(paused){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.fillText('⏸ PAUSED',340,260)}
+ if(flashT>0)flashT--;else if(!gameOver)document.getElementById('msg').textContent='';
+ let tt=mode==='food'?Math.max(0,timeLeft):elapsed;
+ document.getElementById('timeT').textContent=Math.floor(tt/60)+':'+String(Math.floor(tt%60)).padStart(2,'0');
+}
+function drawFort(x,y,c1,c2,sh,name){
+ ctx.save();ctx.translate(rnd(-sh,sh),rnd(-sh,sh));
+ ctx.fillStyle=c1;ctx.fillRect(x-42,y-52,84,104);
+ ctx.fillStyle=c2;ctx.fillRect(x-42,y-64,84,22);
+ ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.fillText(name,x-32,y-49);
+ ctx.fillStyle='#8b5a2b';ctx.fillRect(x-13,y-10,26,32);
+ ctx.fillStyle='#FFD700';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(x-20+i*20,y-64,3,0,7);ctx.fill()}
+ ctx.restore();
+}
+function updateHUD(){
+ document.getElementById('kaliHpT').textContent=Math.max(0,Math.round(G.kali.fort));
+ document.getElementById('laalHpT').textContent=Math.max(0,Math.round(G.laal.fort));
+ document.getElementById('kaliFood').textContent=Math.floor(G.kali.food);
+ document.getElementById('laalFood').textContent=Math.floor(G.laal.food);
+ document.getElementById('kaliHpB').style.width=(G.kali.fort/G.kali.maxFort*100)+'%';
+ document.getElementById('laalHpB').style.width=(G.laal.fort/G.laal.maxFort*100)+'%';
+ document.getElementById('kaliW').textContent=ants.filter(a=>a.team==='kali'&&a.type==='worker').length;
+ document.getElementById('kaliS').textContent=ants.filter(a=>a.team==='kali'&&a.type==='soldier').length;
+ document.getElementById('laalW').textContent=ants.filter(a=>a.team==='laal'&&a.type==='worker').length;
+ document.getElementById('laalS').textContent=ants.filter(a=>a.team==='laal'&&a.type==='soldier').length;
+ document.getElementById('heroT').textContent=hero?(hero.hp>0?Math.round(hero.hp)+' ❤':'Respawn...'):'-';
+}
+function loop(){step();draw();requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>
