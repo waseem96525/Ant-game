@@ -158,6 +158,13 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <button class="btn-o" id="tSword" onclick="research('sword')">⚔ Tez Talwar 40🍚+20🪙</button>
 <button class="btn-o" id="tArmor" onclick="research('armor')">🛡 Kavach 40🪵+20🪙</button>
 <button class="btn-o" id="tSpeed" onclick="research('speed')">👟 Tez Kadam 30🍚+30🪵</button>
+<button class="btn-r" id="bAge" onclick="advanceAge()">🏰 Yug Badhao</button>
+<button class="btn-s" id="bMarket" onclick="build('market')">🛒 Market 80🪵</button>
+<button class="btn-s" id="bWonder" onclick="build('wonder')">🛕 Wonder 200🍚+300🪵+200🪙</button>
+<button class="btn-w" onclick="trade('fw')">50🍚→30🪵</button>
+<button class="btn-w" onclick="trade('wf')">40🪵→30🍚</button>
+<button class="btn-w" onclick="trade('fg')">80🍚+40🪵→30🪙</button>
+<button class="btn-w" onclick="trade('gf')">20🪙→60🍚</button>
 </div>
 <div id="p2row" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#3d0a0a;border:1px solid #e11d1d;border-radius:10px;padding:8px">
 <span style="font-weight:900">🟥 P2 Laal:</span>
@@ -287,22 +294,27 @@ let tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
 for(let i=0;i<10;i++)trees.push({x:i<5?rnd(200,320):rnd(580,700),y:rnd(70,430),hp:120});
 mines=[{x:340,y:90,hp:200},{x:560,y:410,hp:200}];
 function civOf(t){return t==='kali'?CIVS[myCiv]:CIVS[laalCiv]}
-function techDmg(t){return (1+0.25*tech[t].sword)*civOf(t).dmg}
-function techHp(t){return 1+0.3*tech[t].armor}
+function techDmg(t){return (1+0.25*tech[t].sword)*civOf(t).dmg*(AGEDMG[age[t]]||1)}
+function techHp(t){return (1+0.3*tech[t].armor)*(AGEHP[age[t]]||1)}
 function techSpd(t){return 1+0.15*tech[t].speed}
 function popCap(t){let c=25;for(let b of buildings)if(b.team===t&&b.kind==='house'&&b.hp>0)c+=8;return c}
 function popUsed(t){let n=0;for(let a of ants)if(a.team===t)n++;return n}
 function setFocus(f){workerFocus=f;S.click();flash('👷 Worker focus: '+(f==='food'?'🍚 Khana':f==='wood'?'🪵 Lakdi':'🪙 Sona'))}
 function setCiv(c){myCiv=c;document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.c===c));S.click();flash(CIVS[c].name+' chuni! '+CIVS[c].desc)}
-const BCOST={barrack:{wood:40,gold:0},farm:{wood:30,gold:0},tower:{wood:50,gold:20},house:{wood:20,gold:0}};
+const BCOST={barrack:{wood:40,gold:0},farm:{wood:30,gold:0},tower:{wood:50,gold:20},house:{wood:20,gold:0},market:{wood:80,gold:0},wonder:{food:200,wood:300,gold:200}};
 function build(kind){
  if(!started||gameOver)return;
+ if(kind==='tower'&&age.kali<2){flash('🗼 Burj ke liye Castle Yug chahiye!');S.click();return}
+ if(kind==='wonder'&&age.kali<3){flash('🛕 Wonder ke liye Imperial Yug chahiye!');S.click();return}
+ if(kind==='wonder'&&buildings.some(b=>b.team==='kali'&&b.kind==='wonder'&&b.hp>0)){flash('🛕 Wonder ban gaya! Raksha karo!');return}
  const c=BCOST[kind];const g=G.kali;
- if(g.wood<(c.wood||0)||g.gold<(c.gold||0)){flash('🏯 Kam resource! Chahiye '+c.wood+'🪵 '+(c.gold?c.gold+'🪙':'') );S.click();return}
- g.wood-=c.wood||0;g.gold-=c.gold||0;
+ if(g.food<(c.food||0)||g.wood<(c.wood||0)||g.gold<(c.gold||0)){flash('🏯 Kam resource! Chahiye '+(c.food||0)+'🍚 '+(c.wood||0)+'🪵 '+((c.gold||0)?(c.gold||0)+'🪙':'') );S.click();return}
+ g.food-=c.food||0;g.wood-=c.wood||0;g.gold-=c.gold||0;
  const b=G.kali.base;const n=buildings.filter(x=>x.team==='kali').length;
- buildings.push({team:'kali',kind,x:b.x+rnd(-30,40),y:b.y-110-n*38,hp:220,maxHp:220,cool:0});
- S.power();float(b.x,b.y-120,'🏯 '+(kind==='barrack'?'Barrack! Foji +20% strong':kind==='farm'?'Khet! +khana':kind==='tower'?'Burj! Raksha':'Ghar! +8 Pop'),'#ffd27f');
+ const hp=kind==='wonder'?800:220;
+ buildings.push({team:'kali',kind,x:b.x+rnd(-30,40),y:b.y-110-n*30,hp,maxHp:hp,cool:0});
+ if(kind==='wonder'){wonderT.kali=90*60;showBanner('🛕 WONDER BAN GAYA! 90s bachao = JEET!');S.win()}
+ S.power();float(b.x,b.y-120,'🏯 '+(kind==='barrack'?'Barrack! Foji +20% strong':kind==='farm'?'Khet! +khana':kind==='tower'?'Burj! Raksha':kind==='market'?'Market! Trade khula':kind==='wonder'?'WONDER!':'Ghar! +8 Pop'),'#ffd27f');
 }
 const TCOST={sword:{food:40,gold:20},armor:{wood:40,gold:20},speed:{food:30,wood:30}};
 function research(k){
@@ -315,6 +327,46 @@ function research(k){
  G.kali.food-=needF;G.kali.wood-=needW;G.kali.gold-=needG;
  tech.kali[k]++;S.win();
  flash(k==='sword'?'⚔ Hamla +25%!':k==='armor'?'🛡 HP +30%!':'👟 Speed +15%!');
+}
+// ===== 🏰 PHASE-2: Yug (Ages) + Wonder + Market =====
+const AGES=[
+ {id:'stone',icon:'🪨',name:'Stone Yug'},
+ {id:'feudal',icon:'🏰',name:'Feudal Yug',cost:{food:100,wood:50}},
+ {id:'castle',icon:'🏯',name:'Castle Yug',cost:{food:150,wood:100,gold:50}},
+ {id:'imperial',icon:'👑',name:'Imperial Yug',cost:{food:250,wood:150,gold:100}}
+];
+let age={kali:0,laal:0};
+let wonderT={kali:0,laal:0};
+const AGEDMG=[1,1.1,1.25,1.45],AGEHP=[1,1.1,1.25,1.5];
+function ageName(t){return AGES[age[t]].icon+' '+AGES[age[t]].name}
+function advanceAge(){
+ if(!started||gameOver)return;
+ if(age.kali>=3){flash('👑 Max Yug!');return}
+ const c=AGES[age.kali+1].cost;
+ if(G.kali.food<(c.food||0)||G.kali.wood<(c.wood||0)||G.kali.gold<(c.gold||0)){flash('🏰 Yug ke liye '+(c.food||0)+'🍚 '+(c.wood||0)+'🪵 '+(c.gold||0)+'🪙 chahiye!');S.click();return}
+ G.kali.food-=c.food||0;G.kali.wood-=c.wood||0;G.kali.gold-=c.gold||0;
+ age.kali++;S.win();shakeAll=6;
+ showBanner(AGES[age.kali].icon+' '+AGES[age.kali].name.toUpperCase()+'! +HP +DMG!');
+ float(G.kali.base.x,G.kali.base.y-130,AGES[age.kali].icon+' '+AGES[age.kali].name+'!','#FFD700');
+}
+function laalAgeUp(){
+ if(age.laal>=3)return;
+ const c=AGES[age.laal+1].cost;
+ if(G.laal.food>=(c.food||0)*1.2&&G.laal.wood>=(c.wood||0)*1.2&&G.laal.gold>=(c.gold||0)*1.2){
+  G.laal.food-=c.food||0;G.laal.wood-=c.wood||0;G.laal.gold-=c.gold||0;
+  age.laal++;float(G.laal.base.x,G.laal.base.y-130,AGES[age.laal].icon+' Laal '+AGES[age.laal].name+'!','red');
+ }
+}
+function trade(kind){
+ if(!started||gameOver)return;
+ const hasMarket=buildings.some(b=>b.team==='kali'&&b.kind==='market'&&b.hp>0);
+ if(!hasMarket){flash('🛒 Pehle Market banao (80🪵)!');S.click();return}
+ const g=G.kali;
+ if(kind==='fw'&&g.food>=50){g.food-=50;g.wood+=30;S.eat();float(g.base.x,g.base.y-100,'50🍚 → +30🪵','#a3e635')}
+ else if(kind==='wf'&&g.wood>=40){g.wood-=40;g.food+=30;S.eat();float(g.base.x,g.base.y-100,'40🪵 → +30🍚','#4ade80')}
+ else if(kind==='fg'&&g.food>=80&&g.wood>=40){g.food-=80;g.wood-=40;g.gold+=30;S.power();float(g.base.x,g.base.y-100,'+30🪙 Sona!','#FFD700')}
+ else if(kind==='gf'&&g.gold>=20){g.gold-=20;g.food+=60;S.eat();float(g.base.x,g.base.y-100,'20🪙 → +60🍚','#4ade80')}
+ else{flash('🛒 Resource kam!');S.click();return}
 }
 // ===== ⏱️ TAIYAARI PHASE (army banane ka time) =====
 let inPrep=false,prepT=0,prepLen=20;
@@ -743,6 +795,7 @@ function refreshLevels(){
 function startGame(){ac();S.power();started=true;currentLevel=null;wavesToWin=0;laalStrat='balanced';document.getElementById('menu').style.display='none';
  G.kali.wood=30;G.kali.gold=20;G.laal.wood=30;G.laal.gold=20;
  buildings=[];tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
+ age={kali:0,laal:0};wonderT={kali:0,laal:0};
  laalCiv=['japan','cheen','bharat'][Math.floor(Math.random()*3)];
  if(myCiv==='bharat'){G.kali.food+=20;float(G.kali.base.x,G.kali.base.y-90,'🇮🇳 +20🍚 bonus!','#4ade80')}
  const names={fort:'Fort Todo',food:'Khana Race',endless:'Endless',waves:'Waves 🌊',versus:'Vs Dost 👥'};
@@ -789,6 +842,7 @@ function spawn(team,type,free){
  if(!free&&!freeNow){
   let cc=cost;
   if(team==='kali'&&myCiv==='bharat'&&type==='worker')cc=Math.ceil(cost*0.7);
+  if(type==='tank'&&age[team]<1){if(team==='kali'){flash('🛡 Tank ke liye Feudal Yug chahiye!');S.click()}return}
   if(type==='tank'&&G[team].wood<10){if(team==='kali'){flash('🪵 Tank ke liye 10 lakdi!');S.click()}return}
   if(G[team].food<cc){if(team==='kali'){flash('🍚 Khana kam! Worker bhejo!');S.click()}return}
   G[team].food-=cc;if(type==='tank')G[team].wood-=10;S.spawn()}
@@ -1023,7 +1077,10 @@ function step(){
   for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
   // 🏯 AOE economy: khet income + laal trickle + burj attack
   if(frame%120===0){for(let b of buildings){if(b.hp<=0)continue;if(b.kind==='farm'){G[b.team].food+=4*civOf(b.team).foodRate;if(b.team==='kali'&&Math.random()<0.3)float(b.x,b.y-24,'+4 🍚','#4ade80')}}}
-  if(frame%300===0){G.laal.wood+=8;G.laal.gold+=5;if(frame%900===0&&mode!=='versus'&&G.laal.wood>=40&&buildings.filter(x=>x.team==='laal').length<3){const lb=G.laal.base;buildings.push({team:'laal',kind:['barrack','tower','farm'][Math.floor(Math.random()*3)],x:lb.x+rnd(-40,30),y:lb.y-110,hp:220,maxHp:220,cool:0})}}
+  if(frame%300===0){G.laal.wood+=8;G.laal.gold+=5;if(frame%1200===0)laalAgeUp();if(frame%900===0&&mode!=='versus'&&G.laal.wood>=40&&buildings.filter(x=>x.team==='laal').length<4){const lb=G.laal.base;const pool=age.laal>=2?['barrack','tower','farm','market']:['barrack','farm','market'];buildings.push({team:'laal',kind:pool[Math.floor(Math.random()*pool.length)],x:lb.x+rnd(-40,30),y:lb.y-110,hp:220,maxHp:220,cool:0})}}
+  if(frame%300===0){for(let b of buildings){if(b.hp>0&&b.kind==='market'){G[b.team].gold+=3}}}
+  // 🛕 Wonder timer: 90s tak bachao = jeet
+  for(let t of ['kali','laal']){const w=buildings.find(b=>b.team===t&&b.kind==='wonder'&&b.hp>0);if(w){if(wonderT[t]>0){wonderT[t]--;if(wonderT[t]%600===0)float(w.x,w.y-50,'🛕 '+Math.ceil(wonderT[t]/60)+'s!','#FFD700');if(wonderT[t]<=0&&!gameOver){gameOver=true;const win=t==='kali';document.getElementById('msg').textContent=win?'🛕 WONDER JEET! Kali amar! 🎉':'🛕 Laal Wonder jeet gaya! 💔';if(win){addScore(300);S.win();recordWin(mode);showLoot()}else{S.lose()}showBanner(win?'🛕 WONDER JEET! +300⭐':'🛕 HAAR!')}}}}
   for(let b of buildings){if(b.hp<=0||b.kind!=='tower')continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
 // surprise events har ~45s + tension heartbeat jab fort tootne wala ho
  if(frame>600&&frame%2700===0)triggerEvent();
@@ -1279,6 +1336,8 @@ function draw(){
   if(killStreak>=4)pill('🔥 x'+Math.min(5,1+Math.floor(killStreak/4)),'#ff0');
   if(mode==='waves')pill(waveState==='break'?'🌊 Wave '+(waveN+1)+' in '+(waveT/60).toFixed(0)+'s':'🌊 WAVE '+waveN+' ('+ants.filter(a=>a.team==='laal').length+' left)','#67e8f9');
   if(huts.length>0)pill('🏘 '+huts.length+' 🌾'+villageStore,'#d6a756');
+  pill(ageName('kali'),'#FFD700');
+  if(wonderT.kali>0)pill('🛕 '+Math.ceil(wonderT.kali/60)+'s','#FFD700');
   if(daily)pill('📅 DAILY','#FFD700');
   if(inPrep)pill('⏱️ TAIYAARI '+Math.max(0,Math.ceil(prepT/60))+'s','#22c55e');
   pill(nightF>0.5?'🌙 Raat':'☀ Din',nightF>0.5?'#818cf8':'#fde047');
@@ -1292,7 +1351,7 @@ function draw(){
  // 🏯 AOE nodes: ped + sona + imaratein
  for(let t of trees){if(t.hp<=0)continue;ctx.save();ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(t.x,t.y+14,14,5,0,0,7);ctx.fill();ctx.fillStyle='#5a3a15';ctx.fillRect(t.x-3,t.y-2,6,16);ctx.fillStyle='#2d6a1e';ctx.beginPath();ctx.arc(t.x,t.y-12,15,0,7);ctx.fill();ctx.fillStyle='#3f9e2f';ctx.beginPath();ctx.arc(t.x-4,t.y-16,8,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.fillText('🪵',t.x-7,t.y+4);ctx.restore()}
  for(let m of mines){if(m.hp<=0)continue;ctx.save();ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(m.x,m.y,22,14,0,0,7);ctx.fill();ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(m.x-5,m.y-3,4,0,7);ctx.arc(m.x+6,m.y+2,3,0,7);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 11px sans-serif';ctx.fillText('🪙',m.x-8,m.y+5);ctx.restore()}
- for(let b of buildings){if(b.hp<=0)continue;ctx.save();ctx.fillStyle=b.team==='kali'?'#3a2d16':'#3d0a0a';rr(b.x-22,b.y-20,44,34,6);ctx.fill();ctx.strokeStyle='#c68a2e';ctx.lineWidth=2;rr(b.x-22,b.y-20,44,34,6);ctx.stroke();ctx.font='bold 18px sans-serif';ctx.fillText(b.kind==='barrack'?'🏟':b.kind==='farm'?'🌾':b.kind==='tower'?'🗼':'🏠',b.x-13,b.y+6);ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-20,b.y-28,40,5);ctx.fillStyle='#4ade80';ctx.fillRect(b.x-20,b.y-28,40*Math.max(0,b.hp/b.maxHp),5);ctx.restore()}
+ for(let b of buildings){if(b.hp<=0)continue;ctx.save();const big=b.kind==='wonder';const w2=big?34:22,h2=big?48:34;ctx.fillStyle=b.team==='kali'?'#3a2d16':'#3d0a0a';rr(b.x-w2,b.y-20,w2*2,h2,6);ctx.fill();ctx.strokeStyle=big?'#FFD700':'#c68a2e';ctx.lineWidth=big?3:2;rr(b.x-w2,b.y-20,w2*2,h2,6);ctx.stroke();ctx.font=big?'bold 26px sans-serif':'bold 18px sans-serif';ctx.fillText(b.kind==='barrack'?'🏟':b.kind==='farm'?'🌾':b.kind==='tower'?'🗼':b.kind==='market'?'🛒':b.kind==='wonder'?'🛕':'🏠',b.x-(big?17:13),b.y+6);if(big&&wonderT[b.team]>0){ctx.fillStyle='#FFD700';ctx.font='bold 12px sans-serif';ctx.fillText(Math.ceil(wonderT[b.team]/60)+'s',b.x-12,b.y-32)}ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-20,b.y-28,40,5);ctx.fillStyle='#4ade80';ctx.fillRect(b.x-20,b.y-28,40*Math.max(0,b.hp/b.maxHp),5);ctx.restore()}
  // forts HQ (behind ants? draw base then ants then top flag for depth)
  drawFortBase(G.kali.base.x,G.kali.base.y,'kali',shakeK);
  drawFortBase(G.laal.base.x,G.laal.base.y,'laal',shakeL);
@@ -1825,7 +1884,8 @@ function updateHUD(){
   document.getElementById('laalWood').textContent=Math.floor(G.laal.wood);
   document.getElementById('laalGold').textContent=Math.floor(G.laal.gold);
   document.getElementById('kaliPop').textContent=popUsed('kali')+'/'+popCap('kali');
-  document.getElementById('civT').textContent=CIVS[myCiv].name+' | 👷:'+(workerFocus==='food'?'🍚':workerFocus==='wood'?'🪵':'🪙')+' | ⚔'+tech.kali.sword+' 🛡'+tech.kali.armor+' 👟'+tech.kali.speed;
+  document.getElementById('civT').textContent=CIVS[myCiv].name+' | '+ageName('kali')+' | 👷:'+(workerFocus==='food'?'🍚':workerFocus==='wood'?'🪵':'🪙')+' | ⚔'+tech.kali.sword+' 🛡'+tech.kali.armor+' 👟'+tech.kali.speed+(wonderT.kali>0?' | 🛕'+Math.ceil(wonderT.kali/60)+'s':'');
+  const ba=document.getElementById('bAge');if(ba)ba.textContent=age.kali>=3?'👑 Max Yug':'🏰 '+(AGES[age.kali+1].icon+' '+AGES[age.kali+1].name);
  }catch(e){}
  document.getElementById('kaliHpB').style.width=(G.kali.fort/G.kali.maxFort*100)+'%';
  document.getElementById('laalHpB').style.width=(G.laal.fort/G.laal.maxFort*100)+'%';
