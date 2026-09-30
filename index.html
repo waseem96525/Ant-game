@@ -749,6 +749,30 @@ function onKill(how,v){
 }
 
 let shakeK=0,shakeL=0;
+// ===== FORT DESTRUCTION CINEMATIC: debris + shockwave rings =====
+let debris=[],rings=[],endCine=null;
+function spawnDebris(x,y,team,n=26){
+ const cols=team==='kali'?['#3a3a41','#17171b','#9ca3af','#8b5a2b','#FFD700']:['#8a1a1a','#d64545','#FFD700','#5a3a15','#3d0606'];
+ for(let i=0;i<n;i++){
+  const a=rnd(-Math.PI,0),sp=rnd(1,6);
+  debris.push({x:x+rnd(-30,30),y:y+rnd(-50,30),vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
+   w:rnd(5,14),h:rnd(4,10),rot:rnd(0,6.28),vr:rnd(-0.3,0.3),
+   c:cols[Math.floor(Math.random()*cols.length)],life:rnd(120,240),max:240});
+ }
+}
+function startCine(loser){
+ if(endCine)return;
+ endCine={loser,t:0};
+ const b=G[loser].base,win=loser==='laal';
+ slowmoT=60;shakeAll=20;vib([100,50,100]);
+ showBanner(win?'💥 LAAL FORT TOOT GAYA!':'💥 KALI FORT TOOT GAYA!');
+ S.boom();setTimeout(()=>S.boom(),300);setTimeout(()=>{S.cannon();S.boom()},700);
+ spawnDebris(b.x,b.y,loser,30);
+ burst(b.x,b.y,'#ff7b00',30,6);burst(b.x,b.y,'#ff2222',20,5);spark(b.x,b.y,'#ffef00',24);puff(b.x,b.y,'rgba(30,20,10,0.8)',16);
+ rings.push({x:b.x,y:b.y,r:12,life:50,max:50});
+ craters.push({x:b.x,y:b.y+40,life:1200,max:1200});
+ float(b.x,b.y-90,'💥 DHADAAAM!','#ff0');
+}
 function step(){
  if(gameOver||!started||paused)return;
  for(let s=0;s<speed;s++){
@@ -880,10 +904,21 @@ function spawnWaveAnt(){
  }
  ants=ants.filter(a=>a.hp>0);
  if(hero&&hero.hp<=0&&ants.includes(hero)===false){heroRespawn=600;float(G.kali.base.x,G.kali.base.y,'Raja gir gaya! 10s...','red')}
-  if(G.kali.fort<=0||G.laal.fort<=0){
-   gameOver=true;
-   if(G.kali.fort<=0){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose();showBanner('💔 HAAR! Score '+score+' ⭐');gainXP(score)}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';addScore(150);S.win();slowmoT=100;showBanner('🎉 JEET! +150 ⭐');burst(G.laal.base.x,G.laal.base.y,'gold',50,6);puff(G.laal.base.x,G.laal.base.y,'rgba(0,0,0,0.7)',20);recordWin(mode);showLoot()}
-   try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
+  if(!gameOver&&!endCine&&(G.kali.fort<=0||G.laal.fort<=0)){
+   startCine(G.kali.fort<=0?'kali':'laal');
+  }
+  if(endCine&&!endCine.done){
+   endCine.t++;
+   const bb=G[endCine.loser].base;
+   if(endCine.t%12===0){spawnDebris(bb.x+rnd(-30,30),bb.y+rnd(-40,20),endCine.loser,4);puff(bb.x+rnd(-35,35),bb.y+rnd(-50,30),'rgba(60,50,40,0.6)',2)}
+   if(endCine.t%20===0){shakeAll=8;if(endCine.loser==='kali')shakeK=8;else shakeL=8}
+   if(endCine.t===60){rings.push({x:bb.x,y:bb.y,r:12,life:45,max:45});S.boom()}
+   if(endCine.t>=150){
+    gameOver=true;endCine.done=true;
+    const kaliLost=endCine.loser==='kali';
+    if(kaliLost){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose();showBanner('💔 HAAR! Score '+score+' ⭐');gainXP(score)}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';addScore(150);S.win();showBanner('🎉 JEET! +150 ⭐');recordWin(mode);showLoot()}
+    try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
+   }
   }
  }
  updateHUD();
@@ -964,6 +999,14 @@ function draw(){
   p.x+=p.vx;p.y+=p.vy;p.vy+=(p.grav??0.05);p.life--;
  }
  parts=parts.filter(p=>p.life>0);
+ // malba physics (game over ke baad bhi girta rahega)
+ for(let db of debris){db.vy+=0.35;db.x+=db.vx;db.y+=db.vy;db.rot+=db.vr;if(db.y>H-8){db.y=H-8;db.vy*=-0.35;db.vx*=0.7;db.vr*=0.6}db.life--}
+ debris=debris.filter(d=>d.life>0);
+ for(let db of debris){ctx.save();ctx.translate(db.x,db.y);ctx.rotate(db.rot);ctx.globalAlpha=Math.min(1,db.life/60);ctx.fillStyle=db.c;ctx.fillRect(-db.w/2,-db.h/2,db.w,db.h);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(-db.w/2,-db.h/2,db.w,2);ctx.restore()}
+ // shockwave rings
+ for(let rg of rings){rg.r+=11;rg.life--}
+ rings=rings.filter(r=>r.life>0);
+ for(let rg of rings){const k=Math.max(0,rg.life/rg.max);ctx.save();ctx.globalAlpha=k;ctx.strokeStyle='#ffdd88';ctx.lineWidth=5*k+1;ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r,0,7);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r*0.85,0,7);ctx.stroke();ctx.restore()}
  // motes sparkle
  for(let m of motes){ctx.fillStyle=`rgba(255,255,220,${0.25+0.2*Math.sin(frame/25+m.ph)})`;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fill()}
  // floats with pop scale
@@ -1064,6 +1107,10 @@ function drawFortBase(x,y,team,sh){
  const hp=fortHP(team);
  const wallC=kali?'#2a2a30':'#8a1a1a', darkC=kali?'#111':'#5a0d0d', trimC=kali?'#d1d5db':'#FFD700';
  ctx.save();ctx.translate(rnd(-sh,sh),rnd(-sh,sh));
+ // toot raha fort: dheere dhasna + halka fade
+ const breaking=endCine&&endCine.loser===team;
+ const bt=breaking?Math.min(1,endCine.t/120):0;
+ if(bt>0){ctx.translate(Math.sin(endCine.t/6)*3*bt,bt*24);ctx.globalAlpha=1-bt*0.2}
  // ground shadow + glow
  ctx.fillStyle='rgba(0,0,0,0.35)';ctx.beginPath();ctx.ellipse(x,y+56,56,14,0,0,7);ctx.fill();
  if(team==='kali'){ctx.shadowColor='rgba(255,255,255,0.15)';ctx.shadowBlur=18}else{ctx.shadowColor='rgba(255,40,40,0.35)';ctx.shadowBlur=18}
@@ -1117,11 +1164,31 @@ function drawFortBase(x,y,team,sh){
  const hpg=ctx.createLinearGradient(x-30,0,x+30,0);
  if(kali){hpg.addColorStop(0,'#e5e7eb');hpg.addColorStop(1,'#9ca3af')}else{hpg.addColorStop(0,'#ff6b6b');hpg.addColorStop(1,'#b91c1c')}
  ctx.fillStyle=hpg;const hw=60*Math.max(0,hp);rr(x-30,y+60,hw,7,3);ctx.fill();
+ // malbe ka dher (tootne par ugta hai)
+ if(bt>0){
+  ctx.fillStyle=kali?'#3f3f46':'#7a2a2a';
+  ctx.beginPath();ctx.moveTo(x-54,y+58);ctx.quadraticCurveTo(x-20,y+58-bt*48,x,y+58-bt*30);ctx.quadraticCurveTo(x+25,y+58-bt*42,x+54,y+58);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  for(let ri=0;ri<Math.floor(8*bt);ri++){ctx.fillRect(x+rnd(-46,46),y+58-rnd(0,Math.max(1,bt*34)),rnd(4,10),rnd(3,7))}
+  ctx.fillStyle=trimC;
+  for(let ri=0;ri<Math.floor(4*bt);ri++){ctx.beginPath();ctx.arc(x+rnd(-40,40),y+58-rnd(0,Math.max(1,bt*30)),2,0,7);ctx.fill()}
+  if(Math.random()<bt*0.5){const fx=x+rnd(-35,35),fy=y+52-rnd(0,bt*30);const fg=ctx.createRadialGradient(fx,fy,1,fx,fy,16);fg.addColorStop(0,'#ffff00');fg.addColorStop(0.5,'#ff7b00');fg.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=fg;ctx.beginPath();ctx.arc(fx,fy,11,0,7);ctx.fill()}
+ }
  ctx.restore();
 }
 function drawFortTop(x,y,team){
  const kali=team==='kali';
  ctx.save();
+ // gira hua jhanda + bujhi mashaal (fort tootne par)
+ if(endCine&&endCine.loser===team&&endCine.t>40){
+  ctx.translate(x+28,y+42);ctx.rotate(1.25);
+  ctx.strokeStyle='#3a2a10';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-36);ctx.stroke();
+  ctx.fillStyle=kali?'#333':'#b91c1c';ctx.fillRect(0,-36,28,13);
+  ctx.fillStyle=kali?'#fff':'#FFD700';ctx.font='bold 10px sans-serif';ctx.fillText(kali?'K':'L',10,-26);
+  ctx.restore();
+  if(Math.random()<0.25)parts.push({x:x+rnd(-30,30),y:y+30,vx:rnd(-0.3,0.3),vy:rnd(-1,-0.4),life:40,max:40,c:'rgba(70,70,70,0.6)',sz:rnd(4,8),grav:-0.01,smoke:true});
+  return;
+ }
  // flag pole + waving flag
  const sway=Math.sin(frame/12+x)*4;
  ctx.strokeStyle='#3a2a10';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-62);ctx.lineTo(x,y-96);ctx.stroke();
