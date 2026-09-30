@@ -177,6 +177,7 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 🏃 <b>Runner</b>(12🍚, tez), 🛡 <b>Tank</b>(35🍚, mota HP), ⚕ <b>Healer</b>(25🍚, sathiyon ko heal) — <kbd>E</kbd>/<kbd>Q</kbd>/<kbd>H</kbd> se banao!<br>
 🎁 <b>Power-ups</b> khana zone me girte hain: 🛡 Kavach, ❄ Freeze, 💢 Double War, 🍯 +40 khana — koi bhi Kali ant uthayegi!<br>
 🌊 <b>Waves:</b> lehar-dar-lehar Laal hamla, jeeto +⭐! 👥 <b>Versus:</b> P1 Arrow vs P2 WASD + right joystick, ek hi screen par dost se lado! 📅 <b>Daily:</b> roz naya 2-min challenge!<br>
+🏘 <b>Gaon:</b> Beech me neutral gaon hai — gaon-wale khana jama karte hain. Foji se ghar thoko: har vaar +3🍚, ghar giraya to <b>+30🍚 LOOT!</b> Gaon dobara ghar bana lega. Straw-hat walon ko pehchano!<br>
 🌙 <b>Din-Raat + 🌧 Barish</b> apne aap badalte hain — raat me mashaalon ki roshni, barish me sab slow. ⭐ Score har kill par, 🏆 best save rehta hai. 📸 Photo se jeet ki tasveer lo!<br>
 💣 <b>Bomb:</b> Rally point par dhamaka (pehle goliyan, phir DHAMAKA)! 🍬 <b>Cheeni:</b> 8 dane. ⚡ <b>Josh:</b> 8 sec speed.<br>
 🗡 <b>Talwar:</b> Soldier/Raja ki har takkar par talwar ki jhanjhanahat! 🔫 <b>Goli:</b> Fort par hamle + Bomb me goliyon ki thain-thain! <kbd>T</kbd>/<kbd>G</kbd> dabakar test karo.<br>
@@ -240,6 +241,26 @@ const UNITS={
 const FIGHTERS=['soldier','runner','tank'];
 let powerups=[],drops=[];
 let shieldT=0,freezeT=0,doubleT=0;
+// ===== GAON: ghar + gaon-wale + anaaj bhandar =====
+let huts=[
+ {x:380,y:150,hp:220,maxHp:220,ph:rnd(0,6.28)},
+ {x:450,y:112,hp:220,maxHp:220,ph:rnd(0,6.28)},
+ {x:520,y:150,hp:220,maxHp:220,ph:rnd(0,6.28)}
+];
+let hutQueue=[],villageStore=0;
+function destroyHut(h,team){
+ huts.splice(huts.indexOf(h),1);
+ S.boom();shakeAll=8;vib(60);
+ burst(h.x,h.y,'#8b5a2b',22,4);burst(h.x,h.y,'#ffd27f',12,3);puff(h.x,h.y,'rgba(80,60,30,0.7)',10);
+ for(let i=0;i<6;i++)foods.push({x:h.x+rnd(-45,45),y:h.y+rnd(-32,32),r:6,ph:rnd(0,6.28)});
+ G[team].food+=30;addScore(40);
+ showBanner('🏘 GHAR TOOT GAYA! +30🍚 +40⭐');
+ float(h.x,h.y-60,'+30 🍚 LOOT!','#ffd27f');
+ hutQueue.push({x:h.x,y:h.y,t:3600});
+}
+function mkVillager(h){
+ return {team:'village',type:'villager',x:h.x+rnd(-15,15),y:h.y+rnd(-8,12),hp:50,maxHp:50,dmg:4,speed:1.7,carry:false,cool:0,tx:null,ty:null,boost:0,face:rnd(0,6.28),px:h.x,py:h.y,ph:rnd(0,6.28)};
+}
 let waveN=0,waveState='break',waveT=480,waveLeft=0,waveTick=0;
 let score=0,high=0,daily=null,slowmoT=0,timeScale=1;
 let bannerTxt='',bannerT=0;
@@ -589,6 +610,7 @@ hero=makeHero('kali');
 ants.push(hero);
 for(let i=0;i<3;i++){spawn('kali','worker',true);spawn('laal','worker',true)}
 spawn('kali','soldier',true);spawn('laal','soldier',true);
+for(let i=0;i<4;i++){const h0=huts[i%huts.length];ants.push(mkVillager(h0))}
 if(difficulty==='hard'){/* laal raja start me banega */}
 
 function spawn(team,type,free){
@@ -733,7 +755,7 @@ function onKill(how,v){
  kills++;killStreak++;streakT=120;S.die();
  // score: victim ke hisaab se
  let pts=10;
- if(v){if(v.type==='hero')pts=50;else if(v.type==='tank')pts=20;else if(v.type==='soldier'||v.type==='runner')pts=12;else if(v.type==='healer')pts=15}
+ if(v){if(v.type==='hero')pts=50;else if(v.type==='tank')pts=20;else if(v.type==='soldier'||v.type==='runner')pts=12;else if(v.type==='healer')pts=15;else if(v.type==='villager')pts=6}
  if(how==='ult')pts+=10;
  // combo multiplier: lagatar kill par x5 tak!
  const mult=Math.min(5,1+Math.floor(killStreak/4));
@@ -787,6 +809,12 @@ function step(){
   else if(Math.random()<0.0006){rainT=1200;S.thunder();float(450,120,'🌧 BARISH! Sab slow!','#a5f3fc')}
   // power-ups
   if(frame%840===0)spawnPower();
+  // gaon: ghar dobara banao + gaon-walon ki bharti
+  for(let q of hutQueue){q.t--;if(q.t<=0){huts.push({x:q.x,y:q.y,hp:220,maxHp:220,ph:rnd(0,6.28)});showBanner('🏘 Gaon ne ghar dobara banaya!');S.power()}}
+  hutQueue=hutQueue.filter(q=>q.t>0);
+  if(frame%600===0&&huts.length>0&&ants.filter(a=>a.type==='villager').length<5){
+   const h=huts[Math.floor(Math.random()*huts.length)];const v=mkVillager(h);ants.push(v);puff(v.x,v.y,'rgba(150,110,60,0.4)',4);
+  }
   for(let p of powerups)p.life--;powerups=powerups.filter(p=>p.life>0);
   for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
   // surprise events har ~45s + tension heartbeat jab fort tootne wala ho
@@ -868,6 +896,14 @@ function spawnWaveAnt(){
     if(hurt){a.px=a.x;a.py=a.y;moveTo(a,hurt.x,hurt.y);if(hd<44&&a.cool<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+14);a.cool=40;S.heal();spark(hurt.x,hurt.y-8,'#4ade80',5)}}
     else{const hb=G[a.team].base;if(Math.hypot(a.x-hb.x,a.y-hb.y)>70){a.px=a.x;a.py=a.y;moveTo(a,hb.x,hb.y)}}
     let en2=nearestEnemy(a,30);if(en2&&a.cool<=0){en2.hp-=hitDmg(a,en2);a.cool=40;if(en2.hp<=0){burst(en2.x,en2.y,'red',8,2);onKill('bite',en2)}}
+   }else if(a.type==='villager'){
+    // 🏘 gaon-wala: khana jama karo, khatra dekhkar ghar ki taraf bhago!
+    const hut=huts.length?huts.reduce((m,h)=>Math.hypot(a.x-h.x,a.y-h.y)<Math.hypot(a.x-m.x,a.y-m.y)?h:m,huts[0]):null;
+    const flee=nearestEnemy(a,85);
+    if(flee&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y)}
+    else if(a.carry&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y);if(Math.hypot(a.x-hut.x,a.y-hut.y)<28){a.carry=false;const gv=a.carryGolden?30:10;villageStore+=gv;S.eat();spark(hut.x,hut.y-26,'#c4b5fd',5);if(Math.random()<0.25)float(hut.x,hut.y-44,'🌾+'+gv,'#e9d5ff')}}
+    else if(!a.carry){let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#d6bcfa',4)}}}
+    let en3=nearestEnemy(a,30);if(en3&&a.cool<=0){en3.hp-=4;a.cool=40;if(en3.hp<=0){burst(en3.x,en3.y,'#c4b5fd',8,2);onKill('bite',en3)}}
    }else{
     // hero + soldier + runner + tank
     // 😈 LAAL RAJA charge attack (versus me nahi — wahan P2 khud chalata hai)
@@ -899,7 +935,15 @@ function spawnWaveAnt(){
     if(en&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
      if(a.cool<=0){en.hp-=hitDmg(a,en);a.face=Math.atan2(en.y-a.y,en.x-a.x);a.cool=a.type==='hero'?14:26;S.swing();S.clash(a.type==='hero');slashes.push({x:en.x,y:en.y,r:5,life:12,max:12});burst(en.x,en.y,'#ff0',3,2);if(en.hp<=0){burst(en.x,en.y,'red',10,3);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0');puff(en.x,en.y,'rgba(120,0,0,0.5)',6);onKill('sword',en)}}
    }else if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx)){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
-    else{a.px=a.x;a.py=a.y;moveTo(a,tx,ty);if(Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){let fd=a.dmg*(a.type==='hero'?0.9:0.6);if(a.team==='kali'&&doubleT>0)fd*=2;G[eTeam].fort-=fd;a.cool=30;S.cannon();vib(40);burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4,3);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
+     else{a.px=a.x;a.py=a.y;moveTo(a,tx,ty);if(Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){let fd=a.dmg*(a.type==='hero'?0.9:0.6);if(a.team==='kali'&&doubleT>0)fd*=2;G[eTeam].fort-=fd;a.cool=30;S.cannon();vib(40);burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4,3);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
+    // 🏘 gaon ka ghar looto: paas ho to thoko, +3🍚 har vaar
+    if(a.cool<=0&&huts.length){
+     let hh=null,hd=46;
+     for(let h of huts){let dd=Math.hypot(a.x-h.x,a.y-h.y);if(dd<hd){hd=dd;hh=h}}
+     if(hh){hh.hp-=a.dmg*0.6;a.cool=30;S.hit();spark(hh.x,hh.y-22,'#ffd27f',4);G[a.team].food+=3;
+      if(Math.random()<0.3)float(hh.x,hh.y-52,'+3 🍚','#ffd27f');
+      if(hh.hp<=0)destroyHut(hh,a.team)}
+    }
   }
  }
  ants=ants.filter(a=>a.hp>0);
@@ -968,6 +1012,7 @@ function draw(){
   if(freezeT>0)pill('❄ '+(freezeT/60).toFixed(0)+'s','#a5f3fc');
   if(killStreak>=4)pill('🔥 x'+Math.min(5,1+Math.floor(killStreak/4)),'#ff0');
   if(mode==='waves')pill(waveState==='break'?'🌊 Wave '+(waveN+1)+' in '+(waveT/60).toFixed(0)+'s':'🌊 WAVE '+waveN+' ('+ants.filter(a=>a.team==='laal').length+' left)','#67e8f9');
+  if(huts.length>0)pill('🏘 '+huts.length+' 🌾'+villageStore,'#d6a756');
   if(daily)pill('📅 DAILY','#FFD700');
   pill(nightF>0.5?'🌙 Raat':'☀ Din',nightF>0.5?'#818cf8':'#fde047');
   if(rainT>0)pill('🌧 Barish','#a5f3fc');
@@ -979,6 +1024,8 @@ function draw(){
  // forts HQ (behind ants? draw base then ants then top flag for depth)
  drawFortBase(G.kali.base.x,G.kali.base.y,'kali',shakeK);
  drawFortBase(G.laal.base.x,G.laal.base.y,'laal',shakeL);
+ // gaon ke ghar
+ for(let h of huts)drawHut(h);
  if(shakeK>0)shakeK--;if(shakeL>0)shakeL--;
  // ants sorted by y for depth
  let sorted=[...ants].sort((a,b)=>a.y-b.y);
@@ -1206,15 +1253,51 @@ function drawFortTop(x,y,team){
   fg.addColorStop(0,'#fff7a0');fg.addColorStop(0.4,'#ffb300');fg.addColorStop(1,'rgba(255,60,0,0)');
   ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x+s,y-8,fl*2.2,0,7);ctx.fill();
   ctx.fillStyle='#ffef00';ctx.beginPath();ctx.ellipse(x+s,y-7,2.5,fl*0.8,0,0,7);ctx.fill();
-  if(Math.random()<0.06)parts.push({x:x+s,y:y-14,vx:rnd(-0.3,0.3),vy:rnd(-1,-0.5),life:25,max:25,c:'rgba(255,150,0,0.8)',sz:2,grav:-0.02,glow:true});
+   if(Math.random()<0.06)parts.push({x:x+s,y:y-14,vx:rnd(-0.3,0.3),vy:rnd(-1,-0.5),life:25,max:25,c:'rgba(255,150,0,0.8)',sz:2,grav:-0.02,glow:true});
+  }
+  ctx.restore();
+}
+function drawHut(h){
+ const dmg=h.hp/h.maxHp;
+ ctx.save();
+ // zameen par saya
+ ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(h.x,h.y+24,34,9,0,0,7);ctx.fill();
+ // mitti ki gol deewar
+ const wg=ctx.createRadialGradient(h.x-8,h.y-8,4,h.x,h.y,30);
+ wg.addColorStop(0,'#c09a5c');wg.addColorStop(0.6,'#8b5a2b');wg.addColorStop(1,'#4a2e0e');
+ ctx.fillStyle=wg;ctx.beginPath();ctx.arc(h.x,h.y,26,Math.PI,0);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#3a2410';ctx.lineWidth=2;ctx.stroke();
+ // ghaas-phus ki chhat (layered)
+ for(let li=0;li<3;li++){
+  ctx.strokeStyle=['#e3c878','#d4af5a','#b8933f'][li];ctx.lineWidth=7;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(h.x,h.y+2,30-li*6,Math.PI*1.08,Math.PI*1.92);ctx.stroke();
  }
+ ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(h.x,h.y-30,4,0,7);ctx.fill();
+ // darwaza + raat me garm roshni
+ ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.ellipse(h.x,h.y+2,8,13,0,0,7);ctx.fill();
+ if(nightF>0.3){ctx.shadowColor='#ffb300';ctx.shadowBlur=12+nightF*10;ctx.fillStyle='#ffca55';ctx.beginPath();ctx.ellipse(h.x,h.y+4,5,9,0,0,7);ctx.fill();ctx.shadowBlur=0}
+ // khidki
+ ctx.fillStyle=nightF>0.3?'#ffca55':'#3a2a10';ctx.beginPath();ctx.arc(h.x+15,h.y-6,4,0,7);ctx.fill();
+ // chimni + dhuaan
+ ctx.fillStyle='#5a4a3a';ctx.fillRect(h.x+12,h.y-38,7,16);
+ if(Math.random()<0.08)parts.push({x:h.x+15,y:h.y-40,vx:rnd(-0.2,0.3),vy:rnd(-0.9,-0.4),life:45,max:45,c:'rgba(200,200,200,0.5)',sz:rnd(3,6),grav:-0.015,smoke:true});
+ // 🌾 bhandar ka dher (jitna anaaj, utna bada!)
+ if(villageStore>0){const sh=Math.min(12,3+villageStore/15);ctx.fillStyle='#e3c878';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.5;ctx.stroke()}
+ // tutan-phutan
+ if(dmg<0.66){ctx.strokeStyle='rgba(30,15,5,0.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(h.x-12,h.y-18);ctx.lineTo(h.x-4,h.y-6);ctx.lineTo(h.x-10,h.y+2);ctx.stroke()}
+ if(dmg<0.33&&Math.random()<0.2)puff(h.x+rnd(-18,18),h.y-20,'rgba(120,90,50,0.6)',1);
+ // HP bar
+ ctx.fillStyle='rgba(0,0,0,0.7)';rr(h.x-24,h.y-52,48,6,3);ctx.fill();
+ const hg=ctx.createLinearGradient(h.x-24,0,h.x+24,0);hg.addColorStop(0,'#e3c878');hg.addColorStop(1,'#8b5a2b');
+ ctx.fillStyle=hg;if(dmg>0){rr(h.x-24,h.y-52,48*Math.max(0,dmg),5,2);ctx.fill()}
+ ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('🏘',h.x,h.y-56);ctx.textAlign='left';
  ctx.restore();
 }
 function drawAnt(a){
  const heroA=a.type==='hero';
- const RM={worker:6,runner:5,soldier:8,tank:11,healer:7};
+ const RM={worker:6,runner:5,soldier:8,tank:11,healer:7,villager:6};
  const r=heroA?14:(RM[a.type]??7);
- const kali=a.team==='kali';
+ const kali=a.team==='kali',vil=a.team==='village';
  const ang=a.face??0;
  const run=Math.hypot((a.x-(a.px??a.x)),(a.y-(a.py??a.y)));
  const moving=run>0.05?1:0;
@@ -1248,14 +1331,14 @@ function drawAnt(a){
  ctx.lineCap='round';
  for(let l=-1;l<=1;l++){
   const ph=Math.sin(wig*2.2+l*1.8)*(moving?3.2:1.2);
-  ctx.strokeStyle=kali?'#1a1a1e':'#7a1010';ctx.lineWidth=heroA?2.8:2;
+   ctx.strokeStyle=kali?'#1a1a1e':(vil?'#4a2e0e':'#7a1010');ctx.lineWidth=heroA?2.8:2;
   // upper legs
   ctx.beginPath();ctx.moveTo(1,l*4);ctx.lineTo(-3+ph*0.4,l*6+ph);ctx.lineTo(-8,l*7+ph*1.4);ctx.stroke();
   ctx.beginPath();ctx.moveTo(1,l*4);ctx.lineTo(6+ph*0.3,l*6-ph);ctx.lineTo(11,l*7-ph*1.2);ctx.stroke();
  }
  // abdomen (back)
  const abdG=ctx.createRadialGradient(-8,-3,1,-8,0,12);
- if(kali){abdG.addColorStop(0,heroA?'#4b4b55':'#3a3a40');abdG.addColorStop(1,'#050507')}else{abdG.addColorStop(0,heroA?'#ff6b6b':'#f04444');abdG.addColorStop(1,heroA?'#7a0d0d':'#5a0d0d')}
+ if(kali){abdG.addColorStop(0,heroA?'#4b4b55':'#3a3a40');abdG.addColorStop(1,'#050507')}else if(vil){abdG.addColorStop(0,'#b08a4f');abdG.addColorStop(1,'#4a2e0e')}else{abdG.addColorStop(0,heroA?'#ff6b6b':'#f04444');abdG.addColorStop(1,heroA?'#7a0d0d':'#5a0d0d')}
  ctx.fillStyle=abdG;ctx.beginPath();ctx.ellipse(-9,0,heroA?10:7.5,heroA?8:5.5,0,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'rgba(255,255,255,0.7)';ctx.lineWidth=heroA?2:1;ctx.stroke();
  // stripes
@@ -1264,11 +1347,11 @@ function drawAnt(a){
  // tank armor plate + rivets
  if(a.type==='tank'){ctx.fillStyle=kali?'#6b7280':'#f87171';ctx.beginPath();ctx.ellipse(-9,-4,7,3.5,-0.2,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#111';for(let rv=-2;rv<=1;rv++){ctx.beginPath();ctx.arc(-9+rv*4,-5,1.1,0,7);ctx.fill()}}
  // thorax
- ctx.fillStyle=kali?'#232328':'#b91c1c';ctx.beginPath();ctx.arc(0,0,heroA?6.5:4.5,0,7);ctx.fill();
+ ctx.fillStyle=kali?'#232328':(vil?'#6b4a1f':'#b91c1c');ctx.beginPath();ctx.arc(0,0,heroA?6.5:4.5,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=1;ctx.stroke();
  // head
  const headG=ctx.createRadialGradient(6,-2,1,8,0,9);
- if(kali){headG.addColorStop(0,'#3d3d46');headG.addColorStop(1,'#0a0a0c')}else{headG.addColorStop(0,'#ff7b7b');headG.addColorStop(1,'#7a0d0d')}
+ if(kali){headG.addColorStop(0,'#3d3d46');headG.addColorStop(1,'#0a0a0c')}else if(vil){headG.addColorStop(0,'#c09a5c');headG.addColorStop(1,'#5a3a15')}else{headG.addColorStop(0,'#ff7b7b');headG.addColorStop(1,'#7a0d0d')}
  ctx.fillStyle=headG;ctx.beginPath();ctx.arc(heroA?11:8,0,heroA?7:5,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=heroA?2:1;ctx.stroke();
  // mandibles / jaws
@@ -1284,6 +1367,8 @@ function drawAnt(a){
  ctx.beginPath();ctx.moveTo(heroA?14:10,-3);ctx.quadraticCurveTo(heroA?20:15,-8+aw,heroA?23:18,-10+aw);ctx.stroke();
  ctx.beginPath();ctx.moveTo(heroA?14:10,3);ctx.quadraticCurveTo(heroA?20:15,8-aw,heroA?23:18,10-aw);ctx.stroke();
  ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(heroA?23:18,-10+aw,1.4,0,7);ctx.arc(heroA?23:18,10-aw,1.4,0,7);ctx.fill();
+ // straw hat (gaon-wale ki pehchan)
+ if(vil){ctx.fillStyle='#e3c878';ctx.beginPath();ctx.ellipse(5,-1,7.5,3,0,0,7);ctx.fill();ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(5,-1,4,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(5,-1,7.5,3,0,0,7);ctx.stroke()}
  // eyes (forward = +x after rotate)
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(heroA?12:9,-2.5,heroA?2.6:1.8,0,7);ctx.arc(heroA?12:9,2.5,heroA?2.6:1.8,0,7);ctx.fill();
  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(heroA?12.8:9.6,-2.5,heroA?1.3:0.9,0,7);ctx.arc(heroA?12.8:9.6,2.5,heroA?1.3:0.9,0,7);ctx.fill();
