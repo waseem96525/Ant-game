@@ -717,8 +717,8 @@ function refreshPanel(){
  if(placing){info.innerHTML='📍 <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') — jagah tap karo. <b>Esc</b> = cancel';return}
  const b=sel.bld!=null?blds.find(x=>x.id===sel.bld):null;
  if(b){
-  const q=b.queue.length?(' ⏳'+q):'';
-  info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ ban raha '+Math.floor(b.prog/b.need*100)+'% (villager bhejo!)')+q;
+  const qn=b.queue.length?(' ⏳'+b.queue.length):'';
+  info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ ban raha '+Math.floor(b.prog/b.need*100)+'% (villager bhejo!)')+qn;
   if(b.kind==='tc'&&b.done){btn('👷 Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
    btn(age.P1>=4?'👑 MAX Yug':'⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()});}
   if(b.kind==='barracks'&&b.done){for(const t of ['sword','spear','archer','knight','elephant','cannon']){const U=UNITS[t];
