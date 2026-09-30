@@ -518,8 +518,13 @@ function drawBld(b){
    ctx.fillStyle='#d9f99d';for(let px=-b.w/2+10;px<b.w/2-6;px+=18){ctx.beginPath();ctx.arc(px,ry-5,1.2,0,7);ctx.fill()}}
   // bijooka (scarecrow)
   ctx.strokeStyle='#5b3a1a';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(18,-b.h/2+6);ctx.lineTo(18,b.h/2-6);ctx.moveTo(10,-b.h/2+16);ctx.lineTo(26,-b.h/2+16);ctx.stroke();
+  ctx.fillStyle='#7a2e2e';ctx.fillRect(11,-b.h/2+12,14,8);
   ctx.fillStyle='#d9b64a';ctx.beginPath();ctx.arc(18,-b.h/2+2,4,0,7);ctx.fill();
   ctx.fillStyle='#e11d48';ctx.beginPath();ctx.arc(18,-b.h/2+2,4,Math.PI,0);ctx.fill();
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(16.5,-b.h/2+1,0.8,0,7);ctx.arc(19.5,-b.h/2+1,0.8,0,7);ctx.fill();
+  // pathar ki mend + paani naali
+  ctx.fillStyle='#8a857a';for(let bi=-b.w/2+4;bi<b.w/2;bi+=13){ctx.beginPath();ctx.arc(bi,b.h/2-3,3,0,7);ctx.fill()}
+  ctx.fillStyle='#3f7dc4';ctx.fillRect(-b.w/2,b.h/2+4,b.w,3);
   ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('🌾',-b.w/2+9,4);ctx.textAlign='left';
  }else if(b.kind==='tower'){
   ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,b.h/2+4,b.w/2+10,9,0,0,7);ctx.fill();
@@ -535,45 +540,96 @@ function drawBld(b){
   ctx.fillStyle=col;ctx.fillRect(-2,-b.h/2+8,4,10);
   const fl=Math.sin(frame/12+b.x)*4;
   ctx.strokeStyle='#3a2a10';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(0,-b.h/2-8);ctx.lineTo(0,-b.h/2-30);ctx.stroke();
-  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,-b.h/2-30);ctx.quadraticCurveTo(11,-b.h/2-28+fl,20,-b.h/2-23+fl);ctx.lineTo(20,-b.h/2-13+fl);ctx.quadraticCurveTo(11,-b.h/2-18+fl,0,-b.h/2-16);ctx.closePath();ctx.fill();
- }else{
- // saya + pathar ki neev
+   ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,-b.h/2-30);ctx.quadraticCurveTo(11,-b.h/2-28+fl,20,-b.h/2-23+fl);ctx.lineTo(20,-b.h/2-13+fl);ctx.quadraticCurveTo(11,-b.h/2-18+fl,0,-b.h/2-16);ctx.closePath();ctx.fill();
+   // upar angara + latka banner
+   const tfl=4+Math.sin(frame/6+b.x)*1.2+Math.random();
+   ctx.fillStyle='#3a2a10';ctx.fillRect(-14,-b.h/2-2,5,8);
+   const tg2=ctx.createRadialGradient(-11.5,-b.h/2-8,1,-11.5,-b.h/2-8,tfl*3);tg2.addColorStop(0,'#fff7a0');tg2.addColorStop(0.4,'#ffb300');tg2.addColorStop(1,'rgba(255,60,0,0)');
+   ctx.fillStyle=tg2;ctx.beginPath();ctx.arc(-11.5,-b.h/2-8,tfl*2,0,7);ctx.fill();
+   ctx.fillStyle=col;ctx.fillRect(8,-b.h/2+12,10,22);ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=1;ctx.strokeRect(8,-b.h/2+12,10,22);
+   ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText('矢',13,-b.h/2+27);ctx.textAlign='left';
+  }else{
+ // saya
  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,b.h/2+4,b.w/2+6,10,0,0,7);ctx.fill();
+ // pathar ki neev (ek-ek pathar + masala)
  ctx.fillStyle='#7a756a';rr(-b.w/2-4,-b.h/2+2,b.w+8,b.h,4);ctx.fill();
- ctx.fillStyle='#5a5550';for(let sx=-b.w/2;sx<b.w/2;sx+=14)ctx.fillRect(sx,-b.h/2+2,2,b.h);
- // deewar (plaster + lakdi ke shahteer)
+ for(let bx=-b.w/2-4;bx<b.w/2+4;bx+=16){ctx.fillStyle=Math.round(bx/16)%2?'rgba(0,0,0,0.18)':'rgba(255,255,255,0.08)';ctx.fillRect(bx,-b.h/2+2,15,b.h);ctx.fillStyle='#4a463f';ctx.fillRect(bx,-b.h/2+2,1.5,b.h)}
+ // deewar (plaster + daag-dhabbe + darar + neeche mitti)
  const wg=ctx.createLinearGradient(0,-b.h/2,0,b.h/2);wg.addColorStop(0,b.team==='P1'?'#e0cda0':'#d0a8a0');wg.addColorStop(1,b.team==='P1'?'#b09a68':'#a07870');
  ctx.fillStyle=wg;rr(-b.w/2,-b.h/2,b.w,b.h,4);ctx.fill();
+ ctx.fillStyle='rgba(120,90,40,0.14)';ctx.beginPath();ctx.ellipse(-b.w/4,b.h/2-10,15,6,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(b.w/3,-b.h/4,9,5,0.4,0,7);ctx.fill();
+ ctx.strokeStyle='rgba(60,40,20,0.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(b.w/4,-b.h/2+10);ctx.lineTo(b.w/4-4,-b.h/2+20);ctx.lineTo(b.w/4+2,-b.h/2+28);ctx.stroke();
+ ctx.fillStyle='rgba(90,60,20,0.28)';ctx.fillRect(-b.w/2,b.h/2-7,b.w,7);
  ctx.strokeStyle='#4a3311';ctx.lineWidth=2.5;rr(-b.w/2,-b.h/2,b.w,b.h,4);ctx.stroke();
- ctx.strokeStyle='rgba(74,51,17,0.7)';ctx.lineWidth=3;
- ctx.beginPath();ctx.moveTo(-b.w/2+8,-b.h/2);ctx.lineTo(-b.w/2+8,b.h/2);ctx.moveTo(b.w/2-8,-b.h/2);ctx.lineTo(b.w/2-8,b.h/2);ctx.stroke();
+ // lakdi ke shahteer (grain + keel)
+ ctx.strokeStyle='rgba(74,51,17,0.85)';ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(-b.w/2+8,-b.h/2);ctx.lineTo(-b.w/2+8,b.h/2);ctx.moveTo(b.w/2-8,-b.h/2);ctx.lineTo(b.w/2-8,b.h/2);ctx.moveTo(-b.w/2,-b.h/2+10);ctx.lineTo(b.w/2,-b.h/2+10);ctx.stroke();
+ ctx.strokeStyle='rgba(120,85,40,0.6)';ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(-b.w/2+8,-b.h/2+2);ctx.lineTo(-b.w/2+8,b.h/2-2);ctx.moveTo(b.w/2-8,-b.h/2+2);ctx.lineTo(b.w/2-8,b.h/2-2);ctx.stroke();
+ ctx.fillStyle='#2e1f0a';for(const pgy of[-b.h/2+10,0,b.h/2-10]){ctx.beginPath();ctx.arc(-b.w/2+8,pgy,1.6,0,7);ctx.arc(b.w/2-8,pgy,1.6,0,7);ctx.fill()}
  ctx.strokeStyle=col;ctx.lineWidth=3;rr(-b.w/2,-b.h/2,b.w,b.h,4);ctx.stroke();
- // khidkiyan
- ctx.fillStyle='#2a1a08';
- const nw=b.kind==='tc'?3:1;
- for(let i=0;i<nw;i++){const wx2=(i-(nw-1)/2)*26;ctx.beginPath();ctx.arc(wx2,-4,5,0,7);ctx.fill();ctx.strokeStyle='#4a3311';ctx.lineWidth=1.5;ctx.stroke()}
- // darwaza
+ // kagaz ki khidkiyan (garam roshni + jaali)
+ const nw=b.kind==='tc'?3:2;
+ for(let i=0;i<nw;i++){const wx2=(i-(nw-1)/2)*(b.kind==='tc'?26:34);
+  const gl=ctx.createRadialGradient(wx2,-4,1,wx2,-4,7);gl.addColorStop(0,'#ffe9a8');gl.addColorStop(1,'#c98f2e');
+  ctx.fillStyle=gl;ctx.beginPath();ctx.arc(wx2,-4,5,0,7);ctx.fill();
+  ctx.strokeStyle='#4a3311';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(wx2,-4,5,0,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(wx2-5,-4);ctx.lineTo(wx2+5,-4);ctx.moveTo(wx2,-9);ctx.lineTo(wx2,1);ctx.stroke()}
+ // darwaza (takhte + keel) + noren parda
  ctx.fillStyle='#3a2410';rr(-9,b.h/2-24,18,24,3);ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1;for(let dy=b.h/2-20;dy<b.h/2;dy+=5){ctx.beginPath();ctx.moveTo(-9,dy);ctx.lineTo(9,dy);ctx.stroke()}
  ctx.strokeStyle=col;ctx.lineWidth=1.5;rr(-9,b.h/2-24,18,24,3);ctx.stroke();
- // khaprail chhat (paratedaar)
+ ctx.fillStyle=col;for(let ni=-1;ni<=1;ni++)ctx.fillRect(ni*6-2.5,b.h/2-26,5,10);
+ ctx.fillStyle='#fff';ctx.font='bold 7px sans-serif';ctx.textAlign='center';ctx.fillText('●',0,b.h/2-18);ctx.textAlign='left';
+ // khaprail chhat (naliyaan + shibi)
  const tall=b.kind==='tc'?30:20;
  for(let li=0;li<3;li++){
   ctx.fillStyle=['#a83232','#8b2a2a','#6d1f1f'][li];
   ctx.beginPath();ctx.moveTo(-b.w/2-8-li*2,-b.h/2+8-li*6);ctx.lineTo(0,-b.h/2-tall+li*4);ctx.lineTo(b.w/2+8+li*2,-b.h/2+8-li*6);ctx.lineTo(b.w/2+8+li*2,-b.h/2+12-li*6);ctx.lineTo(0,-b.h/2-tall+4+li*4);ctx.lineTo(-b.w/2-8-li*2,-b.h/2+12-li*6);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;
+  for(let tx=-b.w/2;tx<b.w/2;tx+=10){ctx.beginPath();ctx.moveTo(tx,-b.h/2+9-li*6);ctx.lineTo(tx,-b.h/2+13-li*6);ctx.stroke()}
  }
+ ctx.fillStyle='#5a5550';ctx.fillRect(-8,-b.h/2-tall-2,5,6);ctx.fillRect(3,-b.h/2-tall-2,5,6);
  ctx.fillStyle='#FFD700';ctx.fillRect(-3,-b.h/2-tall-4,6,8);
+ // TC: doosri manzil + gallery
+ if(b.kind==='tc'){
+  ctx.fillStyle=b.team==='P1'?'#c9b183':'#bd948c';rr(-b.w/4,-b.h/2-26,b.w/2,16,3);ctx.fill();
+  ctx.strokeStyle='#4a3311';ctx.lineWidth=2;rr(-b.w/4,-b.h/2-26,b.w/2,16,3);ctx.stroke();
+  ctx.strokeStyle='#4a3311';ctx.lineWidth=1.5;for(let gx=-b.w/4+5;gx<b.w/4;gx+=7){ctx.beginPath();ctx.moveTo(gx,-b.h/2-26);ctx.lineTo(gx,-b.h/2-10);ctx.stroke()}
+  ctx.fillStyle='#8b2a2a';ctx.beginPath();ctx.moveTo(-b.w/4-5,-b.h/2-24);ctx.lineTo(0,-b.h/2-38);ctx.lineTo(b.w/4+5,-b.h/2-24);ctx.closePath();ctx.fill();
+ }
  // lehrata jhanda
  const fl=Math.sin(frame/12+b.x)*4;
  ctx.strokeStyle='#3a2a10';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-b.h/2-tall-4);ctx.lineTo(0,-b.h/2-tall-30);ctx.stroke();
  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,-b.h/2-tall-30);
  ctx.quadraticCurveTo(14,-b.h/2-tall-28+fl,26,-b.h/2-tall-22+fl);
  ctx.lineTo(26,-b.h/2-tall-10+fl);ctx.quadraticCurveTo(14,-b.h/2-tall-16+fl,0,-b.h/2-tall-14);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(13,-b.h/2-tall-20+fl*0.5,3.5,0,7);ctx.fill();
  ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
  ctx.fillText(BLD[b.kind].icon,0,12);ctx.textAlign='left';
- // market ki dharidaar chandni
- if(b.kind==='market'){for(let si=0;si<5;si++){ctx.fillStyle=si%2?'#e11d48':'#fff';ctx.fillRect(-b.w/2+4+si*((b.w-8)/5),b.h/2-30,(b.w-8)/5,10)}}
- // barracks par dhal-talwar ka nishan
- if(b.kind==='barracks'){ctx.strokeStyle='#e5e7eb';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-14,2);ctx.lineTo(2,-12);ctx.moveTo(14,2);ctx.lineTo(-2,-12);ctx.stroke()}
+ // nobori (jangi jhanda) barracks/TC par
+ if(b.kind==='barracks'||b.kind==='tc'){const nx=b.w/2+12;
+  ctx.strokeStyle='#3a2a10';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(nx,b.h/2);ctx.lineTo(nx,-b.h/2-24);ctx.stroke();
+  const nw2=Math.sin(frame/10+b.x)*2;ctx.fillStyle=col;ctx.fillRect(nx,-b.h/2-24,16+nw2,34);
+  ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(b.kind==='tc'?'天':'武',nx+8,-b.h/2-2);ctx.textAlign='left'}
+ // market: peti + peepa + bori + scallop chandni
+ if(b.kind==='market'){
+  for(let si=0;si<5;si++){ctx.fillStyle=si%2?'#e11d48':'#fff';ctx.fillRect(-b.w/2+4+si*((b.w-8)/5),b.h/2-32,(b.w-8)/5,10);
+   ctx.fillStyle=si%2?'#e11d48':'#ddd';ctx.beginPath();ctx.arc(-b.w/2+4+si*((b.w-8)/5)+(b.w-8)/10,b.h/2-22,(b.w-8)/10,0,Math.PI);ctx.fill()}
+  ctx.fillStyle='#8b5a2b';ctx.fillRect(-b.w/2-14,b.h/2-14,12,10);ctx.strokeStyle='#4a3311';ctx.lineWidth=1.5;ctx.strokeRect(-b.w/2-14,b.h/2-14,12,10);
+  ctx.beginPath();ctx.moveTo(-b.w/2-14,b.h/2-14);ctx.lineTo(-b.w/2-2,b.h/2-4);ctx.moveTo(-b.w/2-2,b.h/2-14);ctx.lineTo(-b.w/2-14,b.h/2-4);ctx.stroke();
+  ctx.fillStyle='#6b4a2f';ctx.beginPath();ctx.ellipse(b.w/2+10,b.h/2-6,6,8,0,0,7);ctx.fill();ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#c9a86a';ctx.beginPath();ctx.ellipse(b.w/2+24,b.h/2-4,7,5,0,0,7);ctx.fill();ctx.stroke()}
+ // barracks: hathiyar rack + dhal
+ if(b.kind==='barracks'){
+  ctx.strokeStyle='#5b3a10';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-b.w/2-10,b.h/2);ctx.lineTo(-b.w/2-10,b.h/2-26);ctx.moveTo(-b.w/2-2,b.h/2);ctx.lineTo(-b.w/2-2,b.h/2-26);ctx.stroke();
+  ctx.strokeStyle='#7c4a12';ctx.lineWidth=1.8;for(const [rx,ry] of [[-9,-16],[-6,-18],[-3,-16]]){ctx.beginPath();ctx.moveTo(-b.w/2+rx,b.h/2);ctx.lineTo(-b.w/2+rx+3,b.h/2+ry);ctx.stroke()}
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(14,4,8,0,7);ctx.fill();ctx.strokeStyle='#c9a227';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(14,4,2.5,0,7);ctx.fill()}
+ // ghar: pathar lantern
+ if(b.kind==='house'){ctx.fillStyle='#7a756a';ctx.fillRect(b.w/2+6,b.h/2-12,6,12);
+  ctx.fillStyle='#5a5550';ctx.fillRect(b.w/2+3,b.h/2-16,12,4);
+  const gl2=0.6+0.4*Math.sin(frame/15+b.x);ctx.fillStyle='rgba(255,200,80,'+gl2+')';ctx.beginPath();ctx.arc(b.w/2+9,b.h/2-9,3,0,7);ctx.fill()}
  // taameer ke dauran baans ka dhancha (ghar/barrack/market/TC par)
  } // else (generic building) band
  if(!b.done&&b.kind!=='farm'&&b.kind!=='tower'){ctx.globalAlpha=1;ctx.strokeStyle='#8b6a2b';ctx.lineWidth=3;
@@ -590,44 +646,131 @@ function drawBld(b){
 function drawUnit(u){
  const col=u.team==='P1'?'#2563eb':'#dc2626';
  const dark=u.team==='P1'?'#1e3a8a':'#7f1d1d';
+ const light=u.team==='P1'?'#93c5fd':'#fca5a5';
  const isSel=sel.units.includes(u);
  const big=u.type==='knight';
  const wig=u.mv?frame*0.55:frame*0.12;
  ctx.save();ctx.translate(u.x,u.y);
- ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,10,9,3.5,0,0,7);ctx.fill();
- if(isSel){ctx.strokeStyle='#22c55e';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.lineDashOffset=-frame;ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.stroke();ctx.setLineDash([])}
+ ctx.fillStyle='rgba(0,0,0,0.32)';ctx.beginPath();ctx.ellipse(0,10,u.type==='elephant'?17:9,4,0,0,7);ctx.fill();
+ if(isSel){ctx.strokeStyle='#22c55e';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.lineDashOffset=-frame;ctx.beginPath();ctx.arc(0,0,u.type==='elephant'?22:15,0,7);ctx.stroke();ctx.setLineDash([])}
  ctx.rotate(u.face);
  const lunge=u.cool>25?(Math.min(u.cool,40)-25)*0.14:0;
  if(u.mv||lunge>0)ctx.translate(lunge,u.mv?Math.sin(frame*0.7)*1:0);
- // taangein (chalte waqt aage-peeche)
  const lp=u.mv?Math.sin(wig)*4:0;
- ctx.strokeStyle='#3a2a15';ctx.lineWidth=2.5;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(-2,-3);ctx.lineTo(-4+lp,9);ctx.stroke();
- ctx.beginPath();ctx.moveTo(-2,3);ctx.lineTo(-4-lp,9);ctx.stroke();
- // ghoda (knight)
- if(big){ctx.fillStyle='#6b4a1f';ctx.beginPath();ctx.ellipse(-10,0,9,5,0,0,7);ctx.fill();
-  ctx.strokeStyle='#4a3311';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.fillStyle='#8b5a2b';ctx.beginPath();ctx.arc(-17,-3,3.5,0,7);ctx.fill();
-  ctx.strokeStyle='#3a2a15';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-14,4);ctx.lineTo(-14+lp,10);ctx.moveTo(-6,4);ctx.lineTo(-6-lp,10);ctx.stroke()}
- // angarkha (team rang + kamarband)
- const tg=ctx.createLinearGradient(0,-6,0,6);tg.addColorStop(0,col);tg.addColorStop(1,dark);
- ctx.fillStyle=tg;ctx.beginPath();ctx.arc(0,0,big?7:6,0,7);ctx.fill();
- ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
- ctx.fillStyle='#c9a227';ctx.fillRect(-5,-1,10,2.5);
- ctx.fillStyle='rgba(255,255,255,0.25)';ctx.beginPath();ctx.arc(-2,-3,2,0,7);ctx.fill();
- // hathiyar
- if(u.type==='sword'){const jb=u.cool>20? -0.9:0;ctx.save();ctx.translate(4,4);ctx.rotate(jb);ctx.fillStyle='#9aa3ad';ctx.fillRect(0,-1.5,13,3);ctx.fillStyle='#5b3a10';ctx.fillRect(-2,-3,3,6);ctx.restore()}
- if(u.type==='archer'){ctx.strokeStyle='#7c4a12';ctx.lineWidth=2;ctx.beginPath();ctx.arc(5,0,7,-1.2,1.2);ctx.stroke();ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(5+7*Math.cos(-1.2),7*Math.sin(-1.2));ctx.lineTo(5+7*Math.cos(1.2),7*Math.sin(1.2));ctx.stroke()}
- if(u.type==='knight'){ctx.strokeStyle='#8b8f96';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(2,-6);ctx.lineTo(16,-6);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(16,-8.5);ctx.lineTo(21,-6);ctx.lineTo(16,-3.5);ctx.closePath();ctx.fill()}
- if(u.type==='spear'){const jb2=u.cool>20?-0.7:0;ctx.save();ctx.translate(3,3);ctx.rotate(jb2);ctx.strokeStyle='#7c4a12';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(17,0);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(17,-3);ctx.lineTo(23,0);ctx.lineTo(17,3);ctx.closePath();ctx.fill();ctx.restore()}
- if(u.type==='elephant'){ctx.fillStyle='#8a8f98';ctx.beginPath();ctx.ellipse(-4,0,13,8,0,0,7);ctx.fill();ctx.strokeStyle='#4a4d55';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle=col;ctx.fillRect(-11,-10,14,5);ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.strokeRect(-11,-10,14,5);ctx.strokeStyle='#7a7f88';ctx.lineCap='round';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(8,-2);ctx.quadraticCurveTo(13,2,11,7);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(6,-6);ctx.lineTo(10,-8);ctx.lineTo(8,-3);ctx.closePath();ctx.fill();ctx.strokeStyle='#3a2a15';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-11,6);ctx.lineTo(-11+lp,12);ctx.moveTo(1,7);ctx.lineTo(1-lp,12);ctx.stroke();ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(-3,-12,3,0,7);ctx.fill();ctx.fillStyle=dark;ctx.fillRect(-6,-16,6,2)}
- if(u.type==='cannon'){ctx.fillStyle='#3a2a10';ctx.beginPath();ctx.arc(-7,2,5,0,7);ctx.fill();ctx.beginPath();ctx.arc(1,4,5,0,7);ctx.fill();ctx.strokeStyle='#8b6a2b';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(-7,2,5,0,7);ctx.stroke();ctx.beginPath();ctx.arc(1,4,5,0,7);ctx.stroke();ctx.strokeStyle='#2a2a2e';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(16,0);ctx.stroke();ctx.fillStyle='#55555e';ctx.beginPath();ctx.arc(16,0,3.2,0,7);ctx.fill()}
- if(u.type==='villager'){const ch=u.state==='gather'?Math.sin(frame/4.5)*5:0;ctx.strokeStyle='#6b4a1f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(3,3);ctx.lineTo(9,(u.mv?2+Math.sin(wig)*2:4)+ch);ctx.stroke()}
- // sir + topi (haathi par mahout pehle se bana hai)
- if(u.type!=='elephant'){ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(4,0,3.6,0,7);ctx.fill();
- ctx.fillStyle='#000';ctx.beginPath();ctx.arc(5.4,-1.2,0.8,0,7);ctx.fill()}
- if(u.type==='villager'){ctx.fillStyle='#d9b64a';ctx.beginPath();ctx.ellipse(4,-1,6,2.6,0,0,7);ctx.fill();ctx.fillStyle='#b8933f';ctx.beginPath();ctx.arc(4,-1,3,Math.PI,0);ctx.fill()}
- else{ctx.fillStyle=dark;ctx.fillRect(0,-4.5,6,2);ctx.fillStyle=col;ctx.fillRect(0,-4.5,6,1)}
+ const atkRaise=u.cool>0?(u.type==='archer'?0:Math.min(1,u.cool/25)):0;
+ let custom=false;
+ // === HAATHI (poora custom) ===
+ if(u.type==='elephant'){
+  ctx.strokeStyle='#6e727c';ctx.lineWidth=5;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-12,4);ctx.lineTo(-12+lp*1.2,13);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-2,6);ctx.lineTo(-2-lp*1.2,13);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(6,5);ctx.lineTo(6+lp,13);ctx.stroke();
+  ctx.fillStyle='#e8e2d2';ctx.beginPath();ctx.arc(-12+lp*1.2,13,2.4,0,7);ctx.arc(-2-lp*1.2,13,2.4,0,7);ctx.arc(6+lp,13,2.4,0,7);ctx.fill();
+  const eg=ctx.createRadialGradient(-6,-6,2,-4,0,18);eg.addColorStop(0,'#a2a7b2');eg.addColorStop(1,'#6e727c');
+  ctx.fillStyle=eg;ctx.beginPath();ctx.ellipse(-4,0,14,9,0,0,7);ctx.fill();
+  ctx.strokeStyle='#565b64';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.strokeStyle='rgba(70,74,84,0.6)';ctx.lineWidth=1;for(let wi=-1;wi<=1;wi++){ctx.beginPath();ctx.arc(-4+wi*5,0,9,0.6,2.2);ctx.stroke()}
+  const tsw=Math.sin(frame/7+u.id)*2;
+  ctx.strokeStyle='#8a8f98';ctx.lineCap='round';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(9,-2);ctx.quadraticCurveTo(15,2+tsw,13,8+tsw);ctx.stroke();
+  ctx.fillStyle='#f5f0e0';ctx.beginPath();ctx.moveTo(5,-6);ctx.quadraticCurveTo(9,-2,8,2);ctx.lineTo(6,2);ctx.quadraticCurveTo(6,-2,4,-5);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(7,-5);ctx.quadraticCurveTo(11,-1,10,3);ctx.lineTo(8,3);ctx.quadraticCurveTo(8,-1,6,-4);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.arc(4,-5,1.2,0,7);ctx.fill();
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(4,-5,0.5,0,7);ctx.fill();
+  ctx.fillStyle=col;ctx.fillRect(-12,-11,15,6);ctx.strokeStyle='#c9a227';ctx.lineWidth=1.2;ctx.strokeRect(-12,-11,15,6);
+  ctx.strokeStyle='#5b3a10';ctx.lineWidth=1.6;ctx.strokeRect(-9,-17,9,7);
+  ctx.fillStyle='#e8b98a';ctx.beginPath();ctx.arc(-4.5,-14,2.6,0,7);ctx.fill();
+  ctx.fillStyle='#7a2e2e';ctx.beginPath();ctx.arc(-4.5,-15,2.6,Math.PI,0);ctx.fill();
+  ctx.strokeStyle='#5b3a10';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-4.5,-12);ctx.lineTo(4,-6);ctx.stroke();
+  custom=true}
+ // === TOP (poori custom) ===
+ if(u.type==='cannon'){
+  ctx.strokeStyle='#3a2a15';ctx.lineWidth=2.5;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-8,3);ctx.lineTo(-8-lp,10);ctx.moveTo(0,4);ctx.lineTo(0-lp,10);ctx.stroke();
+  ctx.fillStyle='#5b3a10';ctx.beginPath();ctx.arc(-8,3,5.5,0,7);ctx.fill();ctx.beginPath();ctx.arc(0,5,5.5,0,7);ctx.fill();
+  ctx.strokeStyle='#2e1e08';ctx.lineWidth=1.2;
+  for(let si=0;si<6;si++){const sa=si/6*6.28+(u.mv?frame*0.15:0);ctx.beginPath();ctx.moveTo(-8,3);ctx.lineTo(-8+Math.cos(sa)*5,3+Math.sin(sa)*5);ctx.stroke();ctx.beginPath();ctx.moveTo(0,5);ctx.lineTo(Math.cos(sa)*5,5+Math.sin(sa)*5);ctx.stroke()}
+  ctx.fillStyle='#4a3418';ctx.fillRect(-10,-2,16,4);
+  const bg3=ctx.createLinearGradient(0,-4,0,2);bg3.addColorStop(0,'#868b95');bg3.addColorStop(1,'#2f3238');
+  ctx.strokeStyle=bg3;ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-2,-1);ctx.lineTo(17,-1);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-2,-3);ctx.lineTo(17,-3);ctx.stroke();
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(17,-1,3.4,0,7);ctx.fill();
+  ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.arc(17,-1,1.8,0,7);ctx.fill();
+  ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(-6,-7,2.8,0,7);ctx.fill();
+  ctx.fillStyle='#7a2e2e';ctx.fillRect(-9,-11,6,2);
+  ctx.strokeStyle='#e8b98a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-6,-5);ctx.lineTo(-2,-2);ctx.stroke();
+  custom=true}
+ if(!custom){
+  // waraji + hakama pair
+  ctx.strokeStyle='#2e2a26';ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-2,-3);ctx.lineTo(-4+lp,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-2,3);ctx.lineTo(-4-lp,7);ctx.stroke();
+  ctx.fillStyle='#6b4a2b';
+  ctx.beginPath();ctx.ellipse(-4+lp,8,2.6,1.4,0,0,7);ctx.fill();
+  ctx.beginPath();ctx.ellipse(-4-lp,8,2.6,1.4,0,0,7);ctx.fill();
+  // ghoda (knight)
+  if(big){const hg=ctx.createLinearGradient(0,-6,0,6);hg.addColorStop(0,'#8b5a2b');hg.addColorStop(1,'#4a2e12');
+   ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(-10,0,10,5.5,0,0,7);ctx.fill();ctx.strokeStyle='#2e1f0a';ctx.lineWidth=1.5;ctx.stroke();
+   ctx.fillStyle='#2e1f0a';for(let mi=0;mi<3;mi++){ctx.beginPath();ctx.moveTo(-14+mi*3,-5);ctx.lineTo(-12+mi*3,-9);ctx.lineTo(-10+mi*3,-5);ctx.closePath();ctx.fill()}
+   ctx.fillStyle=col;ctx.fillRect(-14,-5,9,8);ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.strokeRect(-14,-5,9,8);
+   ctx.fillStyle='#8b5a2b';ctx.beginPath();ctx.arc(-19,-3,3.6,0,7);ctx.fill();
+   ctx.fillStyle='#000';ctx.beginPath();ctx.arc(-19.5,-4,0.9,0,7);ctx.fill();
+   const tw2=Math.sin(frame/10)*2;ctx.strokeStyle='#2e1f0a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-19,2);ctx.quadraticCurveTo(-23,6+tw2,-21,10);ctx.stroke();
+   ctx.strokeStyle='#3a2a15';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-15,4);ctx.lineTo(-15+lp,10);ctx.moveTo(-5,4);ctx.lineTo(-5-lp,10);ctx.stroke()}
+  // kimono angarkha
+  const tg=ctx.createLinearGradient(0,-6,0,7);tg.addColorStop(0,light);tg.addColorStop(0.45,col);tg.addColorStop(1,dark);
+  ctx.fillStyle=tg;ctx.beginPath();ctx.arc(0,0,big?7:6,0,7);ctx.fill();
+  ctx.strokeStyle='#101010';ctx.lineWidth=1;ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,0.45)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(5,-3);ctx.lineTo(1,1);ctx.lineTo(5,3);ctx.stroke();
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(-6,-1.5,12,3);
+  ctx.fillStyle='#c9a227';ctx.fillRect(-7,-1,2,2);
+  if(u.type!=='villager'){ctx.fillStyle=dark;ctx.beginPath();ctx.arc(-1,-6,3,0,7);ctx.arc(-1,6,3,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.arc(-2,-6.5,1.2,0,7);ctx.arc(-2,5.5,1.2,0,7);ctx.fill()}
+  // pichli baanh
+  const swA=u.mv?Math.sin(wig)*2:0;
+  ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-1,-4);ctx.lineTo(3,-6+swA);ctx.stroke();
+  // hathiyar + vaar wali baanh
+  if(u.type==='sword'){const r2=atkRaise*1.1;const gx=5,gy=5-r2*7;
+   ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(gx,gy);ctx.stroke();
+   ctx.strokeStyle='#3a2a10';ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+3,gy+1);ctx.stroke();
+   ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(gx+3,gy+1,1.8,0,7);ctx.fill();
+   ctx.strokeStyle='#dfe6ee';ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(gx+3,gy+1);ctx.quadraticCurveTo(gx+11,gy-1-r2*4,gx+17,gy-3-r2*6);ctx.stroke();
+   ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(gx+3,gy+0.4);ctx.quadraticCurveTo(gx+11,gy-1.6-r2*4,gx+17,gy-3.6-r2*6);ctx.stroke()}
+  if(u.type==='spear'){const r2=atkRaise*0.8;
+   ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(6,4-r2*6);ctx.stroke();
+   ctx.save();ctx.translate(6,4-r2*6);ctx.rotate(-0.06-r2*0.5);
+   ctx.strokeStyle='#6e4517';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(15,0);ctx.stroke();
+   ctx.fillStyle='#dfe6ee';ctx.beginPath();ctx.moveTo(15,-3);ctx.lineTo(22,0);ctx.lineTo(15,3);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#666';ctx.beginPath();ctx.arc(-14,0,1.6,0,7);ctx.fill();ctx.restore()}
+  if(u.type==='archer'){
+   ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(5,3);ctx.stroke();
+   ctx.strokeStyle='#5b3410';ctx.lineWidth=2.2;ctx.beginPath();ctx.arc(8,0,9,-1.35,1.35);ctx.stroke();
+   ctx.strokeStyle='rgba(240,240,240,0.9)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(8+9*Math.cos(-1.35),9*Math.sin(-1.35));ctx.lineTo(8+9*Math.cos(1.35),9*Math.sin(1.35));ctx.stroke();
+   if(u.cool>30){ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(16,0);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(16,-1.6);ctx.lineTo(19,0);ctx.lineTo(16,1.6);ctx.closePath();ctx.fill()}}
+  if(u.type==='knight'){ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(4,-3);ctx.stroke();
+   ctx.strokeStyle='#8b8f96';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(2,-6);ctx.lineTo(16,-6);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(16,-8.5);ctx.lineTo(21,-6);ctx.lineTo(16,-3.5);ctx.closePath();ctx.fill()}
+  if(u.type==='villager'){const ch=u.state==='gather'?Math.sin(frame/4.5)*5:0;
+   ctx.strokeStyle='#e8b98a';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(6,4+ch*0.5);ctx.stroke();
+   ctx.save();ctx.translate(6,4+ch*0.5);ctx.rotate(0.5+ch*0.12);ctx.strokeStyle='#6b4a1f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(7,0);ctx.stroke();ctx.fillStyle='#9aa3ad';ctx.beginPath();ctx.moveTo(7,-3);ctx.lineTo(11,0);ctx.lineTo(7,3);ctx.closePath();ctx.fill();ctx.restore()}
+  // sashimono (peeth ka jhanda)
+  if(u.type==='sword'||u.type==='spear'||u.type==='archer'){ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(-5,-13);ctx.stroke();ctx.fillStyle=col;ctx.fillRect(-5,-13,9,7);ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=1;ctx.strokeRect(-5,-13,9,7);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-0.5,-9.5,2,0,7);ctx.fill()}
+  // chehra
+  ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(4,0,3.6,0,7);ctx.fill();
+  ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.arc(5.6,-1.2,0.9,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(6.5,1.5);ctx.quadraticCurveTo(5,2.2,3.8,1.6);ctx.stroke();
+  if(u.type==='villager'){ctx.fillStyle='#d9b64a';ctx.beginPath();ctx.ellipse(3.5,-1.5,7.5,3.2,0,0,7);ctx.fill();
+   ctx.fillStyle='#b8933f';ctx.beginPath();ctx.arc(3.5,-1.5,4.5,Math.PI,0);ctx.fill();
+   ctx.strokeStyle='#8b6a2b';ctx.lineWidth=1;for(let ri=-4;ri<=4;ri+=2){ctx.beginPath();ctx.moveTo(3.5,-6);ctx.lineTo(3.5+ri,-1);ctx.stroke()}}
+  if(u.type==='sword'){ctx.fillStyle='#22242a';ctx.beginPath();ctx.arc(3.5,-0.5,4.2,Math.PI*0.95,Math.PI*2.05);ctx.fill();
+   ctx.fillStyle='#c9a227';ctx.beginPath();ctx.moveTo(3.5,-8.5);ctx.quadraticCurveTo(1,-6,2,-3.5);ctx.quadraticCurveTo(3.5,-5,5,-3.5);ctx.quadraticCurveTo(6,-6,3.5,-8.5);ctx.fill();
+   ctx.fillStyle='#33363e';ctx.fillRect(-1.5,-3,2,5);ctx.fillRect(6.5,-3,2,5)}
+  if(u.type==='spear'){ctx.fillStyle=col;ctx.fillRect(-0.5,-4.5,8,2.2);
+   ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.arc(0.5,-5.5,1.6,0,7);ctx.fill()}
+  if(u.type==='archer'){ctx.fillStyle='#3a3340';ctx.beginPath();ctx.arc(3,-0.5,4.4,Math.PI*0.8,Math.PI*2.2);ctx.fill();
+   ctx.fillStyle='#3a3340';ctx.beginPath();ctx.moveTo(-1,2);ctx.lineTo(-4,6);ctx.lineTo(0,6);ctx.closePath();ctx.fill()}
+  if(u.type==='knight'){ctx.fillStyle='#2b2e36';ctx.beginPath();ctx.arc(3.5,-0.5,4.2,Math.PI*0.95,Math.PI*2.05);ctx.fill();
+   ctx.fillStyle='#c9a227';ctx.fillRect(2,-9,3,2.5);
+   ctx.fillStyle='#4a4d55';ctx.beginPath();ctx.ellipse(5,2.5,2.5,1.6,0,0,7);ctx.fill()}
+ }
  ctx.restore();
  // peeth par bojh
  if(u.carry>0){ctx.save();ctx.translate(u.x,u.y);ctx.fillStyle=u.carryKind==='w'?'#6b4a1f':u.carryKind==='g'?'#c9a227':'#c9712e';ctx.beginPath();ctx.arc(-8,-8,5,0,7);ctx.fill();ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.fillText(u.carry,u.type==='villager'?-14:-12,-2);ctx.restore()}
