@@ -45,6 +45,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <span>👥 <b id="popT">0/0</b></span><span>🏰 <b id="ageT">-</b></span><span>⏱ <b id="timeT">0:00</b></span>
 <span id="treatyT">🕊 -</span>
 <button id="bPause" onclick="togglePause()">⏸</button>
+<button id="bSnd" onclick="toggleSnd()">🔊</button>
 <button id="bSpeed" onclick="toggleSpeed()">🚀 1x</button>
 <button onclick="zoomBy(1.25)">🔍+</button><button onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
 <button onclick="deselect()">✖</button>
@@ -58,7 +59,8 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Minimap (neeche-right) tap = camera bhejo.<br>
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
 🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
-🕊 Shuru me <b>40s Taiyaari-Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b>
+🕊 Shuru me <b>Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b><br>
+🌫️ <b>Fog of War:</b> naksha kaala hai — khoji jagah hi dikhegi! 💎 <b>Khazane:</b> chamakte khandar chhoo = +150🪙! 🎯 <b>Campaign:</b> menu se 10 mission khelo! 🔊 button se sound band/kholo.
 </div>
 </div>
 <div id="menu"><div id="menuCard">
@@ -72,7 +74,8 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <button class="opt" data-d="easy">😊 Easy</button>
 <button class="opt sel" data-d="normal">😐 Normal</button>
 <button class="opt" data-d="hard">😈 Hard</button></div></div>
-<button id="startBtn" onclick="startGame()">▶ YUDDH SHURU ⚔️</button>
+<div><b>🎯 Campaign (10 mission — jeeto aur agla kholo):</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;color:#f0e2c0">Free play ya koi level chuno!</div></div>
+<button id="startBtn" onclick="LEVEL=null;startGame()">▶ FREE PLAY ⚔️</button>
 </div></div>
 <div id="endScreen"><div id="endCard"><h2 id="endTitle"></h2><div id="endDesc"></div><br><button onclick="location.reload()">↻ Naya Yuddh</button></div></div>
 <script>
@@ -90,8 +93,18 @@ cv.addEventListener('wheel',e=>{e.preventDefault();if(!started||paused)return;co
 // ============ AUDIO (halka) ============
 let AC=null;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
-function tone(f,d,type,v){try{if(!AC)return;const c=ac();const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}catch(e){}}
-const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))},age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
+function tone(f,d,type,v){try{if(!AC||!soundOn)return;const c=ac();const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}catch(e){}}
+const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))}, age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
+let soundOn=true,lastSw=0,lastBow=0;
+function noiseHit(dur,freq,v){try{if(!AC||!soundOn)return;const c=ac();const len=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,len,c.sampleRate),dt=b.getChannelData(0);for(let i=0;i<len;i++)dt[i]=(Math.random()*2-1)*(1-i/len);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=b;f.type='lowpass';f.frequency.value=freq;g.gain.value=v;s.connect(f);f.connect(g);g.connect(c.destination);s.start()}catch(e){}}
+function toggleSnd(){soundOn=!soundOn;document.getElementById('bSnd').textContent=soundOn?'🔊':'🔇';if(soundOn)S.click()}
+S.sword=()=>{if(!soundOn)return;const n=performance.now();if(n-lastSw<110)return;lastSw=n;noiseHit(0.09,3000,0.10);tone(700+Math.random()*300,0.05,'square',0.04)};
+S.bow=()=>{if(!soundOn)return;const n=performance.now();if(n-lastBow<140)return;lastBow=n;tone(900,0.09,'square',0.05);setTimeout(()=>tone(350,0.08,'square',0.04),40)};
+S.boom=()=>{if(!soundOn)return;tone(58,0.5,'sine',0.22);noiseHit(0.4,500,0.20)};
+S.coin=()=>{if(!soundOn)return;tone(950,0.09,'sine',0.09);setTimeout(()=>tone(1400,0.14,'sine',0.09),80)};
+S.horn=()=>{if(!soundOn)return;tone(130,0.5,'sawtooth',0.12);setTimeout(()=>tone(98,0.6,'sawtooth',0.12),180)};
+S.drum=(hi)=>{if(!soundOn)return;tone(hi?82:66,0.13,'sine',0.06)};
+S.repair=()=>{tone(300,0.06,'triangle',0.06)};
 // ============ DATA ============
 const CIVS={
  japan:{name:'🇯🇵 Japan',swordDmg:1.25,gather:1,cost:1,desc:'Samurai talwar +25%'},
@@ -131,8 +144,22 @@ let tech={P1:{atk:0,def:0},AI:{atk:0,def:0}};
 let myCiv='japan',aiCiv='china',difficulty='normal';
 let started=false,paused=false,speed=1,gameOver=false,frame=0;
 let treaty=40*60; // 40s sandhi
+let LEVEL=null,unlocked=0,objT=0,relicsGot=0;
+try{unlocked=Math.min(9,parseInt(localStorage.getItem('syLevel')||'0')||0)}catch(e){}
+const LEVELS=[
+ {name:'Pehli Jung',icon:'⚔️',obj:'destroy',diff:'easy',treaty:40,tip:'Dushman kamzor hai. Foj banao aur TC todo!'},
+ {name:'Tez Hamla',icon:'🌪️',obj:'destroy',diff:'normal',treaty:25,aggro:6,tip:'Sandhi sirf 25s! Jaldi Barracks banao.'},
+ {name:'Khazana',icon:'💎',obj:'relic',diff:'normal',treaty:40,tip:'3 khazane uthao = jeet! Villager ko bhejo.'},
+ {name:'Ghera',icon:'🛡️',obj:'survive',diff:'normal',treaty:20,survive:240,aggro:5,atkCd:1500,tip:'4 min tak TC bachao! Burj banao.'},
+ {name:'Garibi',icon:'🍂',obj:'destroy',diff:'normal',treaty:40,pRes:{f:120,w:60,g:0},tip:'Kam resource! Har worker keemti hai.'},
+ {name:'Yug Daud',icon:'🏯',obj:'destroy',diff:'normal',treaty:30,pAge:1,aiAge:1,tip:'Dono Yug 2 se shuru. Pehle Yug 3 = jeet!'},
+ {name:'Hathi Sena',icon:'🐘',obj:'destroy',diff:'normal',treaty:35,aiCiv:'india',aggro:6,tip:'Dushman India — hathi aayenge! Bhala banao.'},
+ {name:'Topkhana',icon:'💣',obj:'destroy',diff:'hard',treaty:30,pAge:2,aiAge:2,tip:'Dono ke paas Top! Pehle maaro.'},
+ {name:'Maharaja',icon:'👑',obj:'destroy',diff:'hard',treaty:30,aggro:4,atkCd:2000,tip:'Tez aur khatarnak dushman. Khet + Burj + Tech!'},
+ {name:'Antim Yuddh',icon:'🔥',obj:'destroy',diff:'hard',treaty:25,aiAge:1,aggro:3,atkCd:1500,tip:'Aakhri jung! Sab kuch jhonk do!'}
+];
 let sel={units:[],bld:null},placing=null,uid=1,bid=1;
-let birds=[],rings=[];
+let birds=[],rings=[],relics=[];
 const BRAZIERS=[{x:180,y:735},{x:320,y:865},{x:1280,y:135},{x:1420,y:265}];
 let aiPlan={t:0,attackSent:0};
 function rnd(a,b){return a+Math.random()*(b-a)}
@@ -159,6 +186,8 @@ function genMap(){
  [[250,680],[360,830],[1350,320],[1240,170]].forEach(p=>{for(let i=0;i<5;i++)nodes.push({kind:'food',x:p[0]+rnd(-60,60),y:p[1]+rnd(-50,50),amt:250,tag:0})});
  // shikaar (haran, beech me)
  for(let i=0;i<6;i++)nodes.push({kind:'hunt',x:rnd(600,1000),y:rnd(350,650),amt:120,tag:0});
+ // khazane (3 relics, beech me)
+ relics=[];for(const rp of [[800,450],[620,580],[990,330]])relics.push({x:rp[0]+rnd(-30,30),y:rp[1]+rnd(-30,30),taken:false,ph:rnd(0,6.28)});
  // sona (4 khaan)
  [[700,300],[900,700],[500,500],[1100,500]].forEach(p=>nodes.push({kind:'gold',x:p[0],y:p[1],amt:800,tag:0}));
 }
@@ -324,6 +353,17 @@ function dealDmg(t,v,dmg){if(treaty>0||gameOver)return;v.hp-=dmg;if(v.hp<=0){v.h
   shake=v.kind==='tc'?16:Math.max(shake,7)}}}
 function burst2(x,y,c){for(let i=0;i<8;i++)parts.push({x,y,vx:rnd(-2,2),vy:rnd(-2,1),life:25,c})}
 function nodeKind(n){return n.kind==='wood'?'w':n.kind==='gold'?'g':'f'}
+function sightOf(o){if(o.type)return {villager:170,sword:220,spear:220,archer:230,knight:250,elephant:230,cannon:200}[o.type]||180;return {tc:300,house:180,barracks:220,market:220,tower:340,farm:180}[o.kind]||200}
+const FOGC=40,FOGR=25;
+let fogSeen=new Uint8Array(1000),fogVis=new Uint8Array(1000);
+function fogCell(x,y){return Math.max(0,Math.min(24,Math.floor(y/40)))*40+Math.max(0,Math.min(39,Math.floor(x/40)))}
+function isVis(x,y){return fogVis[fogCell(x,y)]===1}
+function isSeen(x,y){return fogSeen[fogCell(x,y)]===1}
+function updateFog(){fogVis.fill(0);
+ const mark=(x,y,r)=>{const r2=r*r,x0=Math.max(0,Math.floor((x-r)/40)),x1=Math.min(39,Math.floor((x+r)/40)),y0=Math.max(0,Math.floor((y-r)/40)),y1=Math.min(24,Math.floor((y+r)/40));
+  for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++){const px=cx*40+20,py=cy*40+20;if((px-x)*(px-x)+(py-y)*(py-y)<r2){fogVis[cy*40+cx]=1;fogSeen[cy*40+cx]=1}}};
+ for(const u of units)if(u.team==='P1'&&u.hp>0)mark(u.x,u.y,sightOf(u));
+ for(const b of blds)if(b.team==='P1'&&b.hp>0)mark(b.x,b.y,sightOf(b));}
 function updateUnit(u){
  if(u.hp<=0)return;
  if(u.cool>0)u.cool--;
@@ -363,12 +403,12 @@ function updateUnit(u){
  }
  if(tgt){u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);const d=dist(u,tgt);
   if(d>u.range){moveTo(u,tgt.x,tgt.y)}
-  else if(u.cool<=0){u.cool=u.type==='archer'?70:u.type==='cannon'?110:32;let dd=u.dmg;if(u.type==='spear'&&tgt.type==='knight')dd*=3;dealDmg(u.team,tgt,dd);if(u.team==='P1')S.hit();if(u.type!=='archer'&&u.type!=='cannon')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});if(u.type==='archer')parts.push({x:u.x,y:u.y,vx:(tgt.x-u.x)/d*6,vy:(tgt.y-u.y)/d*6,life:12,c:'#ffe9a8'});if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});parts.push({x:mx,y:my,vx:rnd(-0.5,0.5),vy:rnd(-1.2,-0.4),life:30,c:'rgba(120,120,120,0.6)'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,3)}if(u.type==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5);if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
+  else if(u.cool<=0){u.cool=u.type==='archer'?70:u.type==='cannon'?110:32;let dd=u.dmg;if(u.type==='spear'&&tgt.type==='knight')dd*=3;dealDmg(u.team,tgt,dd);if(u.type==='archer')S.bow();else if(u.type==='cannon')S.boom();else S.sword();if(u.type!=='archer'&&u.type!=='cannon')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});if(u.type==='archer')parts.push({x:u.x,y:u.y,vx:(tgt.x-u.x)/d*6,vy:(tgt.y-u.y)/d*6,life:12,c:'#ffe9a8'});if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});parts.push({x:mx,y:my,vx:rnd(-0.5,0.5),vy:rnd(-1.2,-0.4),life:30,c:'rgba(120,120,120,0.6)'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,3)}if(u.type==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5);if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
   return;
  }
  if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
   if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
-  else if(u.cool<=0){u.cool=u.type==='cannon'?110:40;const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);dealDmg(u.team,tgtB,bd2);if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,4)}slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});if(u.team==='P1')S.hit();if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
+  else if(u.cool<=0){u.cool=u.type==='cannon'?110:40;const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);dealDmg(u.team,tgtB,bd2);if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,4)}slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});if(u.type==='cannon')S.boom();else S.sword();if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
   return;
  }
  if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle'}return}
@@ -383,7 +423,7 @@ function updateBlds(){
   if(b.done&&b.kind==='tower'&&treaty<=0){
    if(b.cool>0)b.cool--;
    if(b.cool<=0){let tgt=null,bd=215;for(const e of units){if(e.team===b.team||e.hp<=0)continue;const d=Math.hypot(e.x-b.x,e.y-b.y-30);if(d<bd){bd=d;tgt=e}}
-    if(tgt){b.cool=80;dealDmg(b.team,tgt,11*(1+0.15*tech[b.team].atk));parts.push({x:b.x,y:b.y-60,vx:(tgt.x-b.x)/Math.max(1,bd)*7,vy:(tgt.y-(b.y-60))/Math.max(1,bd)*7,life:14,c:'#ffe9a8'});if(b.team==='P1'&&Math.random()<0.4)S.hit()}}}
+    if(tgt){b.cool=80;dealDmg(b.team,tgt,11*(1+0.15*tech[b.team].atk));parts.push({x:b.x,y:b.y-60,vx:(tgt.x-b.x)/Math.max(1,bd)*7,vy:(tgt.y-(b.y-60))/Math.max(1,bd)*7,life:14,c:'#ffe9a8'});if(b.team==='P1')S.bow()}}}
  }
  const deadFarms=blds.filter(b=>b.hp<=0&&b.kind==='farm').map(b=>b.id);
  if(deadFarms.length)for(let i=nodes.length-1;i>=0;i--)if(nodes[i].farm&&deadFarms.includes(nodes[i].farm))nodes.splice(i,1);
@@ -433,13 +473,14 @@ function aiTick(){
   const cannons=units.filter(u=>u.team===A&&u.type==='cannon').length;
   if(!(t==='cannon'&&cannons>=2)&&rax.queue.length<3&&canAfford(A,trueCost(A,t)))trainUnit(A,rax.id,t);
  }
- const need=difficulty==='easy'?11:difficulty==='hard'?5:7;
- if(army>=need+age.AI*2&&frame-aiPlan.attackSent>3600){
+ const need0=difficulty==='easy'?11:difficulty==='hard'?5:7;
+ const need=(LEVEL&&LEVEL.aggro)||need0;
+ if(army>=need+age.AI*2&&frame-aiPlan.attackSent>((LEVEL&&LEVEL.atkCd)||3600)){
   aiPlan.attackSent=frame;
   const ptc=blds.find(b=>b.team==='P1'&&b.kind==='tc');
   const T=ptc?{x:ptc.x,y:ptc.y}:{x:250,y:800};
   for(const u of units)if(u.team===A&&u.type!=='villager'&&u.hp>0){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null}
-  float(tc.x,tc.y-80,'⚔ Dushman hamla!','red');
+  float(tc.x,tc.y-80,'⚔ Dushman hamla!','red');S.horn();
  }
  aiIdleWork();
 }
@@ -788,11 +829,20 @@ function draw(){
  for(const r2 of rubble){ctx.fillStyle='rgba(30,20,10,0.5)';ctx.beginPath();ctx.ellipse(r2.x,r2.y,r2.r,r2.r*0.6,0,0,7);ctx.fill()}
  for(const t of tufts){const sw=Math.sin(frame/40+t.ph)*2.5;ctx.strokeStyle='#4d7d25';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(t.x,t.y);ctx.quadraticCurveTo(t.x+sw,t.y-8*t.s,t.x+sw*1.4,t.y-12*t.s);ctx.moveTo(t.x+4,t.y);ctx.quadraticCurveTo(t.x+4+sw,t.y-6*t.s,t.x+4+sw*1.3,t.y-10*t.s);ctx.stroke()}
  for(const f of flowers){const bob=Math.sin(frame/30+f.ph)*1.5;ctx.strokeStyle='#2d5a15';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(f.x,f.y-9+bob);ctx.stroke();ctx.fillStyle=f.c;for(let p=0;p<5;p++){const a=p/5*6.28+frame/60;ctx.beginPath();ctx.arc(f.x+Math.cos(a)*3.5,f.y-11+bob+Math.sin(a)*3.5,2.4,0,7);ctx.fill()}ctx.fillStyle='#ffef00';ctx.beginPath();ctx.arc(f.x,f.y-11+bob,2.2,0,7);ctx.fill()}
- for(const n of nodes)if(n.amt>0)drawNode(n);
- for(const b of blds)drawBld(b);
+ for(const n of nodes)if(n.amt>0&&isSeen(n.x,n.y))drawNode(n);
+ for(const rl of relics){if(rl.taken||!isSeen(rl.x,rl.y))continue;
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(rl.x,rl.y+12,20,6,0,0,7);ctx.fill();
+  ctx.fillStyle='#7a756a';ctx.fillRect(rl.x-16,rl.y-4,12,16);ctx.fillRect(rl.x+4,rl.y-4,12,16);
+  ctx.fillStyle='#5a5550';ctx.fillRect(rl.x-16,rl.y-8,12,4);ctx.fillRect(rl.x+4,rl.y-8,12,4);
+  const gl3=ctx.createRadialGradient(rl.x,rl.y-6,2,rl.x,rl.y-6,26);gl3.addColorStop(0,'rgba(255,215,0,0.85)');gl3.addColorStop(1,'rgba(255,215,0,0)');
+  ctx.fillStyle=gl3;ctx.beginPath();ctx.arc(rl.x,rl.y-6,26,0,7);ctx.fill();
+  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(rl.x,rl.y-6,6,0,7);ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  const bl=Math.sin(frame/20+rl.ph)*4;ctx.fillStyle='rgba(255,240,170,0.35)';ctx.fillRect(rl.x-3,rl.y-90,6,80+bl);ctx.fillStyle='#FFD700';ctx.font='bold 13px sans-serif';ctx.fillText('💎',rl.x-7,rl.y-92+bl*0.3);}
+ for(const b of blds)if(b.team==='P1'||isVis(b.x,b.y))drawBld(b);
  for(const c of corpses){ctx.globalAlpha=Math.min(0.8,c.life/100);ctx.fillStyle=c.team==='P1'?'#1e3a8a':'#7f1d1d';ctx.beginPath();ctx.ellipse(c.x,c.y,8,4,c.x%3,0,7);ctx.fill();ctx.globalAlpha=1}
  const sorted=[...units].sort((a,b)=>a.y-b.y);
- for(const u of sorted)if(u.hp>0)drawUnit(u);
+ for(const u of sorted)if(u.hp>0&&(u.team==='P1'||isVis(u.x,u.y)))drawUnit(u);
  for(const s of slashes){ctx.save();ctx.globalAlpha=Math.max(0,s.life/10);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.shadowColor='#ffdd00';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(s.x,s.y,12,s.ang-1,s.ang+1);ctx.stroke();ctx.restore()}
  for(const bf of butterflies){const f2=Math.abs(Math.sin(bf.ph*3))*3+0.5;ctx.fillStyle=bf.c;ctx.beginPath();ctx.ellipse(bf.x-2,bf.y,f2,2,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(bf.x+2,bf.y,f2,2,0,0,7);ctx.fill()}
  for(const c of clouds){ctx.fillStyle='rgba(0,0,0,0.07)';ctx.beginPath();ctx.ellipse(c.x,c.y,c.rx,c.ry,0,0,7);ctx.fill()}
@@ -819,6 +869,8 @@ function draw(){
  // placing ghost
  if(placing){const B=BLD[placing],ok=validSpot(lastMouseW.x,lastMouseW.y,placing);
   ctx.globalAlpha=0.6;ctx.fillStyle=ok?'#4ade80':'#f87171';rr(lastMouseW.x-B.w/2,lastMouseW.y-B.h/2,B.w,B.h,5);ctx.fill();ctx.globalAlpha=1}
+ // dhund (fog of war)
+ for(let fcy=0;fcy<25;fcy++)for(let fcx=0;fcx<40;fcx++){const fi=fcy*40+fcx;if(fogVis[fi])continue;ctx.fillStyle=fogSeen[fi]?'rgba(0,0,0,0.5)':'rgba(5,8,5,0.96)';ctx.fillRect(fcx*40,fcy*40,40,40)}
  // treaty banner
  if(treaty>0&&started&&!gameOver){ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(view.x-VW/2/view.z,view.y-VH/2/view.z+40,VW/view.z,34);
   ctx.fillStyle='#fde68a';ctx.font='bold 17px sans-serif';ctx.textAlign='center';
@@ -830,11 +882,12 @@ function drawMM(){
  const sx=150/W,sy=94/H;
  mmc.clearRect(0,0,150,94);mmc.fillStyle='#3d5c22';mmc.fillRect(0,0,150,94);
  for(const n of nodes){if(n.amt<=0)continue;mmc.fillStyle=n.kind==='wood'?'#2d6a1e':n.kind==='gold'?'#FFD700':'#e11d48';mmc.fillRect(n.x*sx-1,n.y*sy-1,2,2)}
- for(const b of blds){mmc.fillStyle=b.team==='P1'?'#60a5fa':'#f87171';mmc.fillRect(b.x*sx-3,b.y*sy-3,6,6)}
- for(const u of units){if(u.hp<=0)continue;mmc.fillStyle=u.team==='P1'?'#bfdbfe':'#fecaca';mmc.fillRect(u.x*sx-1,u.y*sy-1,2,2)}
+ for(const b of blds){mmc.fillStyle=b.team==='P1'?'#60a5fa':'#f87171';if(b.team==='AI'&&!isVis(b.x,b.y))continue;mmc.fillRect(b.x*sx-3,b.y*sy-3,6,6)}
+ for(const u of units){if(u.hp<=0)continue;if(u.team==='AI'&&!isVis(u.x,u.y))continue;mmc.fillStyle=u.team==='P1'?'#bfdbfe':'#fecaca';mmc.fillRect(u.x*sx-1,u.y*sy-1,2,2)}
  mmc.strokeStyle='#fff';mmc.lineWidth=1;
  const hw=VW/2/view.z*sx,hh=VH/2/view.z*sy;
  mmc.strokeRect(view.x*sx-hw,view.y*sy-hh,hw*2,hh*2);
+ for(let fcy=0;fcy<25;fcy++)for(let fcx=0;fcx<40;fcx++){const fi=fcy*40+fcx;if(fogVis[fi])continue;mmc.fillStyle=fogSeen[fi]?'rgba(0,0,0,0.55)':'#050805';mmc.fillRect(fcx*3.75,fcy*3.76,3.75,3.76)}
 }
 // ============ HUD + PANEL ============
 function costStr(c){const m=civOf('P1').cost;const p=[];if(c.f)p.push(Math.ceil(c.f*m)+'🍖');if(c.w)p.push(Math.ceil(c.w*m)+'🪵');if(c.g)p.push(Math.ceil(c.g*m)+'🪙');return p.join(' ')}
@@ -851,7 +904,7 @@ function orderAttack(){
  const tc=blds.find(b=>b.team==='AI'&&b.kind==='tc');
  const T=tc?{x:tc.x,y:tc.y}:{x:1350,y:200};
  for(const u of mil){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null}
- S.order();msg('⚔ HAMLA! Dushman ke adde ki taraf!');
+ S.order();msg('⚔ HAMLA! Dushman ke adde ki taraf!');S.horn();
 }
 function refreshPanel(){
  const info=document.getElementById('panelInfo'),btns=document.getElementById('panelBtns');
@@ -888,6 +941,7 @@ function updateHUD(){
  const tt=Math.floor(elapsed);
  document.getElementById('timeT').textContent=Math.floor(tt/60)+':'+String(tt%60).padStart(2,'0');
  document.getElementById('treatyT').textContent=treaty>0?('🕊 Sandhi '+Math.ceil(treaty/60)+'s'):(civOf('P1').name+' ⚔ '+civOf('AI').name);
+ if(LEVEL){const lt=document.getElementById('treatyT');if(LEVEL.obj==='survive'&&treaty<=0)lt.textContent='🛡️ '+Math.ceil(objT/60)+'s bacho!';else if(LEVEL.obj==='relic')lt.textContent='💎 '+relicsGot+'/3 Khazana';else if(treaty<=0)lt.textContent='🎯 Lv'+(LEVELS.indexOf(LEVEL)+1)+' TC todo!';}
  document.getElementById('zoomT').textContent=Math.round(view.z*100)+'%';
 }
 // ============ LOOP ============
@@ -899,6 +953,7 @@ function step(){
   if(treaty>0){treaty--;if(treaty===0){msg('⚔ SANDHI KHATM! Dushman hamla karega — foj taiyaar rakho!');S.age()}}
   else elapsed+=1/60;
   if(frame%150===0)aiTick();
+  if(frame%6===0)updateFog();
   for(const u of units){const ox=u.x,oy=u.y;updateUnit(u);u.mv=Math.hypot(u.x-ox,u.y-oy)>0.08}
   // halki dooriyan (bheed na lage)
   for(let i=0;i<units.length;i++){const a=units[i];if(a.hp<=0)continue;
@@ -908,6 +963,7 @@ function step(){
   updateBlds();
   units=units.filter(u=>u.hp>0);
   for(const cl of clouds){cl.x+=cl.vx;if(cl.x-cl.rx>W)cl.x=-cl.rx}
+  if(treaty<=0&&frame%36===0)S.drum(frame%72===0);
   for(const bd of birds){bd.x+=bd.vx;bd.ph+=0.2;if(bd.x>W+30){bd.x=-30;bd.y=rnd(100,400)}}
   for(const n of nodes)if(n.kind==='hunt'&&n.amt>0&&n.hx!==undefined){n.x=n.hx+Math.sin(frame/240+n.ph)*35;n.y=n.hy+Math.cos(frame/300+n.ph)*25}
   for(const rg of rings){rg.r+=7;rg.life--}rings=rings.filter(r=>r.life>0);
@@ -921,12 +977,18 @@ function step(){
   const myTC=blds.some(b=>b.team==='P1'&&b.kind==='tc'),aiTC=blds.some(b=>b.team==='AI'&&b.kind==='tc');
   if(!myTC){endGame(false);break}
   if(!aiTC){endGame(true);break}
+  if(LEVEL&&LEVEL.obj==='survive'&&treaty<=0){objT--;if(objT<=0){endGame(true);break}}
+  if(LEVEL&&LEVEL.obj==='relic'&&relicsGot>=3){endGame(true);break}
  }
+ // 💎 khazana collection
+ for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;res[u.team].g+=150;float(rl.x,rl.y-30,'💎 +150🪙 KHAZANA!','#FFD700');burst2(rl.x,rl.y,'#FFD700');if(u.team==='P1'){S.coin();relicsGot++;msg('💎 Khazana mila! +150 sona! ('+relicsGot+'/3)')}break}}}
+ if(frame%25===0)for(const rl of relics)if(!rl.taken)parts.push({x:rl.x+rnd(-12,12),y:rl.y+rnd(-8,8),vx:0,vy:rnd(-0.8,-0.3),life:25,c:'#FFD700'});
  updateHUD();
  if(frame%30===0)refreshPanel();
 }
 function endGame(win){
  gameOver=true;
+ if(win&&LEVEL){const i=LEVELS.indexOf(LEVEL);if(i>=unlocked&&unlocked<9){unlocked=i+1;try{localStorage.setItem('syLevel',String(unlocked))}catch(e){}}LEVEL=null;refreshLevels()}
  document.getElementById('endTitle').textContent=win?'🎉 FATEH! JEET!' :'💔 SHIKAST! HAAR!';
  document.getElementById('endDesc').textContent=win?'Dushman ka Town Center toot gaya! '+civOf('P1').name+' amar rahe!':'Tumhara Town Center toot gaya. Phir se koshish karo!';
  document.getElementById('endScreen').style.display='flex';
@@ -938,13 +1000,37 @@ function loop(){step();if(started)draw();requestAnimationFrame(loop)}
 // ============ MENU + START ============
 document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');myCiv=b.dataset.c;S.click()});
 document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
+function refreshLevels(){
+ const box=document.getElementById('lvlBtns');if(!box)return;box.innerHTML='';
+ LEVELS.forEach((L,i)=>{
+  const b=document.createElement('button');b.className='opt';
+  b.style.opacity=i<=unlocked?1:0.45;
+  b.textContent=(i<=unlocked?(i+1)+L.icon+' '+L.name:'🔒 '+(i+1));
+  b.onclick=()=>{S.click();if(i>unlocked){msg('🔒 Pehle Level '+(unlocked+1)+' jeeto!');document.getElementById('lvlDesc').textContent='🔒 Pehle Level '+(unlocked+1)+' jeeto!';return}
+   document.getElementById('lvlDesc').innerHTML='<b>'+(i+1)+'. '+L.icon+' '+L.name+'</b> — '+L.tip;
+   playLevel(i)};
+  box.appendChild(b);
+ });
+}
+function playLevel(i){LEVEL=LEVELS[i];startGame()}
+refreshLevels();
 function startGame(){
  ac();S.click();
  units=[];blds=[];parts=[];floats=[];corpses=[];slashes=[];rubble=[];rings=[];shake=0;uid=1;bid=1;frame=0;elapsed=0;gameOver=false;paused=false;speed=1;
  res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
- age={P1:0,AI:0};treaty=40*60;sel={units:[],bld:null};placing=null;aiPlan={t:0,attackSent:0};
+ age={P1:0,AI:0};treaty=40*60;sel={units:[],bld:null};placing=null;aiPlan={t:0,attackSent:0};relicsGot=0;
+ fogSeen.fill(0);fogVis.fill(0);
  const civs=['japan','china','india'].filter(c=>c!==myCiv);
  aiCiv=civs[Math.floor(Math.random()*civs.length)];
+ if(LEVEL){ // campaign overrides
+  if(LEVEL.diff)difficulty=LEVEL.diff;
+  if(LEVEL.aiCiv)aiCiv=LEVEL.aiCiv;
+  if(LEVEL.pRes)res.P1={f:LEVEL.pRes.f||0,w:LEVEL.pRes.w||0,g:LEVEL.pRes.g||0};
+  if(LEVEL.pAge)age.P1=LEVEL.pAge;
+  if(LEVEL.aiAge)age.AI=LEVEL.aiAge;
+  if(LEVEL.treaty)treaty=LEVEL.treaty*60;
+  if(LEVEL.obj==='survive')objT=(LEVEL.survive||240)*60;
+ }
  genMap();paintBG();
  blds.push({id:bid++,team:'P1',kind:'tc',x:250,y:800,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:250,ry:700,cool:0});
  blds.push({id:bid++,team:'AI',kind:'tc',x:1350,y:200,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:1350,ry:300,cool:0});
@@ -952,10 +1038,11 @@ function startGame(){
  for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',250+rnd(-60,60),800+rnd(-60,60));u.state='idle'}
  for(let i=0;i<3;i++){const u=mkUnit('AI','villager',1350+rnd(-60,60),200+rnd(-60,60));u.state='idle'}
  view={x:300,y:750,z:0.85};
+ updateFog();
  started=true;
  document.getElementById('menu').style.display='none';
  document.getElementById('bPause').textContent='⏸';
- msg('🕊 40s Sandhi! Villager se khana/lakdi jama karo, Ghar banao, Yug badhao!');
+ msg(LEVEL?('🎯 Lv'+(LEVELS.indexOf(LEVEL)+1)+' '+LEVEL.icon+' '+LEVEL.name+': '+LEVEL.tip):'🕊 40s Sandhi! Villager se khana/lakdi jama karo, Ghar banao, Yug badhao!');
  float(250,700,'🏰 Tumhara gaon!','#4ade80');
  updateHUD();refreshPanel();
 }
