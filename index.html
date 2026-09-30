@@ -110,8 +110,8 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <div>⭐ <b id="scoreT">0</b> | 🏆 <b id="bestT">0</b> | 🎖 Lv<b id="lvlT">1</b> | 👑 Raja HP: <b id="heroT">-</b></div>
 </div>
 <div id="hud">
-<div class="team kali"><div>⬛ Kali Fort: <span id="kaliHpT">500</span> | 🍚 <span id="kaliFood">50</span></div><div class="bar"><i id="kaliHpB" style="width:100%;background:#e5e7eb;color:#fff"></i></div><div>W:<span id="kaliW">0</span> S:<span id="kaliS">0</span> ⚕:<span id="kaliH">0</span></div></div>
-<div class="team laal"><div>🟥 Laal Fort: <span id="laalHpT">500</span> | 🍚 <span id="laalFood">50</span></div><div class="bar"><i id="laalHpB" style="width:100%;background:#e11d1d;color:#ff5555"></i></div><div>W:<span id="laalW">0</span> S:<span id="laalS">0</span> ⚕:<span id="laalH">0</span></div></div>
+<div class="team kali"><div>⬛ Kali Fort: <span id="kaliHpT">500</span> | 🍚 <span id="kaliFood">50</span> 🪵<span id="kaliWood">0</span> 🪙<span id="kaliGold">0</span></div><div class="bar"><i id="kaliHpB" style="width:100%;background:#e5e7eb;color:#fff"></i></div><div>W:<span id="kaliW">0</span> S:<span id="kaliS">0</span> ⚕:<span id="kaliH">0</span> 🏘<span id="kaliPop">0/25</span></div></div>
+<div class="team laal"><div>🟥 Laal Fort: <span id="laalHpT">500</span> | 🍚 <span id="laalFood">50</span> 🪵<span id="laalWood">0</span> 🪙<span id="laalGold">0</span></div><div class="bar"><i id="laalHpB" style="width:100%;background:#e11d1d;color:#ff5555"></i></div><div>W:<span id="laalW">0</span> S:<span id="laalS">0</span> ⚕:<span id="laalH">0</span></div></div>
 </div>
 <div id="controls">
 <button class="btn-w" id="bWorker" onclick="spawn('kali','worker')">+Worker <kbd>W</kbd> 10🍚</button>
@@ -144,6 +144,20 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <button class="btn-dl" onclick="shareGame()">📲 Share / WhatsApp</button>
 <button class="btn-restart" onclick="location.reload()">↻ Naya</button>
 <button class="btn-restart" style="background:#991b1b" onclick="exitGame()">❌ Exit <kbd>Esc</kbd></button>
+</div>
+<div id="aoeRow" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#1a1409;border:1px solid #c68a2e;border-radius:10px;padding:8px;align-items:center">
+<span style="font-weight:900">🏯 AoE:</span>
+<span id="civT" style="font-size:13px">🇮🇳 Bharat</span>
+<button class="btn-w" onclick="setFocus('food')">🍚 Khana</button>
+<button class="btn-w" onclick="setFocus('wood')">🪵 Lakdi</button>
+<button class="btn-w" onclick="setFocus('gold')">🪙 Sona</button>
+<button class="btn-s" id="bBarrack" onclick="build('barrack')">🏟 Barrack 40🪵</button>
+<button class="btn-s" id="bFarm" onclick="build('farm')">🌾 Khet 30🪵</button>
+<button class="btn-s" id="bTower" onclick="build('tower')">🗼 Burj 50🪵+20🪙</button>
+<button class="btn-s" id="bHouse" onclick="build('house')">🏠 Ghar 20🪵</button>
+<button class="btn-o" id="tSword" onclick="research('sword')">⚔ Tez Talwar 40🍚+20🪙</button>
+<button class="btn-o" id="tArmor" onclick="research('armor')">🛡 Kavach 40🪵+20🪙</button>
+<button class="btn-o" id="tSpeed" onclick="research('speed')">👟 Tez Kadam 30🍚+30🪵</button>
 </div>
 <div id="p2row" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#3d0a0a;border:1px solid #e11d1d;border-radius:10px;padding:8px">
 <span style="font-weight:900">🟥 P2 Laal:</span>
@@ -211,6 +225,10 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <button class="opt" data-m="endless">♾ Endless</button>
 <button class="opt" data-m="waves">🌊 Waves Attack</button>
 <button class="opt" data-m="versus">👥 2-Player (1 Screen)</button></div></div>
+<div class="opt-row"><b>🏯 Sabhyata (Civilization) chuno:</b><div class="opt-btns" id="civBtns">
+<button class="opt sel" data-c="bharat">🇮🇳 Bharat (kheti tez + free worker)</button>
+<button class="opt" data-c="japan">🇯🇵 Japan (hamla +15%)</button>
+<button class="opt" data-c="cheen">🇨🇳 Cheen (sasta tech + tez worker)</button></div></div>
 <div class="opt-row"><b>2. Mushkil:</b><div class="opt-btns" id="diffBtns">
 <button class="opt" data-d="easy">😊 Easy</button>
 <button class="opt sel" data-d="medium">😐 Medium</button>
@@ -243,7 +261,7 @@ let rally={x:650,y:250},foods=[],ants=[],parts=[],floats=[];
 let gameOver=false,started=false,paused=false,speed=1,auto=true,muted=false;
 let mode='fort',difficulty='medium',timeLeft=180,elapsed=0,frame=0,kills=0,killStreak=0,streakT=0;
 let joshT=0, shakeAll=0;
-let G={kali:{food:50,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:50,fort:600,maxFort:600,base:{x:820,y:250}}};
+let G={kali:{food:50,wood:30,gold:20,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:50,wood:30,gold:20,fort:600,maxFort:600,base:{x:820,y:250}}};
 let DIFF={easy:{ai:0.012,dmg:0.8},medium:{ai:0.02,dmg:1.0},hard:{ai:0.034,dmg:1.3}};
 let hero=null, laalRaja=null, heroRespawn=0;
 let keys={};
@@ -257,6 +275,47 @@ const UNITS={
 };
 const FIGHTERS=['soldier','runner','tank'];
 let powerups=[],drops=[];
+// ===== 🏯 AOE ASIAN DYNASTY PHASE-1: Civs + Resources + Buildings + Tech =====
+const CIVS={
+ bharat:{name:'🇮🇳 Bharat',foodRate:1.25,woodRate:1, dmg:1, hp:1, techCost:1, desc:'kheti tez, pehla worker muft'},
+ japan:{name:'🇯🇵 Japan',foodRate:1,woodRate:1, dmg:1.15, hp:1, techCost:1, desc:'hamla +15%'},
+ cheen:{name:'🇨🇳 Cheen',foodRate:1,woodRate:1.2, dmg:1, hp:1, techCost:0.7, desc:'sasta tech, tez lakdi'}
+};
+let myCiv='bharat',laalCiv='japan',workerFocus='food';
+let buildings=[],trees=[],mines=[];
+let tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
+for(let i=0;i<10;i++)trees.push({x:i<5?rnd(200,320):rnd(580,700),y:rnd(70,430),hp:120});
+mines=[{x:340,y:90,hp:200},{x:560,y:410,hp:200}];
+function civOf(t){return t==='kali'?CIVS[myCiv]:CIVS[laalCiv]}
+function techDmg(t){return (1+0.25*tech[t].sword)*civOf(t).dmg}
+function techHp(t){return 1+0.3*tech[t].armor}
+function techSpd(t){return 1+0.15*tech[t].speed}
+function popCap(t){let c=25;for(let b of buildings)if(b.team===t&&b.kind==='house'&&b.hp>0)c+=8;return c}
+function popUsed(t){let n=0;for(let a of ants)if(a.team===t)n++;return n}
+function setFocus(f){workerFocus=f;S.click();flash('👷 Worker focus: '+(f==='food'?'🍚 Khana':f==='wood'?'🪵 Lakdi':'🪙 Sona'))}
+function setCiv(c){myCiv=c;document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.c===c));S.click();flash(CIVS[c].name+' chuni! '+CIVS[c].desc)}
+const BCOST={barrack:{wood:40,gold:0},farm:{wood:30,gold:0},tower:{wood:50,gold:20},house:{wood:20,gold:0}};
+function build(kind){
+ if(!started||gameOver)return;
+ const c=BCOST[kind];const g=G.kali;
+ if(g.wood<(c.wood||0)||g.gold<(c.gold||0)){flash('🏯 Kam resource! Chahiye '+c.wood+'🪵 '+(c.gold?c.gold+'🪙':'') );S.click();return}
+ g.wood-=c.wood||0;g.gold-=c.gold||0;
+ const b=G.kali.base;const n=buildings.filter(x=>x.team==='kali').length;
+ buildings.push({team:'kali',kind,x:b.x+rnd(-30,40),y:b.y-110-n*38,hp:220,maxHp:220,cool:0});
+ S.power();float(b.x,b.y-120,'🏯 '+(kind==='barrack'?'Barrack! Foji +20% strong':kind==='farm'?'Khet! +khana':kind==='tower'?'Burj! Raksha':'Ghar! +8 Pop'),'#ffd27f');
+}
+const TCOST={sword:{food:40,gold:20},armor:{wood:40,gold:20},speed:{food:30,wood:30}};
+function research(k){
+ if(!started||gameOver)return;
+ if(tech.kali[k]>=2){flash('✅ Max research ho gaya!');return}
+ const c=TCOST[k];const disc=CIVS[myCiv].techCost;
+ const cf=Math.ceil(c.food||0*disc),cw=Math.ceil((c.wood||0)*disc),cg=Math.ceil((c.gold||0)*disc);
+ const needF=(c.food||0)*disc,needW=(c.wood||0)*disc,needG=(c.gold||0)*disc;
+ if(G.kali.food<needF||G.kali.wood<needW||G.kali.gold<needG){flash('🔬 Resource kam!');S.click();return}
+ G.kali.food-=needF;G.kali.wood-=needW;G.kali.gold-=needG;
+ tech.kali[k]++;S.win();
+ flash(k==='sword'?'⚔ Hamla +25%!':k==='armor'?'🛡 HP +30%!':'👟 Speed +15%!');
+}
 // ===== ⏱️ TAIYAARI PHASE (army banane ka time) =====
 let inPrep=false,prepT=0,prepLen=20;
 let freeRoster={worker:1,soldier:1,runner:1,tank:1,healer:1};
@@ -597,6 +656,7 @@ document.querySelectorAll('#controls button,#p2row button,#setPanel button').for
 // ===== MENU =====
 document.querySelectorAll('#modeBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');mode=b.dataset.m;S.click()});
 document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
+document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>setCiv(b.dataset.c));
 function refreshMenu(){
  try{
   document.getElementById('menuBest').textContent='🏆 Best Score: '+high;
@@ -681,6 +741,10 @@ function refreshLevels(){
  });
 }
 function startGame(){ac();S.power();started=true;currentLevel=null;wavesToWin=0;laalStrat='balanced';document.getElementById('menu').style.display='none';
+ G.kali.wood=30;G.kali.gold=20;G.laal.wood=30;G.laal.gold=20;
+ buildings=[];tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
+ laalCiv=['japan','cheen','bharat'][Math.floor(Math.random()*3)];
+ if(myCiv==='bharat'){G.kali.food+=20;float(G.kali.base.x,G.kali.base.y-90,'🇮🇳 +20🍚 bonus!','#4ade80')}
  const names={fort:'Fort Todo',food:'Khana Race',endless:'Endless',waves:'Waves 🌊',versus:'Vs Dost 👥'};
  document.getElementById('modeT').textContent=names[mode]||mode;
  document.getElementById('diffT').textContent=difficulty;
@@ -716,14 +780,22 @@ if(difficulty==='hard'){/* laal raja start me banega */}
 
 function spawn(team,type,free){
  if(gameOver||!started&&!free)return;
+ if(!free&&popUsed(team)>=popCap(team)){if(team==='kali'){flash('🏠 Pop full! Ghar banao!');S.click()}return}
  const U=UNITS[type]||UNITS.worker;
  const cost=U.cost;
  // ⏱️ taiyari ke dauran: har type ka 1st unit MUFT
  let freeNow=false;
  if(!free&&inPrep&&freeRoster[type]>0){freeRoster[type]--;freeNow=true;float(G[team].base.x,G[team].base.y-100,'🎁 MUFT '+type.toUpperCase()+'!','#4ade80');spark(G[team].base.x,G[team].base.y-60,'#4ade80',12);S.power()}
- if(!free&&!freeNow){if(G[team].food<cost){flash('🍚 Khana kam! Worker bhejo!');S.click();return}G[team].food-=cost;S.spawn()}
+ if(!free&&!freeNow){
+  let cc=cost;
+  if(team==='kali'&&myCiv==='bharat'&&type==='worker')cc=Math.ceil(cost*0.7);
+  if(type==='tank'&&G[team].wood<10){if(team==='kali'){flash('🪵 Tank ke liye 10 lakdi!');S.click()}return}
+  if(G[team].food<cc){if(team==='kali'){flash('🍚 Khana kam! Worker bhejo!');S.click()}return}
+  G[team].food-=cc;if(type==='tank')G[team].wood-=10;S.spawn()}
  const b=G[team].base;
- const a={team,type,x:b.x+rnd(-20,20),y:b.y+rnd(-70,70),hp:U.hp,maxHp:U.hp,dmg:U.dmg*(team==='laal'?DIFF[difficulty].dmg:1),speed:U.speed*(joshT>0&&team==='kali'?1.8:1),carry:false,cool:0,tx:null,ty:null,boost:0,face:team==='kali'?0:Math.PI,px:b.x,py:b.y,ph:rnd(0,6.28)};
+ const barrackN=buildings.filter(x=>x.team===team&&x.kind==='barrack'&&x.hp>0).length;
+ const barrackBonus=1+0.2*barrackN;
+ const a={team,type,x:b.x+rnd(-20,20),y:b.y+rnd(-70,70),hp:U.hp*techHp(team),maxHp:U.hp*techHp(team),dmg:U.dmg*techDmg(team)*barrackBonus*(team==='laal'?DIFF[difficulty].dmg:1),speed:U.speed*techSpd(team)*(joshT>0&&team==='kali'?1.8:1)*(team==='kali'&&myCiv==='cheen'&&type==='worker'?1.2:1),carry:false,cool:0,tx:null,ty:null,boost:0,face:team==='kali'?0:Math.PI,px:b.x,py:b.y,ph:rnd(0,6.28)};
  ants.push(a);
  puff(a.x,a.y,team==='kali'?'rgba(0,0,0,0.35)':'rgba(255,80,80,0.4)',5);
  if(type!=='worker')S.unsheathe();
@@ -949,6 +1021,10 @@ function step(){
   }
   for(let p of powerups)p.life--;powerups=powerups.filter(p=>p.life>0);
   for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
+  // 🏯 AOE economy: khet income + laal trickle + burj attack
+  if(frame%120===0){for(let b of buildings){if(b.hp<=0)continue;if(b.kind==='farm'){G[b.team].food+=4*civOf(b.team).foodRate;if(b.team==='kali'&&Math.random()<0.3)float(b.x,b.y-24,'+4 🍚','#4ade80')}}}
+  if(frame%300===0){G.laal.wood+=8;G.laal.gold+=5;if(frame%900===0&&mode!=='versus'&&G.laal.wood>=40&&buildings.filter(x=>x.team==='laal').length<3){const lb=G.laal.base;buildings.push({team:'laal',kind:['barrack','tower','farm'][Math.floor(Math.random()*3)],x:lb.x+rnd(-40,30),y:lb.y-110,hp:220,maxHp:220,cool:0})}}
+  for(let b of buildings){if(b.hp<=0||b.kind!=='tower')continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
 // surprise events har ~45s + tension heartbeat jab fort tootne wala ho
  if(frame>600&&frame%2700===0)triggerEvent();
   if(frame%50===0&&!gameOver){
@@ -1021,9 +1097,23 @@ function spawnWaveAnt(){
   a.px=a.px??a.x;a.py=a.py??a.y;
   if(a.type==='worker'){
    if(!a.carry){
-    let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
-    if(best){moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;if(best.mirchi){a.boost=600;float(a.x,a.y,'🌶 SPEED!','red')}foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#aaffaa',5)}}
-   }else{const b=G[a.team].base;moveTo(a,b.x,b.y);if(Math.hypot(a.x-b.x,a.y-b.y)<32){a.carry=false;let v=a.carryGolden?30:10;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}
+    const foc=(a.team==='kali')?workerFocus:'food';
+    if(foc==='wood'){
+     let best=null,bd=1e9;for(let t of trees){if(t.hp<=0)continue;let dd=Math.hypot(a.x-t.x,a.y-t.y);if(dd<bd){bd=dd;best=t}}
+     if(best){moveTo(a,best.x,best.y);if(bd<16){a.carry=true;a.carryKind='wood';best.hp-=12;spark(a.x,a.y,'#a3e635',5);if(best.hp<=0){float(best.x,best.y,'🪵 Ped khatm!','#a3e635');setTimeout(()=>{best.hp=120;best.x=rnd(200,700);best.y=rnd(70,430)},18000)}}}
+     else{let best2=null,bd2=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd2){bd2=dd;best2=f}}if(best2){moveTo(a,best2.x,best2.y);if(bd2<13){a.carry=true;a.carryKind='food';a.carryGolden=best2.golden;foods.splice(foods.indexOf(best2),1)}}}
+    }else if(foc==='gold'){
+     let best=null,bd=1e9;for(let m of mines){if(m.hp<=0)continue;let dd=Math.hypot(a.x-m.x,a.y-m.y);if(dd<bd){bd=dd;best=m}}
+     if(best){moveTo(a,best.x,best.y);if(bd<18){a.carry=true;a.carryKind='gold';best.hp-=8;spark(a.x,a.y,'#FFD700',5);if(best.hp<=0){float(best.x,best.y,'🪙 Khan khatm!','#FFD700');setTimeout(()=>{best.hp=200},24000)}}}
+     else{let best2=null,bd2=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd2){bd2=dd;best2=f}}if(best2){moveTo(a,best2.x,best2.y);if(bd2<13){a.carry=true;a.carryKind='food';a.carryGolden=best2.golden;foods.splice(foods.indexOf(best2),1)}}}
+    }else{
+     let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
+     if(best){moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryKind='food';a.carryGolden=best.golden;if(best.mirchi){a.boost=600;float(a.x,a.y,'🌶 SPEED!','red')}foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#aaffaa',5)}}
+    }
+   }else{const b=G[a.team].base;moveTo(a,b.x,b.y);if(Math.hypot(a.x-b.x,a.y-b.y)<32){a.carry=false;const civ=civOf(a.team);
+    if(a.carryKind==='wood'){let v=12*civ.woodRate;if(inPrep)v*=2;G[a.team].wood+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#365314':'#f66',4,2)}
+    else if(a.carryKind==='gold'){let v=8;if(inPrep)v*=2;G[a.team].gold+=v;S.eat();spark(b.x,b.y,'#FFD700',6)}
+    else{let v=a.carryGolden?30:10;v*=civ.foodRate;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}}
    let en=nearestEnemy(a,42);if(en&&a.cool<=0){en.hp-=hitDmg(a,en);S.hit();slashes.push({x:en.x,y:en.y,r:4,life:10,max:10});a.cool=32;if(en.hp<=0){burst(en.x,en.y,'red',10,3);onKill('bite',en)}}
    }else if(a.type==='healer'){
     // ⚕ healer: zakhmi sathi ko dhoondhkar heal karo
@@ -1079,6 +1169,11 @@ function spawnWaveAnt(){
      if(hh){hh.hp-=a.dmg*0.6;a.cool=30;S.hit();spark(hh.x,hh.y-22,'#ffd27f',4);G[a.team].food+=3;
       if(Math.random()<0.3)float(hh.x,hh.y-52,'+3 🍚','#ffd27f');
       if(hh.hp<=0)destroyHut(hh,a.team)}
+    }
+    // 🏯 dushman imarat todo
+    if(a.cool<=0){
+     let bb=null,bd=48;for(let b of buildings){if(b.team===a.team||b.hp<=0)continue;let dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd<bd){bd=dd;bb=b}}
+     if(bb){bb.hp-=a.dmg*0.8;a.cool=30;S.hit();spark(bb.x,bb.y,'orange',5);if(bb.hp<=0){burst(bb.x,bb.y,'#8b5a2b',14,4);float(bb.x,bb.y-24,'🏯 Toot gaya!','#ff0');addScore(30)}}
     }
   }
  }
@@ -1194,6 +1289,10 @@ function draw(){
  // foods + powerups HQ
  for(let f of foods)drawFood(f);
  for(let p of powerups)drawPower(p);
+ // 🏯 AOE nodes: ped + sona + imaratein
+ for(let t of trees){if(t.hp<=0)continue;ctx.save();ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(t.x,t.y+14,14,5,0,0,7);ctx.fill();ctx.fillStyle='#5a3a15';ctx.fillRect(t.x-3,t.y-2,6,16);ctx.fillStyle='#2d6a1e';ctx.beginPath();ctx.arc(t.x,t.y-12,15,0,7);ctx.fill();ctx.fillStyle='#3f9e2f';ctx.beginPath();ctx.arc(t.x-4,t.y-16,8,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.fillText('🪵',t.x-7,t.y+4);ctx.restore()}
+ for(let m of mines){if(m.hp<=0)continue;ctx.save();ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(m.x,m.y,22,14,0,0,7);ctx.fill();ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(m.x-5,m.y-3,4,0,7);ctx.arc(m.x+6,m.y+2,3,0,7);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 11px sans-serif';ctx.fillText('🪙',m.x-8,m.y+5);ctx.restore()}
+ for(let b of buildings){if(b.hp<=0)continue;ctx.save();ctx.fillStyle=b.team==='kali'?'#3a2d16':'#3d0a0a';rr(b.x-22,b.y-20,44,34,6);ctx.fill();ctx.strokeStyle='#c68a2e';ctx.lineWidth=2;rr(b.x-22,b.y-20,44,34,6);ctx.stroke();ctx.font='bold 18px sans-serif';ctx.fillText(b.kind==='barrack'?'🏟':b.kind==='farm'?'🌾':b.kind==='tower'?'🗼':'🏠',b.x-13,b.y+6);ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-20,b.y-28,40,5);ctx.fillStyle='#4ade80';ctx.fillRect(b.x-20,b.y-28,40*Math.max(0,b.hp/b.maxHp),5);ctx.restore()}
  // forts HQ (behind ants? draw base then ants then top flag for depth)
  drawFortBase(G.kali.base.x,G.kali.base.y,'kali',shakeK);
  drawFortBase(G.laal.base.x,G.laal.base.y,'laal',shakeL);
@@ -1720,6 +1819,14 @@ function updateHUD(){
  document.getElementById('laalHpT').textContent=Math.max(0,Math.round(G.laal.fort));
  document.getElementById('kaliFood').textContent=Math.floor(G.kali.food);
  document.getElementById('laalFood').textContent=Math.floor(G.laal.food);
+ try{
+  document.getElementById('kaliWood').textContent=Math.floor(G.kali.wood);
+  document.getElementById('kaliGold').textContent=Math.floor(G.kali.gold);
+  document.getElementById('laalWood').textContent=Math.floor(G.laal.wood);
+  document.getElementById('laalGold').textContent=Math.floor(G.laal.gold);
+  document.getElementById('kaliPop').textContent=popUsed('kali')+'/'+popCap('kali');
+  document.getElementById('civT').textContent=CIVS[myCiv].name+' | 👷:'+(workerFocus==='food'?'🍚':workerFocus==='wood'?'🪵':'🪙')+' | ⚔'+tech.kali.sword+' 🛡'+tech.kali.armor+' 👟'+tech.kali.speed;
+ }catch(e){}
  document.getElementById('kaliHpB').style.width=(G.kali.fort/G.kali.maxFort*100)+'%';
  document.getElementById('laalHpB').style.width=(G.laal.fort/G.laal.maxFort*100)+'%';
  const cnt=(t,y)=>ants.filter(a=>a.team===t&&a.type===y).length;
@@ -1744,9 +1851,11 @@ function updateHUD(){
  const food=G.kali.food;
  const dim=(id,ok)=>{const b=document.getElementById(id);if(b)b.style.opacity=ok?1:0.42};
  dim('bWorker',food>=10);dim('bSoldier',food>=20);dim('bRunner',food>=12);
- dim('bTank',food>=35);dim('bHealer',food>=25);
+ dim('bTank',food>=35&&G.kali.wood>=10);dim('bHealer',food>=25);
  dim('bRepair',food>=30&&G.kali.fort<G.kali.maxFort);
  dim('bBomb',food>=40);dim('bSugar',food>=30);dim('bJosh',food>=20&&joshT<=0);
+ dim('bBarrack',G.kali.wood>=40);dim('bFarm',G.kali.wood>=30);dim('bTower',G.kali.wood>=50&&G.kali.gold>=20);dim('bHouse',G.kali.wood>=20);
+ dim('tSword',tech.kali.sword<2);dim('tArmor',tech.kali.armor<2);dim('tSpeed',tech.kali.speed<2);
  // taiyari me muft units highlight
  if(inPrep){['bWorker','bSoldier','bRunner','bTank','bHealer'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.outline='3px solid #22c55e'})}
  else{['bWorker','bSoldier','bRunner','bTank','bHealer'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.outline='none'})}
