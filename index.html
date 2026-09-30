@@ -48,6 +48,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <button id="bSnd" onclick="toggleSnd()">🔊</button>
 <button id="bSpeed" onclick="toggleSpeed()">🚀 1x</button>
 <button onclick="zoomBy(1.25)">🔍+</button><button onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
+<button id="bFol" onclick="toggleFollow()">📷 Follow: OFF</button>
 <button onclick="deselect()">✖</button>
 </div>
 <div id="msg"></div>
@@ -55,7 +56,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
 <div class="guide">
 <b>🎮 Kaise khelein (Age of Empires style):</b><br>
-🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare), Right-click = bhejo / katwao / hamla. <kbd>WASD</kbd> = camera, wheel = zoom.<br>
+🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare), Right-click = bhejo / katwao / hamla. Mouse <b>kinare</b> le jao = camera ghumao, <b>beech-button</b> dabakar ghisao = camera pakdo, wheel = zoom. <kbd>WASD</kbd> = camera, 📷 Follow = chuni foj ke saath camera.<br>
 📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Minimap (neeche-right) tap = camera bhejo.<br>
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
 🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
@@ -263,6 +264,8 @@ function trade(t,what){
 // ============ INPUT: select + order ============
 let pDown=null,pDrag=null,pMoved=false;
 let pinchPts=new Map(),pinchD=0;
+let mouseSX=0,mouseSY=0,mouseIn=false,isTouch=false,mPan=null,followOn=false;
+function toggleFollow(){followOn=!followOn;const b=document.getElementById('bFol');if(b)b.textContent=followOn?'📷 Follow: ON':'📷 Follow: OFF';S.click()}
 function worldHit(wx,wy){
  let bu=null,bd=1e9;
  for(const u of units){if(u.hp<=0)continue;const d=Math.hypot(u.x-wx,u.y-wy);if(d<22&&d<bd){bd=d;bu=u}}
@@ -270,7 +273,7 @@ function worldHit(wx,wy){
  let nd=null,ndd=1e9;for(const n of nodes){if(n.amt<=0)continue;const d=Math.hypot(n.x-wx,n.y-wy);if(d<26&&d<ndd){ndd=d;nd=n}}
  return {u:bu,b:bb,n:nd};
 }
-function deselect(){sel={units:[],bld:null};placing=null;refreshPanel()}
+function deselect(){sel={units:[],bld:null};placing=null;if(followOn)toggleFollow();refreshPanel()}
 function refreshPanel(){/* part3 me */}
 function issueOrder(wx,wy,hit){
  const myU=sel.units.filter(u=>u.hp>0);
@@ -304,15 +307,17 @@ function issueOrder(wx,wy,hit){
 cv.addEventListener('contextmenu',e=>{e.preventDefault();if(!started||paused||gameOver)return;const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
  if(placing){return}
  issueOrder(p.x,p.y,hit)});
-cv.addEventListener('pointerdown',e=>{ac();if(!started||paused||gameOver)return;pinchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinchPts.size===2){const pp=[...pinchPts.values()];pinchD=Math.hypot(pp[0].x-pp[1].x,pp[0].y-pp[1].y);pDown=null;pDrag=null;return}pDown={x:e.clientX,y:e.clientY,btn:e.button};pMoved=false;pDrag=null});
-cv.addEventListener('pointermove',e=>{if(pinchPts.has(e.pointerId))pinchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+cv.addEventListener('pointerdown',e=>{ac();if(!started||paused||gameOver)return;if(e.button===1){mPan={x:e.clientX,y:e.clientY};pDown=null;pDrag=null;e.preventDefault();return}pinchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinchPts.size===2){const pp=[...pinchPts.values()];pinchD=Math.hypot(pp[0].x-pp[1].x,pp[0].y-pp[1].y);pDown=null;pDrag=null;return}pDown={x:e.clientX,y:e.clientY,btn:e.button};pMoved=false;pDrag=null});
+cv.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault()});
+cv.addEventListener('pointermove',e=>{mouseSX=e.clientX;mouseSY=e.clientY;mouseIn=true;isTouch=e.pointerType==='touch';if(pinchPts.has(e.pointerId))pinchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(mPan){const rr2=cv.getBoundingClientRect();view.x-=(e.clientX-mPan.x)*VW/rr2.width/view.z;view.y-=(e.clientY-mPan.y)*VH/rr2.height/view.z;mPan={x:e.clientX,y:e.clientY};clampView();if(followOn)toggleFollow();return}
  if(pinchPts.size===2){const pp=[...pinchPts.values()];const d=Math.hypot(pp[0].x-pp[1].x,pp[0].y-pp[1].y);if(pinchD>0&&d>0)zoomBy(d/pinchD);pinchD=d;return}
  if(!pDown)return;const dx=e.clientX-pDown.x,dy=e.clientY-pDown.y;
  if(Math.hypot(dx,dy)>10){pMoved=true;
   if(e.pointerType==='touch'){const r=cv.getBoundingClientRect();view.x-=(e.movementX||0)*VW/r.width/view.z;view.y-=(e.movementY||0)*VH/r.height/view.z;clampView()}
   else if(pDown.btn===0){pDrag={x0:pDown.x,y0:pDown.y,x1:e.clientX,y1:e.clientY}}
  }});
-cv.addEventListener('pointerup',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;if(!pDown)return;const wasTouch=e.pointerType==='touch';
+cv.addEventListener('pointerup',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;mPan=null;if(!pDown)return;const wasTouch=e.pointerType==='touch';
  if(pDrag&&!wasTouch){ // box select
   const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
   sel={units:units.filter(u=>u.team==='P1'&&u.hp>0&&u.x>a.x&&u.x<b.x&&u.y>a.y&&u.y<b.y).slice(0,30),bld:null};placing=null;S.click();refreshPanel();
@@ -330,17 +335,23 @@ cv.addEventListener('pointerup',e=>{pinchPts.delete(e.pointerId);if(pinchPts.siz
   refreshPanel();
  }
  pDown=null;pDrag=null});
-cv.addEventListener('pointercancel',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;pDown=null;pDrag=null});
+cv.addEventListener('pointercancel',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;pDown=null;pDrag=null;mPan=null});
+cv.addEventListener('pointerleave',()=>{mouseIn=false});
 document.addEventListener('keydown',e=>{
  if(e.code==='Escape'){if(placing){placing=null;refreshPanel()}else deselect();return}
  if(!started||gameOver)return;
- const sp=26/view.z;
- if(e.code==='KeyA'||e.code==='ArrowLeft')view.x-=sp;if(e.code==='KeyD'||e.code==='ArrowRight')view.x+=sp;
- if(e.code==='KeyW'||e.code==='ArrowUp')view.y-=sp;if(e.code==='KeyS'||e.code==='ArrowDown')view.y+=sp;
- clampView();
+ const sp=26/view.z;let kp=false;
+ if(e.code==='KeyA'||e.code==='ArrowLeft'){view.x-=sp;kp=true}if(e.code==='KeyD'||e.code==='ArrowRight'){view.x+=sp;kp=true};
+ if(e.code==='KeyW'||e.code==='ArrowUp'){view.y-=sp;kp=true}if(e.code==='KeyS'||e.code==='ArrowDown'){view.y+=sp;kp=true};
+ clampView();if(kp&&followOn)toggleFollow();
  if(e.code==='Space'){e.preventDefault();togglePause()}
 });
-mm.addEventListener('pointerdown',e=>{const r=mm.getBoundingClientRect();view.x=(e.clientX-r.left)/r.width*W;view.y=(e.clientY-r.top)/r.height*H;clampView()});
+let mmDown=false;
+function mmGo(e){const r=mm.getBoundingClientRect();view.x=(e.clientX-r.left)/r.width*W;view.y=(e.clientY-r.top)/r.height*H;clampView();if(followOn)toggleFollow()}
+mm.addEventListener('pointerdown',e=>{mmDown=true;mmGo(e);try{if(e.pointerId!==undefined)mm.setPointerCapture(e.pointerId)}catch(_){}});
+mm.addEventListener('pointermove',e=>{if(mmDown)mmGo(e)});
+mm.addEventListener('pointerup',()=>{mmDown=false});
+mm.addEventListener('pointercancel',()=>{mmDown=false});
 // ============ UPDATE ============
 function nearestNode(x,y,kind,maxD){let best=null,bd=maxD||1e9;for(const n of nodes){if(n.amt<=0)continue;if(kind&&n.kind!==kind)continue;const d=Math.hypot(n.x-x,n.y-y);if(d<bd){bd=d;best=n}}return best}
 function enemyUnitNear(u,range){let best=null,bd=range;for(const e of units){if(e.team===u.team||e.hp<=0)continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}return best}
@@ -1060,6 +1071,13 @@ function step(){
  // 💎 khazana collection
  for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;res[u.team].g+=150;float(rl.x,rl.y-30,'💎 +150🪙 KHAZANA!','#FFD700');burst2(rl.x,rl.y,'#FFD700');if(u.team==='P1'){S.coin();relicsGot++;msg('💎 Khazana mila! +150 sona! ('+relicsGot+'/3)')}break}}}
  if(frame%25===0)for(const rl of relics)if(!rl.taken)parts.push({x:rl.x+rnd(-12,12),y:rl.y+rnd(-8,8),vx:0,vy:rnd(-0.8,-0.3),life:25,c:'#FFD700'});
+ // 📷 camera: kinare-scroll + follow
+ if(mouseIn&&!isTouch){const cr=cv.getBoundingClientRect(),mg=26,sp=14/view.z;let moved=false;
+  if(mouseSX-cr.left<mg){view.x-=sp;moved=true}else if(cr.right-mouseSX<mg){view.x+=sp;moved=true}
+  if(mouseSY-cr.top<mg){view.y-=sp;moved=true}else if(cr.bottom-mouseSY<mg){view.y+=sp;moved=true}
+  if(moved){clampView();if(followOn)toggleFollow()}}
+ if(followOn){let ft=null;if(sel.units.length&&sel.units[0].hp>0)ft=sel.units[0];else if(sel.bld!=null)ft=blds.find(x=>x.id===sel.bld);
+  if(ft&&ft.hp>0){view.x+=(ft.x-view.x)*0.15;view.y+=(ft.y-view.y)*0.15;clampView()}else toggleFollow()}
  updateHUD();
  if(frame%30===0)refreshPanel();
 }
