@@ -202,7 +202,8 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <div id="menu"><div id="menuCard">
 <h2>🐜 Kali vs Laal - DHAMAKA Edition</h2>
 <div>Hero + Bomb + Sound ke sath! Pehle sound ON karne ke liye kahin click karna padega (browser rule).</div>
-<div class="opt-row"><b>1. Mode:</b><div class="opt-btns" id="modeBtns">
+<div class="opt-row"><b>🎮 Levels (10) — jeeto aur agla kholo:</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;margin-top:6px;color:#f0e2c0">Koi level chuno — har level me alag chunauti + tip!</div></div>
+<div class="opt-row"><b>1. Mode (free play):</b><div class="opt-btns" id="modeBtns">
 <button class="opt sel" data-m="fort">🏰 Fort Todo</button>
 <button class="opt" data-m="food">🍚 3 Min Khana Race</button>
 <button class="opt" data-m="endless">♾ Endless</button>
@@ -328,6 +329,7 @@ function misSave(){try{localStorage.setItem('klMis',JSON.stringify({date:todaySt
 function recordWin(md){
  totalWins++;winsByMode[md]=(winsByMode[md]||0)+1;
  misProg.win++;
+ if(currentLevel!==null&&currentLevel<LEVELS.length-1&&unlocked<currentLevel+1){unlocked=currentLevel+1;try{localStorage.setItem('klLevel',String(unlocked))}catch(e){}float(450,260,'🔓 LEVEL '+(unlocked+1)+' KHUL GAYA!','#FFD700')}
  try{localStorage.setItem('klWins',String(totalWins));localStorage.setItem('klWinsByMode',JSON.stringify(winsByMode))}catch(e){}
  misCheck();misSave();
  gainXP(score);
@@ -482,7 +484,7 @@ function downloadPhoto(){
 function todayStr(){return new Date().toISOString().slice(0,10)}
 function startDaily(){
  ac();
- const t=todayStr();daily=t;mode='food';timeLeft=120;
+ const t=todayStr();daily=t;mode='food';timeLeft=120;currentLevel=null;wavesToWin=0;laalStrat='balanced';
  difficulty=['easy','medium','hard'][new Date().getDate()%3];
  document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));
  document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.d===difficulty));
@@ -588,9 +590,13 @@ function refreshMenu(){
  }catch(e){}
 }
 try{
+ let pend=null;try{pend=localStorage.getItem('klPending')}catch(e){}
+ if(pend!==null){try{localStorage.removeItem('klPending')}catch(e){}}
  refreshMenu();
+ refreshLevels();
  let dd=null;try{dd=localStorage.getItem('klDaily')}catch(e){}
  if(dd===todayStr())document.getElementById('dailyBtn').textContent='📅 AAJ KA CHALLENGE ✅ (ho gaya!)';
+ if(pend!==null&&LEVELS[parseInt(pend)])startLevel(parseInt(pend));
 }catch(e){}
 function applyBonus(){
  // level food bonus + jeet ke khazane ka bonus
@@ -600,7 +606,59 @@ function applyBonus(){
  if(pendingBonus.shield>0){shieldT+=pendingBonus.shield;float(G.kali.base.x,G.kali.base.y-110,'🎁 Khazana: 🛡 kavach!','#38bdf8')}
  if(pendingBonus.food>0||pendingBonus.shield>0){pendingBonus={food:0,shield:0};saveBonus()}
 }
-function startGame(){ac();S.power();started=true;document.getElementById('menu').style.display='none';
+// ===== 10-LEVEL CAMPAIGN (strategic!) =====
+const LEVELS=[
+ {name:'Pehli Jung',icon:'⚔️',mode:'fort',diff:'easy',kaliFood:60,laalFood:40,kaliFort:600,laalFort:500,strat:'balanced',tip:'Soldier banao aur seedha fort par hamla! Raja ko aage rakho.'},
+ {name:'Anaaj Race',icon:'🍚',mode:'food',diff:'easy',time:180,kaliFood:30,laalFood:30,kaliFort:600,laalFort:600,strat:'eco',tip:'Worker zyada banao! Laal bhi khana jama kar rahi hai.'},
+ {name:'Turtle Laal',icon:'🐢',mode:'fort',diff:'medium',kaliFood:60,laalFood:60,kaliFort:600,laalFort:750,strat:'turtle',tip:'Laal defend karegi! Bomb 💣 + Chakravat 🌀 se deewar todo.'},
+ {name:'Ghati Hamla',icon:'🌪️',mode:'fort',diff:'medium',kaliFood:60,laalFood:90,kaliFort:600,laalFort:600,strat:'rush',tip:'Laal tez aayegi! Pehle defend (tanks), phir palatwar.'},
+ {name:'Gaon Loot',icon:'🏘️',mode:'fort',diff:'medium',kaliFood:20,laalFood:60,kaliFort:600,laalFort:600,strat:'balanced',villageStore:200,tip:'Khana kam hai! Gaon ke ghar looto (+3/vaar, +30 loot) — wahi jeet hai.'},
+ {name:'Raat Yuddh',icon:'🌙',mode:'fort',diff:'medium',kaliFood:60,laalFood:60,kaliFort:600,laalFort:650,strat:'balanced',nightStart:1,tip:'Andhere me mashaalon ki roshni me lado. Healer saath rakho!'},
+ {name:'Leher 5',icon:'🌊',mode:'waves',diff:'medium',kaliFood:70,laalFood:50,kaliFort:700,laalFort:600,strat:'balanced',wavesToWin:5,tip:'5 waves roko = jeet! Repair + tanks + ult taiyaar rakho.'},
+ {name:'Laal Raja',icon:'😈',mode:'fort',diff:'hard',kaliFood:70,laalFood:70,kaliFort:650,laalFort:650,strat:'rush',rajaEarly:1,tip:'Laal Raja shuru se maidan me + CHARGE karta hai! Raja vs Raja!'},
+ {name:'Toofan',icon:'🌧️',mode:'fort',diff:'hard',kaliFood:60,laalFood:70,kaliFort:600,laalFort:700,strat:'balanced',rainStart:1,tip:'Barish me sab slow. Tank + runner ka sahi istemal jeet dilayega.'},
+ {name:'Maharaja Antim',icon:'👑',mode:'fort',diff:'hard',kaliFood:80,laalFood:100,kaliFort:700,laalFort:900,strat:'rush',rajaEarly:1,tip:'Aakhri jung! Sab kuch max. Bomb, ult, power-ups — sab jhonk do!'}
+];
+let unlocked=0,currentLevel=null,wavesToWin=0,laalStrat='balanced',selLvl=-1;
+try{unlocked=Math.min(LEVELS.length-1,parseInt(localStorage.getItem('klLevel')||'0')||0)}catch(e){}
+function playLevel(i){try{localStorage.setItem('klPending',String(i))}catch(e){}location.reload()}
+function startLevel(i){
+ const L=LEVELS[i];if(!L)return;
+ ac();currentLevel=i;
+ mode=L.mode;difficulty=L.diff;timeLeft=L.time||180;elapsed=0;
+ document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.m===L.mode));
+ document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.d===L.diff));
+ G.kali.food=L.kaliFood;G.laal.food=L.laalFood;
+ G.kali.fort=G.kali.maxFort=L.kaliFort;G.laal.fort=G.laal.maxFort=L.laalFort;
+ wavesToWin=L.wavesToWin||0;waveN=0;waveState='break';waveT=480;
+ laalStrat=L.strat||'balanced';
+ if(L.villageStore)villageStore=L.villageStore;
+ if(L.nightStart)dayT=0.5;
+ if(L.rainStart){rainT=1800;S.thunder()}
+ S.power();started=true;
+ document.getElementById('menu').style.display='none';
+ document.getElementById('modeT').textContent='Lv'+(i+1)+' '+L.icon+' '+L.name;
+ document.getElementById('diffT').textContent=difficulty;
+ if(L.rajaEarly&&!laalRaja){laalRaja=makeHero('laal');ants.push(laalRaja);float(laalRaja.x,laalRaja.y,'😈 LAAL RAJA!','red');S.warHorn()}
+ if(L.wavesToWin)showBanner('🌊 '+L.wavesToWin+' WAVES ROKO = JEET!');
+ showBanner('Lv'+(i+1)+' '+L.icon+' '+L.name.toUpperCase()+'!');
+ applyBonus();
+ flash('📜 '+L.tip);
+}
+function refreshLevels(){
+ const box=document.getElementById('lvlBtns');if(!box)return;
+ box.innerHTML='';
+ LEVELS.forEach((L,i)=>{
+  const b=document.createElement('button');
+  b.className='opt'+(selLvl===i?' sel':'');
+  b.style.opacity=i<=unlocked?1:0.45;
+  b.textContent=(i<=unlocked?(selLvl===i?'▶ ':'')+(i+1)+L.icon:'🔒 '+(i+1));
+  b.onclick=()=>{S.click();if(i>unlocked){flash('🔒 Pehle Level '+(unlocked+1)+' jeeto!');return}selLvl=i;refreshLevels();
+   document.getElementById('lvlDesc').innerHTML='<b>Lv'+(i+1)+' '+L.icon+' '+L.name+'</b> ('+L.diff+')<br>'+L.tip+'<br><button class="btn-w" style="margin-top:6px" onclick="playLevel('+i+')">▶ LEVEL KHELO</button>'};
+  box.appendChild(b);
+ });
+}
+function startGame(){ac();S.power();started=true;currentLevel=null;wavesToWin=0;laalStrat='balanced';document.getElementById('menu').style.display='none';
  const names={fort:'Fort Todo',food:'Khana Race',endless:'Endless',waves:'Waves 🌊',versus:'Vs Dost 👥'};
  document.getElementById('modeT').textContent=names[mode]||mode;
  document.getElementById('diffT').textContent=difficulty;
@@ -870,7 +928,9 @@ function step(){
    if(waveState==='break'){waveT--;if(waveT<=0){waveN++;waveLeft=Math.min(14,2+waveN*2);waveTick=0;waveState='attack';showBanner('🌊 WAVE '+waveN+'!');S.warHorn()}}
    else{
     waveTick--;if(waveTick<=0&&waveLeft>0){waveTick=45;waveLeft--;spawnWaveAnt()}
-    if(waveLeft<=0&&!ants.some(a=>a.team==='laal')){const bonus=100*waveN;addScore(bonus);G.kali.food+=30+waveN*10;showBanner('✅ WAVE '+waveN+' CLEAR! +'+bonus+'⭐');S.win();waveState='break';waveT=480}
+    if(waveLeft<=0&&!ants.some(a=>a.team==='laal')){const bonus=100*waveN;addScore(bonus);G.kali.food+=30+waveN*10;S.win();
+     if(wavesToWin>0&&waveN>=wavesToWin){gameOver=true;showBanner('🌊 SAARE '+wavesToWin+' WAVES CLEAR! JEET! +'+bonus+'⭐');recordWin(mode);showLoot()}
+     else{showBanner('✅ WAVE '+waveN+' CLEAR! +'+bonus+'⭐');waveState='break';waveT=480}}
    }
   }
  if(mode==='food'){timeLeft-=1/60;if(timeLeft<=0){endByFood();break}}else elapsed+=1/60;
@@ -910,14 +970,16 @@ function spawnWaveAnt(){
   const d=DIFF[difficulty];
   if(auto&&frame%100===0){const kw=ants.filter(a=>a.team==='kali'&&a.type==='worker').length;if(kw<4&&G.kali.food>=10)spawn('kali','worker')}
   if(mode==='versus'&&frame%100===0){const lw2=ants.filter(a=>a.team==='laal'&&a.type==='worker').length;if(lw2<3)spawn('laal','worker',true)}
-  if(mode!=='versus'&&mode!=='waves'&&Math.random()<d.ai){
+  if(mode!=='versus'&&mode!=='waves'&&Math.random()<d.ai*(laalStrat==='rush'?1.3:1)){
    const lw=ants.filter(a=>a.team==='laal'&&a.type==='worker').length,ls=ants.filter(a=>a.team==='laal'&&FIGHTERS.includes(a.type)).length;
    const lt=ants.filter(a=>a.team==='laal'&&a.type==='tank').length,lh=ants.filter(a=>a.team==='laal'&&a.type==='healer').length;
-   if(G.laal.food>=35&&lt<2&&Math.random()<0.15)spawn('laal','tank');
+   if(laalStrat==='eco'&&G.laal.food>=10&&(lw<5||Math.random()<0.5))spawn('laal','worker');
+   else if(laalStrat==='rush'&&G.laal.food>=20&&Math.random()<0.7)spawn('laal','soldier');
+   else if(G.laal.food>=35&&lt<2&&Math.random()<0.15)spawn('laal','tank');
    else if(G.laal.food>=25&&lh<1&&Math.random()<0.2)spawn('laal','healer');
    else if(G.laal.food>=12&&Math.random()<0.25)spawn('laal','runner');
    else if(G.laal.food>=20&&(ls<lw+1||Math.random()<0.45))spawn('laal','soldier');else if(G.laal.food>=10)spawn('laal','worker');
-   if(G.laal.food>90&&G.laal.fort<450)repair('laal');
+   if(G.laal.food>(laalStrat==='turtle'?50:90)&&G.laal.fort<(laalStrat==='turtle'?550:450))repair('laal');
    if(difficulty==='hard'&&!laalRaja&&frame>600){laalRaja=makeHero('laal');laalRaja.x=G.laal.base.x;laalRaja.px=laalRaja.x;ants.push(laalRaja);float(laalRaja.x,laalRaja.y,'😈 LAAL RAJA AAYA!','red');S.warHorn()}
   }
  for(let a of ants){
@@ -968,7 +1030,7 @@ function spawnWaveAnt(){
    let en=nearestEnemy(a,a.type==='hero'?260:230);
    let ebase=a.team==='kali'?G.laal.base:G.kali.base,eTeam=a.team==='kali'?'laal':'kali';
    let tx=a.tx??(a.team==='kali'?rally.x:ebase.x),ty=a.ty??(a.team==='kali'?rally.y:ebase.y);
-   if(a.team==='laal'&&a.type!=='hero'){if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130){tx=en.x;ty=en.y}else{tx=ebase.x;ty=ebase.y}}
+    if(a.team==='laal'&&a.type!=='hero'){const aggro=laalStrat==='turtle'?70:(laalStrat==='rush'?200:130);if(en&&Math.hypot(a.x-en.x,a.y-en.y)<aggro){tx=en.x;ty=en.y}else if(laalStrat==='turtle'){tx=G.laal.base.x+50;ty=G.laal.base.y}else{tx=ebase.x;ty=ebase.y}}
    if(a===hero&&a.tx==null&&en&&Math.hypot(a.x-en.x,a.y-en.y)<200){tx=en.x;ty=en.y}
    if((a.type==='hero')&&!en){
     let best=null,bd=90;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
