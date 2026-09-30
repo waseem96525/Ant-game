@@ -1091,6 +1091,12 @@ function draw(){
  ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-camX,-camY);
  // cached ground
  ctx.drawImage(bgC,0,0);
+ // ☀️ dynamic sunlight: din me upar se roshni, raat me mashaalon
+ if(nightF<0.5){
+  const sg=ctx.createLinearGradient(0,0,W*0.3,H);
+  sg.addColorStop(0,`rgba(255,245,200,${0.10*(1-nightF*2)})`);sg.addColorStop(1,'rgba(255,245,200,0)');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+ }
  // cloud shadows drifting
  for(let c of cloudShadows){ctx.fillStyle='rgba(0,0,0,0.08)';ctx.beginPath();ctx.ellipse(c.x,c.y,c.rx,c.ry,0,0,7);ctx.fill()}
  // craters
@@ -1164,6 +1170,11 @@ function draw(){
  // ants sorted by y for depth
  let sorted=[...ants].sort((a,b)=>a.y-b.y);
  for(let a of sorted)drawAnt(a);
+ // 🐜 ants ke neeche soft contact shadow (ground par padi hui)
+ for(let a of sorted){
+  const rr2=(a.type==='hero'?14:({worker:6,runner:5,soldier:8,tank:11,healer:7,villager:6}[a.type]??7));
+  ctx.fillStyle='rgba(0,0,0,0.18)';ctx.beginPath();ctx.ellipse(a.x,a.y+rr2*0.9+3,rr2+2,4.5,0,0,7);ctx.fill();
+ }
  // fort tops (flags wave over ants) + torch flames
  drawFortTop(G.kali.base.x,G.kali.base.y,'kali');
  drawFortTop(G.laal.base.x,G.laal.base.y,'laal');
@@ -1212,6 +1223,9 @@ function draw(){
  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.38)');
  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
  ctx.fillStyle='rgba(255,255,200,0.05)';ctx.fillRect(0,0,W,60);
+ // 🎬 color grade: din me garam, raat me thanda
+ if(nightF>0.02){ctx.fillStyle=`rgba(40,60,140,${0.10*nightF})`;ctx.fillRect(0,0,W,H)}
+ else{ctx.fillStyle='rgba(255,200,120,0.04)';ctx.fillRect(0,0,W,H)}
  // combo banner (sabse upar, hamesha saaf)
  if(bannerT>0){bannerT--;const bk=Math.min(1,bannerT/20,(160-bannerT)/15+0.3);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,bk));ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(bannerTxt,W/2,240);const bg2=ctx.createLinearGradient(0,200,0,250);bg2.addColorStop(0,'#fff7cc');bg2.addColorStop(1,'#ff9d00');ctx.fillStyle=bg2;ctx.fillText(bannerTxt,W/2,240);ctx.textAlign='left';ctx.restore()}
  if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillText('⏸ PAUSED',340,260);ctx.shadowBlur=0}
@@ -1295,6 +1309,8 @@ function drawFortBase(x,y,team,sh){
  if(bt>0){ctx.translate(Math.sin(endCine.t/6)*3*bt,bt*24);ctx.globalAlpha=1-bt*0.2}
  // ground shadow + glow
  ctx.fillStyle='rgba(0,0,0,0.35)';ctx.beginPath();ctx.ellipse(x,y+56,56,14,0,0,7);ctx.fill();
+ // ☀️ fort ka lambha saya (dhoop ke hisaab se)
+ ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(x+18,y+58,52,12,0.3,0,7);ctx.fill();
  if(team==='kali'){ctx.shadowColor='rgba(255,255,255,0.15)';ctx.shadowBlur=18}else{ctx.shadowColor='rgba(255,40,40,0.35)';ctx.shadowBlur=18}
  // side towers
  for(let s of [-38,38]){
@@ -1317,6 +1333,11 @@ function drawFortBase(x,y,team,sh){
  if(kali){mg.addColorStop(0,'#3a3a41');mg.addColorStop(0.5,'#17171b');mg.addColorStop(1,'#000')}else{mg.addColorStop(0,'#d64545');mg.addColorStop(0.5,'#8a1a1a');mg.addColorStop(1,'#4a0a0a')}
  ctx.fillStyle=mg;rr(x-32,y-48,64,104,6);ctx.fill();
  ctx.strokeStyle=trimC;ctx.lineWidth=2;rr(x-32,y-48,64,104,6);ctx.stroke();
+ // 🧱 brick texture: har ek brick par halki chamak + andhera edge
+ for(let by=y-30;by<y+50;by+=12){for(let bx=x-32+((by/12)%2)*10;bx<x+32;bx+=20){
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(bx,by,18,2);
+  ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(bx,by+10,18,2);
+ }}
  // brick lines
  ctx.strokeStyle=kali?'rgba(255,255,255,0.10)':'rgba(0,0,0,0.25)';ctx.lineWidth=1;
  for(let by=y-30;by<y+50;by+=12){ctx.beginPath();ctx.moveTo(x-32,by);ctx.lineTo(x+32,by);ctx.stroke()}
@@ -1334,6 +1355,10 @@ function drawFortBase(x,y,team,sh){
  ctx.fillStyle=dg;ctx.beginPath();ctx.ellipse(x,y+42,11,14,0,0,7);ctx.fill();
  ctx.strokeStyle='#2a1a05';ctx.lineWidth=2;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(x+i*5,y+30);ctx.lineTo(x+i*5,y+54);ctx.stroke()}
  ctx.fillStyle='#FFD700';for(let yy=34;yy<=50;yy+=6){ctx.beginPath();ctx.arc(x-7,y+yy,1.5,0,7);ctx.arc(x+7,y+yy,1.5,0,7);ctx.fill()}
+ // 🚪 darwaza par lakdi ki grain + dhoop ka gradient
+ const woodG=ctx.createLinearGradient(x-11,y+30,x+11,y+54);
+ woodG.addColorStop(0,'rgba(255,220,150,0.15)');woodG.addColorStop(0.5,'rgba(0,0,0,0)');woodG.addColorStop(1,'rgba(0,0,0,0.25)');
+ ctx.fillStyle=woodG;ctx.beginPath();ctx.ellipse(x,y+42,11,14,0,0,7);ctx.fill();
  // damage cracks + fire when low
  if(hp<0.66){ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-20,y-20);ctx.lineTo(x-8,y-2);ctx.lineTo(x-16,y+14);ctx.stroke()}
  if(hp<0.33){ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x+18,y-30);ctx.lineTo(x+6,y-8);ctx.lineTo(x+14,y+20);ctx.stroke();
@@ -1397,34 +1422,55 @@ function drawHut(h){
  ctx.save();
  // zameen par saya
  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(h.x,h.y+24,34,9,0,0,7);ctx.fill();
+ // ☀️ ghar ka lambha saya
+ ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(h.x+14,h.y+26,32,8,0.3,0,7);ctx.fill();
  // mitti ki gol deewar
  const wg=ctx.createRadialGradient(h.x-8,h.y-8,4,h.x,h.y,30);
  wg.addColorStop(0,'#c09a5c');wg.addColorStop(0.6,'#8b5a2b');wg.addColorStop(1,'#4a2e0e');
  ctx.fillStyle=wg;ctx.beginPath();ctx.arc(h.x,h.y,26,Math.PI,0);ctx.closePath();ctx.fill();
  ctx.strokeStyle='#3a2410';ctx.lineWidth=2;ctx.stroke();
+ // 🧱 mitti ki texture: chhoti chhoti dhaariyan
+ ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;
+ for(let ty=h.y-18;ty<h.y+20;ty+=7){ctx.beginPath();ctx.moveTo(h.x-24,ty);ctx.quadraticCurveTo(h.x,ty+3,h.x+24,ty);ctx.stroke()}
  // ghaas-phus ki chhat (layered)
  for(let li=0;li<3;li++){
   ctx.strokeStyle=['#e3c878','#d4af5a','#b8933f'][li];ctx.lineWidth=7;ctx.lineCap='round';
   ctx.beginPath();ctx.arc(h.x,h.y+2,30-li*6,Math.PI*1.08,Math.PI*1.92);ctx.stroke();
  }
+ // ☀️ chhat par dhoop ka gradient
+ const thG=ctx.createLinearGradient(h.x-30,h.y-30,h.x+30,h.y+10);
+ thG.addColorStop(0,'rgba(255,240,180,0.25)');thG.addColorStop(1,'rgba(0,0,0,0.15)');
+ ctx.fillStyle=thG;ctx.beginPath();ctx.arc(h.x,h.y+2,30,Math.PI*1.08,Math.PI*1.92);ctx.closePath();ctx.fill();
  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(h.x,h.y-30,4,0,7);ctx.fill();
  // darwaza + raat me garm roshni
  ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.ellipse(h.x,h.y+2,8,13,0,0,7);ctx.fill();
  if(nightF>0.3){ctx.shadowColor='#ffb300';ctx.shadowBlur=12+nightF*10;ctx.fillStyle='#ffca55';ctx.beginPath();ctx.ellipse(h.x,h.y+4,5,9,0,0,7);ctx.fill();ctx.shadowBlur=0}
+ // 🚪 darwaza par lakdi ki grain
+ ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=1;
+ for(let gy=h.y-6;gy<h.y+14;gy+=5){ctx.beginPath();ctx.moveTo(h.x-6,gy);ctx.lineTo(h.x+6,gy+2);ctx.stroke()}
  // khidki
  ctx.fillStyle=nightF>0.3?'#ffca55':'#3a2a10';ctx.beginPath();ctx.arc(h.x+15,h.y-6,4,0,7);ctx.fill();
+ // 🪟 khidki ka frame
+ ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(h.x+15,h.y-6,4,0,7);ctx.stroke();
  // chimni + dhuaan
  ctx.fillStyle='#5a4a3a';ctx.fillRect(h.x+12,h.y-38,7,16);
+ // ☀️ chimni ka saya
+ ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(h.x+16,h.y-38,4,16);
  if(Math.random()<0.08)parts.push({x:h.x+15,y:h.y-40,vx:rnd(-0.2,0.3),vy:rnd(-0.9,-0.4),life:45,max:45,c:'rgba(200,200,200,0.5)',sz:rnd(3,6),grav:-0.015,smoke:true});
  // 🌾 bhandar ka dher (jitna anaaj, utna bada!)
- if(villageStore>0){const sh=Math.min(12,3+villageStore/15);ctx.fillStyle='#e3c878';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.5;ctx.stroke()}
+ if(villageStore>0){const sh=Math.min(12,3+villageStore/15);ctx.fillStyle='#e3c878';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.5;ctx.stroke();
+  // ☀️ dher par dhoop
+  ctx.fillStyle='rgba(255,240,180,0.2)';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI*1.1,Math.PI*1.9);ctx.fill();}
  // tutan-phutan
  if(dmg<0.66){ctx.strokeStyle='rgba(30,15,5,0.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(h.x-12,h.y-18);ctx.lineTo(h.x-4,h.y-6);ctx.lineTo(h.x-10,h.y+2);ctx.stroke()}
+ if(dmg<0.33){ctx.strokeStyle='rgba(30,15,5,0.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(h.x+10,h.y-20);ctx.lineTo(h.x+16,h.y-8);ctx.lineTo(h.x+12,h.y+4);ctx.stroke()}
  if(dmg<0.33&&Math.random()<0.2)puff(h.x+rnd(-18,18),h.y-20,'rgba(120,90,50,0.6)',1);
  // HP bar
  ctx.fillStyle='rgba(0,0,0,0.7)';rr(h.x-24,h.y-52,48,6,3);ctx.fill();
  const hg=ctx.createLinearGradient(h.x-24,0,h.x+24,0);hg.addColorStop(0,'#e3c878');hg.addColorStop(1,'#8b5a2b');
  ctx.fillStyle=hg;if(dmg>0){rr(h.x-24,h.y-52,48*Math.max(0,dmg),5,2);ctx.fill()}
+ // ☀️ HP bar par dhoop
+ ctx.fillStyle='rgba(255,255,255,0.15)';if(dmg>0){rr(h.x-24,h.y-52,48*Math.max(0,dmg),2,1);ctx.fill()}
  ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('🏘',h.x,h.y-56);ctx.textAlign='left';
  ctx.restore();
 }
@@ -1440,6 +1486,16 @@ function drawAnt(a){
  ctx.save();ctx.translate(a.x,a.y);
  // shadow
  ctx.fillStyle='rgba(0,0,0,0.30)';ctx.beginPath();ctx.ellipse(0,r*0.9+3,r+2,4.5,0,0,7);ctx.fill();
+ // ☀️ body ka upar se soft highlight (3D feel)
+ ctx.fillStyle='rgba(255,255,255,0.10)';ctx.beginPath();ctx.ellipse(-2,-r*0.5,r*0.7,r*0.4,0,0,7);ctx.fill();
+ // ☀️ legs par bhi dhoop
+ ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-8,-r*0.3);ctx.lineTo(-11,-r*0.3+ph*1.4);ctx.stroke();
+ // ☀️ antennae par dhoop
+ ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(heroA?14:10,-3);ctx.quadraticCurveTo(heroA?20:15,-8+aw,heroA?23:18,-10+aw);ctx.stroke();
+ // ☀️ mandibles par dhoop
+ ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(heroA?16:12,-2);ctx.quadraticCurveTo(heroA?22:17,-3+jaw,heroA?24:19,-1+jaw);ctx.stroke();
+ // ☀️ eyes par dhoop
+ ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(heroA?12:9,-2.5,0.5,0,7);ctx.arc(heroA?12:9,2.5,0.5,0,7);ctx.fill();
  // josh / boost aura
  if(joshT>0&&a.team==='kali'){ctx.strokeStyle='rgba(255,230,0,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.lineDashOffset=-frame;ctx.beginPath();ctx.arc(0,0,r+7,0,7);ctx.stroke();ctx.setLineDash([])}
  if(a.boost>0){ctx.shadowColor='red';ctx.shadowBlur=12}
@@ -1476,6 +1532,8 @@ function drawAnt(a){
  if(kali){abdG.addColorStop(0,heroA?'#4b4b55':'#3a3a40');abdG.addColorStop(1,'#050507')}else if(vil){abdG.addColorStop(0,'#b08a4f');abdG.addColorStop(1,'#4a2e0e')}else{abdG.addColorStop(0,heroA?'#ff6b6b':'#f04444');abdG.addColorStop(1,heroA?'#7a0d0d':'#5a0d0d')}
  ctx.fillStyle=abdG;ctx.beginPath();ctx.ellipse(-9,0,heroA?10:7.5,heroA?8:5.5,0,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'rgba(255,255,255,0.7)';ctx.lineWidth=heroA?2:1;ctx.stroke();
+ // ✨ abdomen par glossy highlight (kitni chamak!)
+ ctx.fillStyle='rgba(255,255,255,0.22)';ctx.beginPath();ctx.ellipse(-11,-3,3.5,2,-0.3,0,7);ctx.fill();
  // stripes
  ctx.strokeStyle=kali?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.35)';ctx.lineWidth=1.2;
  ctx.beginPath();ctx.moveTo(-12,-4);ctx.quadraticCurveTo(-9,0,-12,4);ctx.moveTo(-7,-5);ctx.quadraticCurveTo(-4,0,-7,5);ctx.stroke();
@@ -1497,6 +1555,8 @@ function drawAnt(a){
  if(kali){headG.addColorStop(0,'#3d3d46');headG.addColorStop(1,'#0a0a0c')}else if(vil){headG.addColorStop(0,'#c09a5c');headG.addColorStop(1,'#5a3a15')}else{headG.addColorStop(0,'#ff7b7b');headG.addColorStop(1,'#7a0d0d')}
  ctx.fillStyle=headG;ctx.beginPath();ctx.arc(heroA?11:8,0,heroA?7:5,0,7);ctx.fill();
  ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=heroA?2:1;ctx.stroke();
+ // 👁 aankhon par chamak (life!)
+ ctx.fillStyle='rgba(255,255,255,0.9)';ctx.beginPath();ctx.arc(heroA?12.5:9.5,-3,0.9,0,7);ctx.arc(heroA?12.5:9.5,3,0.9,0,7);ctx.fill();
  // soldier: lohe ka top + kalgi
  if(a.type==='soldier'){const hx=8,hr=5;ctx.fillStyle=kali?'#4b5563':'#7f1d1d';ctx.beginPath();ctx.arc(hx,0,hr+0.6,Math.PI*1.02,Math.PI*1.98);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#e11d1d';ctx.beginPath();ctx.moveTo(hx-2,-hr);ctx.lineTo(hx+2,-hr);ctx.lineTo(hx,-hr-4);ctx.closePath();ctx.fill()}
  // hero: sunehre kandhe (pauldrons)
@@ -1520,6 +1580,8 @@ function drawAnt(a){
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(heroA?12:9,-2.5,heroA?2.6:1.8,0,7);ctx.arc(heroA?12:9,2.5,heroA?2.6:1.8,0,7);ctx.fill();
  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(heroA?12.8:9.6,-2.5,heroA?1.3:0.9,0,7);ctx.arc(heroA?12.8:9.6,2.5,heroA?1.3:0.9,0,7);ctx.fill();
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(heroA?13.2:9.9,-2.8,0.5,0,7);ctx.arc(heroA?13.2:9.9,2.2,0.5,0,7);ctx.fill();
+ // 👃 nose dot
+ ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.arc(heroA?15:11,0,0.8,0,7);ctx.fill();
  // runner headband + speed lines
  if(a.type==='runner'){ctx.fillStyle='#22d3ee';ctx.fillRect(3,-6.5,9,2.6);ctx.fillStyle='#0e7490';ctx.fillRect(3,-4.2,9,1);if(moving){ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1.5;for(let sl2=0;sl2<2;sl2++){ctx.beginPath();ctx.moveTo(-12-sl2*5,-3+sl2*6);ctx.lineTo(-18-sl2*5,-3+sl2*6);ctx.stroke()}}}
  ctx.restore();
