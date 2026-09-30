@@ -3,1932 +3,621 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Kali vs Laal Chunti - Dhamaka Edition 🔊</title>
+<title>Samrat Yuddh — Asian Dynasty 🏯</title>
 <link rel="icon" type="image/svg+xml" href="ant-icon.svg">
-<link rel="apple-touch-icon" href="ant-icon.svg">
-<link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#1a1207">
-<meta name="description" content="🐜 Kali vs Laal Chunti - Khana aur Fort ki Jung! Hero, Bomb, Sound ke sath. Mobile + PC game.">
 <style>
 *{box-sizing:border-box;font-family:'Segoe UI',system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#3a2a12 0%,#1a1207 55%,#0b0803 100%);color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;overscroll-behavior:none}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:22px 22px;opacity:.5}
-h1{margin:12px 0 2px;font-size:24px;text-align:center;letter-spacing:.5px;background:linear-gradient(180deg,#fff7cc,#ffd94d 45%,#ff9d00 70%,#fff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 14px rgba(255,180,0,.25))}
-#wrap{width:95%;max-width:960px;padding-bottom:110px;position:relative;z-index:1}
-#hud{display:flex;gap:10px;margin:10px 0;flex-wrap:wrap}
-.team{flex:1;min-width:220px;background:linear-gradient(180deg,#2e2514,#1c150a);border:1px solid #6b5320;border-radius:12px;padding:8px 12px;box-shadow:0 4px 14px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
-.team.kali{border-left:6px solid #9ca3af;background:linear-gradient(180deg,#2b2b30,#141416)}
-.team.laal{border-left:6px solid #e11d1d}
-.bar{height:12px;background:#0a0a0a;border-radius:7px;overflow:hidden;margin:5px 0;border:1px solid #555;box-shadow:inset 0 2px 4px #000}
-.bar>i{display:block;height:100%;border-radius:6px;transition:width .25s;box-shadow:0 0 8px currentColor}
-#controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-button{cursor:pointer;border:none;border-radius:12px;padding:12px 14px;font-weight:800;font-size:14px;min-height:44px;transition:transform .08s,filter .15s;box-shadow:0 4px 0 rgba(0,0,0,.45),0 6px 14px rgba(0,0,0,.35)}
-button:hover{filter:brightness(1.12)}button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
-.btn-w{background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f}
-.btn-s{background:linear-gradient(180deg,#3a3a3f,#000);color:#fff;border:1px solid #888}
-.btn-r{background:linear-gradient(180deg,#fde047,#ca8a04);color:#000}
-.btn-b{background:linear-gradient(180deg,#60a5fa,#1d4ed8);color:#fff}
-.btn-o{background:linear-gradient(180deg,#8b5cf6,#5b21b6);color:#fff}
-.btn-fun{background:linear-gradient(180deg,#f87171,#b91c1c);color:#fff;border:2px solid #fde68a}
-.btn-dl{background:linear-gradient(180deg,#22d3ee,#0e7490);color:#00141a;border:2px solid #fff}
-.btn-restart{background:linear-gradient(180deg,#737373,#3f3f3f);color:#fff}
-@media(max-width:640px){
- h1{font-size:18px}
- #controls button{flex:1 1 30%;font-size:13px;padding:12px 8px}
- #wrap{width:98%;padding-bottom:150px}
- .team{min-width:140px;font-size:13px}
-}
-#joyBase{position:fixed;left:14px;bottom:14px;width:120px;height:120px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:50%;display:none;z-index:20;touch-action:none;backdrop-filter:blur(4px);box-shadow:0 0 20px rgba(255,215,0,.2)}
-#joyStick{position:absolute;left:35px;top:35px;width:50px;height:50px;background:radial-gradient(circle at 35% 30%,#fff6b0,#FFD700 60%,#a16207);border-radius:50%;box-shadow:0 2px 8px #000}
-#joyBase2{position:fixed;right:14px;bottom:14px;width:120px;height:120px;background:rgba(255,80,80,.12);border:2px solid rgba(255,80,80,.5);border-radius:50%;display:none;z-index:20;touch-action:none;backdrop-filter:blur(4px)}
-#joyStick2{position:absolute;left:35px;top:35px;width:50px;height:50px;background:radial-gradient(circle at 35% 30%,#fecaca,#e11d1d 60%,#7f1d1d);border-radius:50%;box-shadow:0 2px 8px #000}
-body.versus-on #joyBase2{display:block}
-#ultBtn.ready{box-shadow:0 4px 0 rgba(0,0,0,.45),0 0 16px rgba(255,215,0,.7)}
-#joyLabel{position:fixed;left:14px;bottom:140px;font-size:12px;background:#000a;padding:4px 8px;border-radius:6px;display:none;z-index:20}
-@media(pointer:coarse){#joyBase{display:block}#joyLabel{display:block}}
-canvas{width:100%;height:auto;background:#7aa744;border-radius:14px;border:3px solid #4a3311;touch-action:none;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 2px #8b5a2b,0 0 32px rgba(255,180,0,.12)}
-#msg{text-align:center;font-size:19px;font-weight:900;min-height:30px;margin:6px;color:#fde68a;text-shadow:1px 1px 0 #000,0 0 14px rgba(255,180,0,.5);animation:msgPop .3s}
-@keyframes msgPop{from{transform:scale(.8)}to{transform:scale(1)}}
-#topInfo{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;font-size:14px;background:linear-gradient(180deg,#221a0d,#100c06);padding:8px 12px;border-radius:10px;border:1px solid #5a451a}
-.guide{background:linear-gradient(180deg,#1a1409,#100c06);border-radius:10px;padding:10px;font-size:13px;line-height:1.6;margin-top:10px;color:#f0e2c0;border:1px solid #4a3a15}
+body{margin:0;background:#141007;color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:10px 0 2px;font-size:22px;text-align:center;color:#ffd94d;text-shadow:1px 1px 0 #000}
+#wrap{width:98%;max-width:1000px;padding-bottom:20px}
+#topbar{display:flex;gap:8px;flex-wrap:wrap;background:#221a0d;border:1px solid #c68a2e;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700;margin:8px 0}
+#topbar span{background:#0008;padding:2px 8px;border-radius:6px}
+#msg{text-align:center;min-height:26px;font-weight:800;color:#fde68a;margin:4px}
+#cvwrap{position:relative}
+canvas#cv{width:100%;height:auto;background:#6da344;border-radius:12px;border:3px solid #4a3311;touch-action:none;display:block}
+canvas#mm{position:absolute;right:8px;bottom:8px;width:150px;height:94px;border:2px solid #ffd94d;border-radius:8px;background:#223;opacity:.95;touch-action:none}
+#panel{background:#1c150a;border:1px solid #8b5a2b;border-radius:10px;padding:8px;margin-top:8px;min-height:86px;font-size:14px}
+#panel .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+button{cursor:pointer;border:none;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;min-height:42px;background:linear-gradient(180deg,#4a3a18,#2a2008);color:#ffe9a8;border:1px solid #8b5a2b}
+button:hover{filter:brightness(1.15)}button:active{transform:translateY(2px)}
+button:disabled{opacity:.4}
+button.sel{outline:3px solid #22c55e}
+#bTrain{background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f}
+#bAge{background:linear-gradient(180deg,#fde047,#b45309);color:#000}
+#bAtk{background:linear-gradient(180deg,#f87171,#b91c1c);color:#fff}
+.guide{background:#100c06;border-radius:10px;padding:10px;font-size:13px;line-height:1.6;margin-top:10px;color:#f0e2c0;border:1px solid #4a3a15}
 kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font-size:12px}
-#menu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:10;padding:15px;backdrop-filter:blur(6px)}
-#menuCard{background:linear-gradient(180deg,#32240f,#1a1206);border:2px solid #c68a2e;border-radius:16px;padding:22px;max-width:580px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 0 60px rgba(255,170,0,.25)}
-.opt-btns{display:flex;gap:8px;flex-wrap:wrap}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:10;padding:15px}
+#menuCard{background:linear-gradient(180deg,#32240f,#1a1206);border:2px solid #c68a2e;border-radius:16px;padding:22px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+.opt-btns{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
 .opt{padding:8px 12px;border-radius:8px;background:#3a2d16;color:#fff;border:1px solid #666}
-.opt.sel{background:linear-gradient(180deg,#4ade80,#16a34a);color:#000;border-color:#fff;box-shadow:0 0 12px rgba(34,197,94,.6)}
-#startBtn{width:100%;font-size:19px;background:linear-gradient(180deg,#fde047,#f59e0b);margin-top:12px;padding:14px}
-/* ===== REAL FULLSCREEN GAMEPLAY (canvas poori screen, HUD floating) ===== */
-.btn-fs{background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff}
-#fsExit{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:60;display:none;width:52px;height:52px;border-radius:50%;font-size:22px;font-weight:900;background:rgba(0,0,0,.65);color:#fff;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.6)}
-#fsFloat{position:fixed;right:10px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:40;display:none;width:56px;height:56px;border-radius:50%;font-size:24px;background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.55)}
-#controls button,#p2row button,#setPanel button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
-@media(pointer:coarse){
- #controls button{flex:1 1 30%;font-size:15px;padding:14px 8px;min-height:58px}
- #p2row button{font-size:14px;min-height:54px}
- #joyBase{width:150px;height:150px}
- #joyStick{width:62px;height:62px;left:44px;top:44px}
- #joyBase2{width:150px;height:150px}
- #joyStick2{width:62px;height:62px;left:44px;top:44px}
-}
-#rotateHint{position:fixed;inset:0;z-index:59;display:none;align-items:center;justify-content:center;pointer-events:none;text-align:center}
-#rotateHint span{background:rgba(0,0,0,.78);border:2px solid #FFD700;border-radius:16px;padding:18px 22px;font-size:20px;font-weight:900;color:#fde68a;animation:msgPop .6s infinite alternate}
-@media(orientation:portrait){body.fs-mode #rotateHint{display:flex}}
-body.fs-mode #fsFloat{display:none}
-body.fs-mode #fsExit{display:block}
-body.fs-mode{background:#000;overflow:hidden}
-body.fs-mode #wrap{width:100vw;max-width:none;padding:0;margin:0}
-body.fs-mode h1,body.fs-mode .guide,body.fs-mode #joyLabel{display:none}
-/* canvas = poori screen */
-body.fs-mode canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-height:none;border:none;border-radius:0;margin:0;z-index:1;background:#000}
-/* upar floating HUD */
-body.fs-mode #topInfo{position:fixed;top:0;left:0;right:0;z-index:55;margin:0;border-radius:0;font-size:12px;padding:6px 70px 6px 8px;background:rgba(16,12,6,.82)}
-body.fs-mode #hud{position:fixed;top:34px;left:0;right:0;z-index:55;margin:0;gap:6px;padding:4px 8px;pointer-events:none}
-body.fs-mode .team{font-size:11px;padding:5px 8px;min-width:0;background:rgba(20,16,8,.82)}
-body.fs-mode .bar{height:8px}
-/* beech me floating msg toast */
-body.fs-mode #msg{position:fixed;top:118px;left:0;right:0;z-index:56;font-size:16px;min-height:0;margin:0;padding:6px 14px;text-align:center;pointer-events:none;text-shadow:1px 1px 0 #000,0 0 14px rgba(255,180,0,.5)}
-body.fs-mode #menu{z-index:70}
-body.fs-mode #exitScreen{z-index:70}
-/* neeche floating buttons */
-body.fs-mode #controls{position:fixed;bottom:0;left:0;right:0;z-index:55;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(10,8,3,.85);backdrop-filter:blur(6px);border-top:1px solid #5a451a;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-body.fs-mode #controls button{flex:0 0 auto;font-size:13px;padding:12px 12px;min-height:50px;min-width:88px}
-body.fs-mode #p2row,body.fs-mode #setPanel{position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:55;margin:0;border-radius:0;max-height:30vh;overflow:auto}
-body.fs-mode #joyBase{width:136px;height:136px;bottom:calc(160px + env(safe-area-inset-bottom));opacity:.9;z-index:56}
-body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:.9;z-index:56}
-:fullscreen #wrap{width:100vw;max-width:none}
+.opt.sel{background:linear-gradient(180deg,#4ade80,#16a34a);color:#000;border-color:#fff}
+#startBtn{width:100%;font-size:19px;background:linear-gradient(180deg,#fde047,#f59e0b);margin-top:12px;padding:14px;color:#000}
+#endScreen{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:20;align-items:center;justify-content:center}
+#endCard{background:#241b0e;border:2px solid #FFD700;border-radius:14px;padding:26px;text-align:center;max-width:400px}
 </style>
 </head>
 <body>
 <div id="wrap">
-<h1><img src="ant-icon.svg" alt="ant" width="40" height="40" style="vertical-align:middle;border-radius:10px"> Kali vs Laal — DHAMAKA Edition 💥🔊</h1>
-<div id="topInfo">
-<div>🎮 <b id="modeT">-</b> | ⚡ <b id="diffT">-</b> | ⏱ <b id="timeT">0:00</b> | ☠️ Kills: <b id="killT">0</b></div>
-<div>⭐ <b id="scoreT">0</b> | 🏆 <b id="bestT">0</b> | 🎖 Lv<b id="lvlT">1</b> | 👑 Raja HP: <b id="heroT">-</b></div>
+<h1>🏯 Samrat Yuddh — Asian Dynasty</h1>
+<div id="topbar">
+<span>🍖 <b id="resF">0</b></span><span>🪵 <b id="resW">0</b></span><span>🪙 <b id="resG">0</b></span>
+<span>👥 <b id="popT">0/0</b></span><span>🏰 <b id="ageT">-</b></span><span>⏱ <b id="timeT">0:00</b></span>
+<span id="treatyT">🕊 -</span>
+<button id="bPause" onclick="togglePause()">⏸</button>
+<button id="bSpeed" onclick="toggleSpeed()">🚀 1x</button>
+<button onclick="deselect()">✖</button>
 </div>
-<div id="hud">
-<div class="team kali"><div>⬛ Kali Fort: <span id="kaliHpT">500</span> | 🍚 <span id="kaliFood">50</span> 🪵<span id="kaliWood">0</span> 🪙<span id="kaliGold">0</span></div><div class="bar"><i id="kaliHpB" style="width:100%;background:#e5e7eb;color:#fff"></i></div><div>W:<span id="kaliW">0</span> S:<span id="kaliS">0</span> ⚕:<span id="kaliH">0</span> 🏘<span id="kaliPop">0/25</span></div></div>
-<div class="team laal"><div>🟥 Laal Fort: <span id="laalHpT">500</span> | 🍚 <span id="laalFood">50</span> 🪵<span id="laalWood">0</span> 🪙<span id="laalGold">0</span></div><div class="bar"><i id="laalHpB" style="width:100%;background:#e11d1d;color:#ff5555"></i></div><div>W:<span id="laalW">0</span> S:<span id="laalS">0</span> ⚕:<span id="laalH">0</span></div></div>
-</div>
-<div id="controls">
-<button class="btn-w" id="bWorker" onclick="spawn('kali','worker')">+Worker <kbd>W</kbd> 10🍚</button>
-<button class="btn-s" id="bSoldier" onclick="spawn('kali','soldier')">+Soldier <kbd>S</kbd> 20🍚</button>
-<button class="btn-s" id="bRunner" onclick="spawn('kali','runner')">🏃 Runner <kbd>E</kbd> 12🍚</button>
-<button class="btn-s" id="bTank" onclick="spawn('kali','tank')">🛡 Tank <kbd>Q</kbd> 35🍚</button>
-<button class="btn-w" id="bHealer" onclick="spawn('kali','healer')">⚕ Healer <kbd>H</kbd> 25🍚</button>
-<button class="btn-r" id="bRepair" onclick="repair('kali')">🔧 <kbd>R</kbd> 30🍚</button>
-<button class="btn-fun" id="ultBtn" onclick="rajaUlt()">🌀 Chakravat <kbd>U</kbd></button>
-<button class="btn-w" id="prepBtn" onclick="startBattleNow()" style="display:none;background:linear-gradient(180deg,#f87171,#dc2626);border:2px solid #fff">⚔ LADDI SHURU!</button>
-<button class="btn-fun" id="bBomb" onclick="dropBomb()">💣 Bomb <kbd>B</kbd> 40🍚</button>
-<button class="btn-fun" id="bSugar" onclick="sugarRain()">🍬 Cheeni <kbd>C</kbd> 30🍚</button>
-<button class="btn-fun" id="bJosh" onclick="josh()">⚡ Josh <kbd>J</kbd> 20🍚</button>
-<button class="btn-b" id="bAttack" onclick="orderAll('attack')">⚔ Hamla <kbd>F</kbd></button>
-<button class="btn-b" onclick="orderAll('defend')">🛡 Wapas <kbd>D</kbd></button>
-<button class="btn-fun" onclick="S.swing();S.clash(true)">🗡 Talwar <kbd>T</kbd></button>
-<button class="btn-fun" onclick="S.goliBurst(4)">🔫 Goli <kbd>G</kbd></button>
-<button class="btn-o" id="soundBtn" onclick="toggleSound()">🔊 Sound: ON</button>
-<button class="btn-o" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
-<button class="btn-o" id="speedBtn" onclick="toggleSpeed()">🚀 1x</button>
-<button class="btn-fs" id="fsBtn" onclick="toggleFullscreen()">⛶ Full Screen</button>
-<button class="btn-o" onclick="zoomBy(1.25)">🔍+</button>
-<button class="btn-o" onclick="zoomBy(0.8)">🔍−</button>
-<button class="btn-o" id="zoomBtn" onclick="resetZoom()">🔍 <span id="zoomT">100%</span></button>
-<button class="btn-o" id="followBtn" onclick="toggleFollow()">📷 Follow: ON</button>
-<button class="btn-o" onclick="toggleSettings()">⚙ Settings</button>
-<button class="btn-dl" onclick="downloadPhoto()">📸 Photo</button>
-<button class="btn-dl" onclick="downloadGame()">⬇ Download Game</button>
-<button class="btn-dl" onclick="shareGame()">📲 Share / WhatsApp</button>
-<button class="btn-restart" onclick="location.reload()">↻ Naya</button>
-<button class="btn-restart" style="background:#991b1b" onclick="exitGame()">❌ Exit <kbd>Esc</kbd></button>
-</div>
-<div id="aoeRow" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#1a1409;border:1px solid #c68a2e;border-radius:10px;padding:8px;align-items:center">
-<span style="font-weight:900">🏯 AoE:</span>
-<span id="civT" style="font-size:13px">🇮🇳 Bharat</span>
-<button class="btn-w" onclick="setFocus('food')">🍚 Khana</button>
-<button class="btn-w" onclick="setFocus('wood')">🪵 Lakdi</button>
-<button class="btn-w" onclick="setFocus('gold')">🪙 Sona</button>
-<button class="btn-s" id="bBarrack" onclick="build('barrack')">🏟 Barrack 40🪵</button>
-<button class="btn-s" id="bFarm" onclick="build('farm')">🌾 Khet 30🪵</button>
-<button class="btn-s" id="bTower" onclick="build('tower')">🗼 Burj 50🪵+20🪙</button>
-<button class="btn-s" id="bHouse" onclick="build('house')">🏠 Ghar 20🪵</button>
-<button class="btn-o" id="tSword" onclick="research('sword')">⚔ Tez Talwar 40🍚+20🪙</button>
-<button class="btn-o" id="tArmor" onclick="research('armor')">🛡 Kavach 40🪵+20🪙</button>
-<button class="btn-o" id="tSpeed" onclick="research('speed')">👟 Tez Kadam 30🍚+30🪵</button>
-<button class="btn-r" id="bAge" onclick="advanceAge()">🏰 Yug Badhao</button>
-<button class="btn-s" id="bMarket" onclick="build('market')">🛒 Market 80🪵</button>
-<button class="btn-s" id="bWonder" onclick="build('wonder')">🛕 Wonder 200🍚+300🪵+200🪙</button>
-<button class="btn-w" onclick="trade('fw')">50🍚→30🪵</button>
-<button class="btn-w" onclick="trade('wf')">40🪵→30🍚</button>
-<button class="btn-w" onclick="trade('fg')">80🍚+40🪵→30🪙</button>
-<button class="btn-w" onclick="trade('gf')">20🪙→60🍚</button>
-</div>
-<div id="p2row" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#3d0a0a;border:1px solid #e11d1d;border-radius:10px;padding:8px">
-<span style="font-weight:900">🟥 P2 Laal:</span>
-<button class="btn-s" onclick="spawn('laal','worker')">+Worker 10🍚</button>
-<button class="btn-s" onclick="spawn('laal','soldier')">+Soldier 20🍚</button>
-<button class="btn-s" onclick="spawn('laal','runner')">🏃 12🍚</button>
-<button class="btn-s" onclick="spawn('laal','tank')">🛡 35🍚</button>
-<button class="btn-w" onclick="spawn('laal','healer')">⚕ 25🍚</button>
-<button class="btn-r" onclick="repair('laal')">🔧 30🍚</button>
-</div>
-<div id="setPanel" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 8px;background:#141007;border:1px solid #8b5a2b;border-radius:10px;padding:8px;align-items:center">
-<span style="font-weight:900">⚙ Settings:</span>
-<button class="btn-o" id="fxBtn" onclick="toggleFx()">🎵 Effects: ON</button>
-<button class="btn-o" id="drumBtn" onclick="toggleDrum()">🥁 Dhol: ON</button>
-<button class="btn-o" id="vibBtn" onclick="toggleVib()">📳 Vibration: ON</button>
-<span>Mushkil:</span>
-<button class="opt" onclick="setDiff('easy')">😊</button>
-<button class="opt" onclick="setDiff('medium')">😐</button>
-<button class="opt" onclick="setDiff('hard')">😈</button>
-</div>
-<div id="exitScreen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:30;align-items:center;justify-content:center;padding:15px">
-<div style="background:#241b0e;border:2px solid #8b5a2b;border-radius:14px;padding:24px;max-width:420px;width:100%;text-align:center">
-<h2 style="margin:0 0 8px">🐜 Khel Khatm!</h2>
-<div style="color:#d8c49a;margin-bottom:6px">Thanks for playing Kali vs Laal!</div>
-<div id="exitScore" style="font-size:15px;margin:8px 0"></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">
-<button class="btn-w" onclick="resumeGame()">▶ Wapas Khelo</button>
-<button class="btn-dl" onclick="downloadGame()">⬇ Download</button>
-<button class="btn-o" onclick="location.reload()">↻ Naya Khel</button>
-<button class="btn-restart" style="background:#991b1b" onclick="closeTab()">❌ Tab Band Karo</button>
-</div>
-<div style="font-size:12px;color:#999;margin-top:10px">Esc dabakar bhi exit / wapas kar sakte ho</div>
-</div>
-</div>
-<div id="joyLabel">👑 Joystick se Raja chalao 👇</div>
-<button id="fsExit" onclick="toggleFullscreen()" title="Exit fullscreen">✕</button>
-<button id="fsFloat" onclick="toggleFullscreen()" title="Fullscreen khelo">⛶</button>
-<div id="rotateHint"><span>📱 Phone TEDHA karo 🔄<br>Landscape me sabse bada mazaa!</span></div>
-<div id="joyBase"><div id="joyStick"></div></div>
-<div id="joyBase2"><div id="joyStick2"></div></div>
 <div id="msg"></div>
-<canvas id="c" width="900" height="500"></canvas>
+<div id="cvwrap"><canvas id="cv" width="900" height="500"></canvas><canvas id="mm" width="150" height="94"></canvas></div>
+<div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
 <div class="guide">
-⏱️ <b>Training:</b> Har jung se pehle <b>20 second</b> (versus 25s) milte hain — isme <b>koi ladai nahi</b>, sirf army banao + resource jama karo (har type ka <b>1st unit MUFT</b>, income <b>2×</b>)! Training khatm ho to <b>✅ TRAINING KHATM</b> dabao. Uske baad bhi <b>koi auto-attack nahi</b> — jab army ready ho tab <b>⚔ HAMLA (F)</b> dabao, TABHI jung shuru hogi! <kbd>N</kbd> = training khatm, <kbd>F</kbd> = hamla.<br>
-<b>🔥 NAYA MAZA:</b> 👑 <b>Kali Raja</b> ko PC par <kbd>Arrow</kbd> se, <b>mobile par neeche joystick</b> se chalao! <kbd>U</kbd> = 🌀 <b>Chakravat Ult</b> (30s me ek baar, sabko udao)!<br>
-🏃 <b>Runner</b>(12🍚, tez), 🛡 <b>Tank</b>(35🍚, mota HP), ⚕ <b>Healer</b>(25🍚, sathiyon ko heal) — <kbd>E</kbd>/<kbd>Q</kbd>/<kbd>H</kbd> se banao!<br>
-🎁 <b>Power-ups</b> khana zone me girte hain: 🛡 Kavach, ❄ Freeze, 💢 Double War, 🍯 +40 khana — koi bhi Kali ant uthayegi!<br>
-🌊 <b>Waves:</b> lehar-dar-lehar Laal hamla, jeeto +⭐! 👥 <b>Versus:</b> P1 Arrow vs P2 WASD + right joystick, ek hi screen par dost se lado! 📅 <b>Daily:</b> roz naya 2-min challenge!<br>
-🏘 <b>Gaon:</b> Beech me neutral gaon hai — gaon-wale khana jama karte hain. Foji se ghar thoko: har vaar +3🍚, ghar giraya to <b>+30🍚 LOOT!</b> Gaon dobara ghar bana lega. Straw-hat walon ko pehchano!<br>
-🌙 <b>Din-Raat + 🌧 Barish</b> apne aap badalte hain — raat me mashaalon ki roshni, barish me sab slow. ⭐ Score har kill par, 🏆 best save rehta hai. 📸 Photo se jeet ki tasveer lo!<br>
-💣 <b>Bomb:</b> Rally point par dhamaka (pehle goliyan, phir DHAMAKA)! 🍬 <b>Cheeni:</b> 8 dane. ⚡ <b>Josh:</b> 8 sec speed.<br>
-🗡 <b>Talwar:</b> Soldier/Raja ki har takkar par talwar ki jhanjhanahat! 🔫 <b>Goli:</b> Fort par hamle + Bomb me goliyon ki thain-thain! <kbd>T</kbd>/<kbd>G</kbd> dabakar test karo.<br>
-📱 <b>Mobile:</b> Canvas par TAP = foji ko wahan bhejo, joystick = Raja move. Auto-attack nahi hai — ladai ke liye <b>⚔ HAMLA</b> dabana padega! Khana kam ho to button apne aap halka dikhega. <b>⛶ Full Screen</b> dabao (ya canvas double-tap / <kbd>M</kbd>) — phone tedha (landscape) karo, game sabse bada dikhega! ✕ se wapas.<br>
-🔍 <b>Zoom:</b> 🔍+ / 🔍− button, mouse wheel, ya 2-ungli pinch se <b>zoom in/out</b>! <kbd>+</kbd>/<kbd>−</kbd> keys bhi, 📷 Follow se camera Raja ke saath chalega. <kbd>V</kbd> se follow on/off.<br>
-⬇ <b>Download:</b> Upar <b>Download Game</b> dabao - ek html file milegi. Usko WhatsApp se bhejo, dost bina net ke bhi khelega! 📲 <b>Share</b> se link bhejo.
+<b>🎮 Kaise khelein (Age of Empires style):</b><br>
+🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare), Right-click = bhejo / katwao / hamla. <kbd>WASD</kbd> = camera, wheel = zoom.<br>
+📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Minimap (neeche-right) tap = camera bhejo.<br>
+👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
+🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj | 🛒 Market = trade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
+🕊 Shuru me <b>40s Taiyaari-Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b>
 </div>
 </div>
 <div id="menu"><div id="menuCard">
-<h2>🐜 Kali vs Laal - DHAMAKA Edition</h2>
-<div>Hero + Bomb + Sound ke sath! Pehle sound ON karne ke liye kahin click karna padega (browser rule).</div>
-<div class="opt-row"><b>🎮 Levels (10) — jeeto aur agla kholo:</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;margin-top:6px;color:#f0e2c0">Koi level chuno — har level me alag chunauti + tip!</div></div>
-<div class="opt-row"><b>1. Mode (free play):</b><div class="opt-btns" id="modeBtns">
-<button class="opt sel" data-m="fort">🏰 Fort Todo</button>
-<button class="opt" data-m="food">🍚 3 Min Khana Race</button>
-<button class="opt" data-m="endless">♾ Endless</button>
-<button class="opt" data-m="waves">🌊 Waves Attack</button>
-<button class="opt" data-m="versus">👥 2-Player (1 Screen)</button></div></div>
-<div class="opt-row"><b>🏯 Sabhyata (Civilization) chuno:</b><div class="opt-btns" id="civBtns">
-<button class="opt sel" data-c="bharat">🇮🇳 Bharat (kheti tez + free worker)</button>
-<button class="opt" data-c="japan">🇯🇵 Japan (hamla +15%)</button>
-<button class="opt" data-c="cheen">🇨🇳 Cheen (sasta tech + tez worker)</button></div></div>
-<div class="opt-row"><b>2. Mushkil:</b><div class="opt-btns" id="diffBtns">
+<h2>🏯 Samrat Yuddh — Asian Dynasty</h2>
+<div style="color:#d8c49a">Apni sabhyata chuno, gaon basao, foj banao, Yug badhao — dushman ka Town Center todo!</div>
+<div><b>🏯 Sabhyata:</b><div class="opt-btns" id="civBtns">
+<button class="opt sel" data-c="japan">🇯🇵 Japan (talwar +25%)</button>
+<button class="opt" data-c="china">🇨🇳 China (sasta + tez kaam)</button>
+<button class="opt" data-c="india">🇮🇳 India (mota HP + 1 worker free)</button></div></div>
+<div><b>⚡ Mushkil:</b><div class="opt-btns" id="diffBtns">
 <button class="opt" data-d="easy">😊 Easy</button>
-<button class="opt sel" data-d="medium">😐 Medium</button>
-<button class="opt" data-d="hard">😈 Hard + Laal Raja!</button></div></div>
-<div class="opt-row"><b>🎖 Level <span id="menuLvl">1</span> (<span id="menuXp">0</span> XP) | 🏆 Jeet: <span id="menuWins">0</span></b>
-<div id="shelf" style="font-size:13px;margin-top:4px"></div></div>
-<div class="opt-row"><b>3. Raja Skin:</b><div class="opt-btns" id="skinBtns">
-<button class="opt" data-s="raja" onclick="selectSkin('raja')">👑 Kali Raja</button>
-<button class="opt" data-s="gold" onclick="selectSkin('gold')">✨ Sunehra Raja</button>
-<button class="opt" data-s="fire" onclick="selectSkin('fire')">🔥 Aag Raja</button></div>
-<div style="font-size:12px;color:#cbb">✨ = 3 jeet | 🔥 = Level 4</div></div>
-<div class="opt-row"><b>🎯 Aaj ke Mission (+100⭐ har ek):</b><div id="misList" style="font-size:13px;line-height:1.7"></div></div>
-<button id="startBtn" onclick="startGame()">▶ KHEL SHURU 🔊💥</button>
-<button id="dailyBtn" onclick="startDaily()" style="width:100%;font-size:15px;background:linear-gradient(180deg,#67e8f9,#0284c7);margin-top:8px;padding:12px">📅 AAJ KA CHALLENGE</button>
-<div id="menuBest" style="margin-top:8px;font-size:14px;color:#fde68a">🏆 Best Score: 0</div>
-<div style="font-size:12px;color:#cbb;margin-top:6px">👥 Versus me: P1 Kali Raja = Arrow keys, P2 Laal Raja = WASD / 2 joystick. Foji button se banao!</div>
+<button class="opt sel" data-d="normal">😐 Normal</button>
+<button class="opt" data-d="hard">😈 Hard</button></div></div>
+<button id="startBtn" onclick="startGame()">▶ YUDDH SHURU ⚔️</button>
 </div></div>
-<div id="loot" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:80;align-items:center;justify-content:center;padding:15px">
-<div style="background:linear-gradient(180deg,#3a2a08,#1a1206);border:2px solid #FFD700;border-radius:16px;padding:24px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 60px rgba(255,200,0,.4)">
-<h2 style="margin:0 0 8px">🎉 JEET KA KHAZANA!</h2>
-<div id="lootTxt" style="color:#fde68a">Ek dabba chuno!</div>
-<div id="lootBoxes" style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
-</div>
-</div>
-</div></div>
+<div id="endScreen"><div id="endCard"><h2 id="endTitle"></h2><div id="endDesc"></div><br><button onclick="location.reload()">↻ Naya Yuddh</button></div></div>
 <script>
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-const W=900,H=500;
-let rally={x:650,y:250},foods=[],ants=[],parts=[],floats=[];
-let gameOver=false,started=false,paused=false,speed=1,auto=true,muted=false;
-let mode='fort',difficulty='medium',timeLeft=180,elapsed=0,frame=0,kills=0,killStreak=0,streakT=0;
-let joshT=0, shakeAll=0;
-let G={kali:{food:80,wood:50,gold:30,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:80,wood:50,gold:30,fort:600,maxFort:600,base:{x:820,y:250}}};
-let DIFF={easy:{ai:0.012,dmg:0.8},medium:{ai:0.02,dmg:1.0},hard:{ai:0.034,dmg:1.3}};
-let hero=null, laalRaja=null, heroRespawn=0;
-let keys={};
-// ===== NAYE SYSTEMS: units, powerups, waves, score, weather, versus =====
-const UNITS={
- worker:{hp:45, dmg:6,  speed:1.9, cost:10},
- runner:{hp:32, dmg:9,  speed:2.7, cost:12},
- soldier:{hp:110,dmg:20, speed:1.9, cost:20},
- tank:  {hp:260,dmg:26, speed:1.2, cost:35},
- healer:{hp:60, dmg:4,  speed:1.6, cost:25}
-};
-const FIGHTERS=['soldier','runner','tank'];
-let powerups=[],drops=[];
-// ===== 🏯 AOE ASIAN DYNASTY PHASE-1: Civs + Resources + Buildings + Tech =====
-const CIVS={
- bharat:{name:'🇮🇳 Bharat',foodRate:1.25,woodRate:1, dmg:1, hp:1, techCost:1, desc:'kheti tez, pehla worker muft'},
- japan:{name:'🇯🇵 Japan',foodRate:1,woodRate:1, dmg:1.15, hp:1, techCost:1, desc:'hamla +15%'},
- cheen:{name:'🇨🇳 Cheen',foodRate:1,woodRate:1.2, dmg:1, hp:1, techCost:0.7, desc:'sasta tech, tez lakdi'}
-};
-let myCiv='bharat',laalCiv='japan',workerFocus='food';
-let buildings=[],trees=[],mines=[];
-let tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
-for(let i=0;i<10;i++)trees.push({x:i<5?rnd(200,320):rnd(580,700),y:rnd(70,430),hp:120});
-mines=[{x:340,y:90,hp:200},{x:560,y:410,hp:200}];
-function civOf(t){return t==='kali'?CIVS[myCiv]:CIVS[laalCiv]}
-function techDmg(t){return (1+0.25*tech[t].sword)*civOf(t).dmg*(AGEDMG[age[t]]||1)}
-function techHp(t){return (1+0.3*tech[t].armor)*(AGEHP[age[t]]||1)}
-function techSpd(t){return 1+0.15*tech[t].speed}
-function popCap(t){let c=25;for(let b of buildings)if(b.team===t&&b.kind==='house'&&b.hp>0)c+=8;return c}
-function popUsed(t){let n=0;for(let a of ants)if(a.team===t)n++;return n}
-function setFocus(f){workerFocus=f;S.click();flash('👷 Worker focus: '+(f==='food'?'🍚 Khana':f==='wood'?'🪵 Lakdi':'🪙 Sona'))}
-function setCiv(c){myCiv=c;document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.c===c));S.click();flash(CIVS[c].name+' chuni! '+CIVS[c].desc)}
-const BCOST={barrack:{wood:40,gold:0},farm:{wood:30,gold:0},tower:{wood:50,gold:20},house:{wood:20,gold:0},market:{wood:80,gold:0},wonder:{food:200,wood:300,gold:200}};
-function build(kind){
- if(!started||gameOver)return;
- if(kind==='tower'&&age.kali<2){flash('🗼 Burj ke liye Castle Yug chahiye!');S.click();return}
- if(kind==='wonder'&&age.kali<3){flash('🛕 Wonder ke liye Imperial Yug chahiye!');S.click();return}
- if(kind==='wonder'&&buildings.some(b=>b.team==='kali'&&b.kind==='wonder'&&b.hp>0)){flash('🛕 Wonder ban gaya! Raksha karo!');return}
- const c=BCOST[kind];const g=G.kali;
- if(g.food<(c.food||0)||g.wood<(c.wood||0)||g.gold<(c.gold||0)){flash('🏯 Kam resource! Chahiye '+(c.food||0)+'🍚 '+(c.wood||0)+'🪵 '+((c.gold||0)?(c.gold||0)+'🪙':'') );S.click();return}
- g.food-=c.food||0;g.wood-=c.wood||0;g.gold-=c.gold||0;
- const b=G.kali.base;const n=buildings.filter(x=>x.team==='kali').length;
- const hp=kind==='wonder'?800:220;
- buildings.push({team:'kali',kind,x:b.x+rnd(-30,40),y:b.y-110-n*30,hp,maxHp:hp,cool:0});
- if(kind==='wonder'){wonderT.kali=90*60;showBanner('🛕 WONDER BAN GAYA! 90s bachao = JEET!');S.win()}
- S.power();float(b.x,b.y-120,'🏯 '+(kind==='barrack'?'Barrack! Foji +20% strong':kind==='farm'?'Khet! +khana':kind==='tower'?'Burj! Raksha':kind==='market'?'Market! Trade khula':kind==='wonder'?'WONDER!':'Ghar! +8 Pop'),'#ffd27f');
-}
-const TCOST={sword:{food:40,gold:20},armor:{wood:40,gold:20},speed:{food:30,wood:30}};
-function research(k){
- if(!started||gameOver)return;
- if(tech.kali[k]>=2){flash('✅ Max research ho gaya!');return}
- const c=TCOST[k];const disc=CIVS[myCiv].techCost;
- const cf=Math.ceil(c.food||0*disc),cw=Math.ceil((c.wood||0)*disc),cg=Math.ceil((c.gold||0)*disc);
- const needF=(c.food||0)*disc,needW=(c.wood||0)*disc,needG=(c.gold||0)*disc;
- if(G.kali.food<needF||G.kali.wood<needW||G.kali.gold<needG){flash('🔬 Resource kam!');S.click();return}
- G.kali.food-=needF;G.kali.wood-=needW;G.kali.gold-=needG;
- tech.kali[k]++;S.win();
- flash(k==='sword'?'⚔ Hamla +25%!':k==='armor'?'🛡 HP +30%!':'👟 Speed +15%!');
-}
-// ===== 🏰 PHASE-2: Yug (Ages) + Wonder + Market =====
-const AGES=[
- {id:'stone',icon:'🪨',name:'Stone Yug'},
- {id:'feudal',icon:'🏰',name:'Feudal Yug',cost:{food:100,wood:50}},
- {id:'castle',icon:'🏯',name:'Castle Yug',cost:{food:150,wood:100,gold:50}},
- {id:'imperial',icon:'👑',name:'Imperial Yug',cost:{food:250,wood:150,gold:100}}
-];
-let age={kali:0,laal:0};
-let wonderT={kali:0,laal:0};
-const AGEDMG=[1,1.1,1.25,1.45],AGEHP=[1,1.1,1.25,1.5];
-function ageName(t){return AGES[age[t]].icon+' '+AGES[age[t]].name}
-function advanceAge(){
- if(!started||gameOver)return;
- if(age.kali>=3){flash('👑 Max Yug!');return}
- const c=AGES[age.kali+1].cost;
- if(G.kali.food<(c.food||0)||G.kali.wood<(c.wood||0)||G.kali.gold<(c.gold||0)){flash('🏰 Yug ke liye '+(c.food||0)+'🍚 '+(c.wood||0)+'🪵 '+(c.gold||0)+'🪙 chahiye!');S.click();return}
- G.kali.food-=c.food||0;G.kali.wood-=c.wood||0;G.kali.gold-=c.gold||0;
- age.kali++;S.win();shakeAll=6;
- showBanner(AGES[age.kali].icon+' '+AGES[age.kali].name.toUpperCase()+'! +HP +DMG!');
- float(G.kali.base.x,G.kali.base.y-130,AGES[age.kali].icon+' '+AGES[age.kali].name+'!','#FFD700');
-}
-function laalAgeUp(){
- if(age.laal>=3)return;
- const c=AGES[age.laal+1].cost;
- if(G.laal.food>=(c.food||0)*1.2&&G.laal.wood>=(c.wood||0)*1.2&&G.laal.gold>=(c.gold||0)*1.2){
-  G.laal.food-=c.food||0;G.laal.wood-=c.wood||0;G.laal.gold-=c.gold||0;
-  age.laal++;float(G.laal.base.x,G.laal.base.y-130,AGES[age.laal].icon+' Laal '+AGES[age.laal].name+'!','red');
- }
-}
-function trade(kind){
- if(!started||gameOver)return;
- const hasMarket=buildings.some(b=>b.team==='kali'&&b.kind==='market'&&b.hp>0);
- if(!hasMarket){flash('🛒 Pehle Market banao (80🪵)!');S.click();return}
- const g=G.kali;
- if(kind==='fw'&&g.food>=50){g.food-=50;g.wood+=30;S.eat();float(g.base.x,g.base.y-100,'50🍚 → +30🪵','#a3e635')}
- else if(kind==='wf'&&g.wood>=40){g.wood-=40;g.food+=30;S.eat();float(g.base.x,g.base.y-100,'40🪵 → +30🍚','#4ade80')}
- else if(kind==='fg'&&g.food>=80&&g.wood>=40){g.food-=80;g.wood-=40;g.gold+=30;S.power();float(g.base.x,g.base.y-100,'+30🪙 Sona!','#FFD700')}
- else if(kind==='gf'&&g.gold>=20){g.gold-=20;g.food+=60;S.eat();float(g.base.x,g.base.y-100,'20🪙 → +60🍚','#4ade80')}
- else{flash('🛒 Resource kam!');S.click();return}
-}
-// ===== ⏱️ TAIYAARI PHASE (army banane ka time) =====
-let inPrep=false,prepT=0,prepLen=20;
-let warStarted=false;
-let freeRoster={worker:1,soldier:1,runner:1,tank:1,healer:1};
-function beginPrep(len){
- inPrep=true;const secs=len||20;prepLen=secs*60;prepT=prepLen;
- warStarted=false;
- freeRoster={worker:1,soldier:1,runner:1,tank:1,healer:1};
- // dono taraf ka muft starting roster (fair)
- ['worker','soldier','runner','tank','healer'].forEach(t=>{if(freeRoster[t]>0)spawn('laal',t,true)});
- const pb=document.getElementById('prepBtn');if(pb)pb.style.display='inline-block';
- showBanner('⏱️ TRAINING TIME '+secs+'s — Army taiyaar karo!');
- flash('⏱️ Training: koi ladai nahi! Army banao (har type 1 MUFT, 2× income). Ready ho to ⚔ HAMLA SHURU dabao!');
-}
-function startBattleNow(){
- if(!inPrep)return;
- prepT=0;inPrep=false;S.power();vib(40);shakeAll=6;
- if(mode==='versus'){warStarted=true;showBanner('⚔ HAMLA SHURU!');flash('⚔ AB HAMLA! Dono lado!')}
- else{showBanner('✅ TRAINING KHATM!');flash('✅ Army taiyaar! Hamla ke liye ⚔ HAMLA button dabao!')}
-}
-function armyPower(t){let p=0;for(const a of ants){if(a.team!==t||a.type==='villager')continue;p+=(a.type==='hero'?4:1)+a.maxHp/40+a.dmg/4}return Math.round(p)}
-let shieldT=0,freezeT=0,doubleT=0;
-// ===== GAON: ghar + gaon-wale + anaaj bhandar =====
-let huts=[
- {x:380,y:150,hp:220,maxHp:220,ph:rnd(0,6.28)},
- {x:450,y:112,hp:220,maxHp:220,ph:rnd(0,6.28)},
- {x:520,y:150,hp:220,maxHp:220,ph:rnd(0,6.28)}
-];
-let hutQueue=[],villageStore=0;
-function destroyHut(h,team){
- huts.splice(huts.indexOf(h),1);
- S.boom();shakeAll=8;vib(60);
- burst(h.x,h.y,'#8b5a2b',22,4);burst(h.x,h.y,'#ffd27f',12,3);puff(h.x,h.y,'rgba(80,60,30,0.7)',10);
- for(let i=0;i<6;i++)foods.push({x:h.x+rnd(-45,45),y:h.y+rnd(-32,32),r:6,ph:rnd(0,6.28)});
- G[team].food+=30;addScore(40);
- showBanner('🏘 GHAR TOOT GAYA! +30🍚 +40⭐');
- float(h.x,h.y-60,'+30 🍚 LOOT!','#ffd27f');
- hutQueue.push({x:h.x,y:h.y,t:3600});
-}
-function mkVillager(h){
- return {team:'village',type:'villager',x:h.x+rnd(-15,15),y:h.y+rnd(-8,12),hp:50,maxHp:50,dmg:4,speed:1.7,carry:false,cool:0,tx:null,ty:null,boost:0,face:rnd(0,6.28),px:h.x,py:h.y,ph:rnd(0,6.28)};
-}
-let waveN=0,waveState='break',waveT=480,waveLeft=0,waveTick=0;
-let score=0,high=0,daily=null,slowmoT=0,timeScale=1;
-let bannerTxt='',bannerT=0;
-let dayT=0.15,nightF=0,rainT=0,rainDrops=[];
-for(let i=0;i<70;i++)rainDrops.push({x:rnd(0,W),y:rnd(0,H),sp:rnd(7,13)});
-try{high=parseInt(localStorage.getItem('klHigh')||'0')||0}catch(e){}
-let fxOn=true,drumOn=true,vibOn=true;
-function vib(p){if(!vibOn)return;try{if(navigator.vibrate)navigator.vibrate(p)}catch(e){}}
-function showBanner(t){bannerTxt=t;bannerT=160}
-function addScore(n){score+=n;misBest=Math.max(misBest,score);misCheck();try{if(score>high){high=score;localStorage.setItem('klHigh',String(high))}}catch(e){}}
-// ===== ADDICTION: XP/Level, Missions, Skins, Trophies, Loot =====
-const LV=[0,200,500,1000,1700,2600,4000,6000];
-let xp=0,level=1,totalWins=0,winsByMode={},SKIN='raja';
-let pendingBonus={food:0,shield:0};
-let misProg={kill:0,win:0},misBest=0,misDone={};
-const MS=[
- {id:'kill20',txt:'⚔ 20 kills karo',need:20},
- {id:'win1',txt:'🏆 1 jeet haasil karo',need:1},
- {id:'score500',txt:'⭐ Ek game me 500 score',need:500}
-];
-try{
- xp=parseInt(localStorage.getItem('klXP')||'0')||0;
- totalWins=parseInt(localStorage.getItem('klWins')||'0')||0;
- winsByMode=JSON.parse(localStorage.getItem('klWinsByMode')||'{}');
- SKIN=localStorage.getItem('klSkin')||'raja';
- pendingBonus=JSON.parse(localStorage.getItem('klBonus')||'{"food":0,"shield":0}');
- const md=JSON.parse(localStorage.getItem('klMis')||'null');
- if(md&&md.date===todayStr()){misProg=md.prog;misDone=md.done||{}}
-}catch(e){}
-function getLevel(x){let l=1;for(let i=0;i<LV.length;i++)if(x>=LV[i])l=i+1;return l}
-level=getLevel(xp);
-function gainXP(n){
- const before=getLevel(xp);xp+=n;
- try{localStorage.setItem('klXP',String(xp))}catch(e){}
- const after=getLevel(xp);level=after;
- if(after>before){showBanner('🎖 LEVEL UP! Lv '+after+'!');S.win();float(450,280,'🎖 LEVEL '+after+'! Agle khel me +'+Math.min(30,(after-1)*5)+'🍚 bonus!','#FFD700')}
-}
-function misVal(id){return id==='kill20'?misProg.kill:id==='win1'?misProg.win:misBest}
-function misCheck(){
- let changed=false;
- for(let m of MS){
-  if(!misDone[m.id]&&misVal(m.id)>=m.need){
-   misDone[m.id]=1;changed=true;addScoreSilent(100);
-   showBanner('🎯 MISSION: '+m.txt+' ✅ +100⭐');S.win();
-  }
- }
- if(changed)misSave();
-}
-function addScoreSilent(n){score+=n;try{if(score>high){high=score;localStorage.setItem('klHigh',String(high))}}catch(e){}}
-function misSave(){try{localStorage.setItem('klMis',JSON.stringify({date:todayStr(),prog:misProg,done:misDone}))}catch(e){}}
-function recordWin(md){
- totalWins++;winsByMode[md]=(winsByMode[md]||0)+1;
- misProg.win++;
- if(currentLevel!==null&&currentLevel<LEVELS.length-1&&unlocked<currentLevel+1){unlocked=currentLevel+1;try{localStorage.setItem('klLevel',String(unlocked))}catch(e){}float(450,260,'🔓 LEVEL '+(unlocked+1)+' KHUL GAYA!','#FFD700')}
- try{localStorage.setItem('klWins',String(totalWins));localStorage.setItem('klWinsByMode',JSON.stringify(winsByMode))}catch(e){}
- misCheck();misSave();
- gainXP(score);
-}
-
-// ===== DETAILING: static decor + cached background + craters + motes =====
-let craters=[],slashes=[],motes=[],cloudShadows=[];
-function rnd(a,b){return a+Math.random()*(b-a)}
-// deterministic decor
-let pebbles=[],grassTufts=[],flowers=[],leafPatches=[];
-for(let i=0;i<90;i++)pebbles.push({x:rnd(0,W),y:rnd(0,H),r:rnd(1.5,5),s:rnd(0,6.28),c:['#8a7a5a','#6f6247','#a08c66'][i%3]});
-for(let i=0;i<70;i++)grassTufts.push({x:rnd(0,W),y:rnd(0,H),s:rnd(0.6,1.4),ph:rnd(0,6.28),dark:Math.random()<0.4});
-for(let i=0;i<14;i++)flowers.push({x:rnd(20,W-20),y:rnd(20,H-20),c:['#ff6b9d','#ffd93d','#ffffff','#c084fc'][i%4],ph:rnd(0,6.28)});
-for(let i=0;i<26;i++)leafPatches.push({x:rnd(0,W),y:rnd(0,H),r:rnd(8,26),a:rnd(0.04,0.1)});
-let shrooms=[],clovers=[];
-for(let i=0;i<10;i++)shrooms.push({x:rnd(30,W-30),y:rnd(60,H-20),s:rnd(0.7,1.3),ph:rnd(0,6.28)});
-for(let i=0;i<22;i++)clovers.push({x:rnd(0,W),y:rnd(0,H),s:rnd(0.7,1.2),ph:rnd(0,6.28)});
-for(let i=0;i<28;i++)motes.push({x:rnd(0,W),y:rnd(0,H),vx:rnd(-0.2,0.3),vy:rnd(-0.15,0.15),r:rnd(1,2.5),ph:rnd(0,6.28)});
-for(let i=0;i<3;i++)cloudShadows.push({x:rnd(0,W),y:rnd(0,H),rx:rnd(150,260),ry:rnd(50,80),vx:rnd(0.2,0.5)});
-
-// pre-render ground
-const bgC=document.createElement('canvas');bgC.width=W;bgC.height=H;
-(function paintBG(){
- const b=bgC.getContext('2d');
- const g=b.createRadialGradient(W/2,H*0.35,80,W/2,H/2,620);
- g.addColorStop(0,'#c4e58a');g.addColorStop(0.45,'#9dc25e');g.addColorStop(0.8,'#7aa744');g.addColorStop(1,'#5c7f2e');
- b.fillStyle=g;b.fillRect(0,0,W,H);
- // mottled patches
- for(let p of leafPatches){b.fillStyle=`rgba(60,90,20,${p.a})`;b.beginPath();b.ellipse(p.x,p.y,p.r,p.r*0.6,0,0,7);b.fill()}
- // noise speckle
- for(let i=0;i<900;i++){b.fillStyle=`rgba(${Math.random()<0.5?0:255},${Math.random()<0.5?60:255},20,0.05)`;b.fillRect(rnd(0,W),rnd(0,H),2,2)}
- // side soil (fort grounds)
- for(let s of [{x:0,w:190},{x:W-190,w:190}]){
-  const sg=b.createLinearGradient(s.x,0,s.x+s.w,0);
-  sg.addColorStop(0,'rgba(90,60,25,0.55)');sg.addColorStop(0.5,'rgba(120,85,40,0.45)');sg.addColorStop(1,'rgba(90,60,25,0)');
-  b.fillStyle=sg;b.fillRect(s.x,0,s.w,H);
- }
- // central dirt highway
- b.save();
- b.fillStyle='#c9a86a';b.strokeStyle='#8b5a2b';b.lineWidth=4;
- b.beginPath();
- b.moveTo(190,120);b.bezierCurveTo(380,140,520,360,710,380);b.lineTo(710,300);b.bezierCurveTo(520,280,380,180,190,200);b.closePath();
- b.fill();b.stroke();
- b.fillStyle='rgba(0,0,0,0.08)';
- for(let i=0;i<40;i++){b.beginPath();b.ellipse(rnd(220,680),rnd(150,370),rnd(3,9),rnd(2,5),rnd(0,3),0,7);b.fill()}
- b.restore();
- // khana zone
- b.save();
- b.strokeStyle='#3d5a1a';b.lineWidth=3;b.setLineDash([10,7]);
- b.strokeRect(290,40,320,420);b.setLineDash([]);
- b.fillStyle='rgba(61,90,26,0.9)';b.font='bold 14px sans-serif';b.fillText('🍚 KHANA ZONE',382,60);
- // inner soft glow
- b.fillStyle='rgba(255,255,200,0.10)';b.fillRect(292,64,316,394);
- b.restore();
- // pebbles
- for(let p of pebbles){b.save();b.translate(p.x,p.y);b.rotate(p.s);b.fillStyle='rgba(0,0,0,0.25)';b.beginPath();b.ellipse(1,2,p.r,p.r*0.7,0,0,7);b.fill();b.fillStyle=p.c;b.beginPath();b.ellipse(0,0,p.r,p.r*0.7,0,0,7);b.fill();b.fillStyle='rgba(255,255,255,0.5)';b.beginPath();b.ellipse(-p.r*0.3,-p.r*0.25,p.r*0.3,p.r*0.2,0,0,7);b.fill();b.restore()}
-})();
-
-// ===== SOUND =====
+'use strict';
+// ============ ENGINE CORE ============
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const mm=document.getElementById('mm'),mmc=mm.getContext('2d');
+const VW=900,VH=500;               // viewport px
+const W=1600,H=1000;               // world size
+let view={x:300,y:750,z:0.85};
+function clampView(){const hw=VW/2/view.z,hh=VH/2/view.z;view.x=Math.max(hw,Math.min(W-hw,view.x));view.y=Math.max(hh,Math.min(H-hh,view.y));view.z=Math.max(0.45,Math.min(1.6,view.z))}
+function s2w(sx,sy){const r=cv.getBoundingClientRect();const bx=(sx-r.left)*VW/r.width,by=(sy-r.top)*VH/r.height;return {x:view.x+(bx-VW/2)/view.z,y:view.y+(by-VH/2)/view.z}}
+// ============ AUDIO (halka) ============
 let AC=null;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
-function tone(f,d,type='square',v=0.15,slide=0){
- if(muted||!fxOn)return;const c=ac();if(!c)return;
- const o=c.createOscillator(),g=c.createGain();
- o.type=type;o.frequency.setValueAtTime(f,c.currentTime);
- if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),c.currentTime+d);
- g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
- o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);
-}
-function noise(d=0.3,v=0.3){
- if(muted||!fxOn)return;const c=ac();if(!c)return;
- const b=c.createBuffer(1,c.sampleRate*d,c.sampleRate),dt=b.getChannelData(0);
- for(let i=0;i<dt.length;i++)dt[i]=(Math.random()*2-1)*(1-i/dt.length);
- const s=c.createBufferSource(),g=c.createGain();s.buffer=b;g.gain.value=v;
- const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=800;
- s.connect(f);f.connect(g);g.connect(c.destination);s.start();
-}
-// band-pass noise (swoosh / clang body)
-function bpNoise(d=0.15,v=0.2,f0=1200,f1=3000){
- if(muted||!fxOn)return;const c=ac();if(!c)return;
- const b=c.createBuffer(1,c.sampleRate*d,c.sampleRate),dt=b.getChannelData(0);
- for(let i=0;i<dt.length;i++)dt[i]=(Math.random()*2-1)*(1-i/dt.length);
- const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();
- s.buffer=b;f.type='bandpass';f.Q.value=1.2;
- f.frequency.setValueAtTime(f0,c.currentTime);
- f.frequency.exponentialRampToValueAtTime(Math.max(40,f1),c.currentTime+d);
- g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
- s.connect(f);f.connect(g);g.connect(c.destination);s.start();
-}
-// metallic clang: 2-3 detuned high oscillators + fast decay
-function metal(f=3200,d=0.14,v=0.10){
- if(muted||!fxOn)return;const c=ac();if(!c)return;
- [1,1.51,2.32].forEach((m,i)=>{
-  const o=c.createOscillator(),g=c.createGain();
-  o.type=i===0?'triangle':'square';
-  o.frequency.setValueAtTime(f*m*(0.98+Math.random()*0.04),c.currentTime);
-  g.gain.setValueAtTime(v/(i+1),c.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
-  o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);
- });
-}
-// awaaz-spam rokne ke liye throttle
-let lastSword=0,lastSwing=0,lastPew=0;
-const S={
- click(){tone(600,0.07,'square',0.08)},
- spawn(){tone(300,0.12,'square',0.12,200)},
- eat(){tone(880,0.08,'sine',0.15,-300);setTimeout(()=>tone(1200,0.08,'sine',0.12,-400),70)},
- hit(){tone(200,0.08,'sawtooth',0.1,-100)},
- die(){tone(400,0.2,'sawtooth',0.12,-350)},
- boom(){noise(0.5,0.5);tone(80,0.5,'sine',0.3,-40)},
- power(){tone(500,0.1,'square',0.12,500);setTimeout(()=>tone(750,0.12,'square',0.12,500),100)},
- heal(){tone(400,0.2,'sine',0.12,400)},
- win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.15),i*150))},
- lose(){[400,300,200,120].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.14),i*180))},
- drum(){tone(70,0.12,'sine',0.07,-20)},
- // ===== 🗡 TALWAR =====
- swing(){const n=performance.now();if(n-lastSwing<90)return;lastSwing=n;bpNoise(0.14,0.16,600,3200)},
- clash(big){const n=performance.now();if(n-lastSword<80)return;lastSword=n;
-  bpNoise(0.1,0.22,2500,5000);metal(big?2600:3200+Math.random()*800,0.16,big?0.14:0.10);
-  tone(big?180:240,0.07,'sawtooth',0.08,-80)},
- unsheathe(){bpNoise(0.18,0.12,4000,1500);metal(4200,0.1,0.06)},
- // ===== 🔫 GOLI =====
- goli(){const n=performance.now();if(n-lastPew<85)return;lastPew=n;
-  tone(1400+Math.random()*400,0.11,'square',0.10,-1100);bpNoise(0.06,0.10,3000,800)},
- goliBurst(n=4){for(let i=0;i<n;i++)setTimeout(()=>{lastPew=0;S.goli()},i*75)},
- cannon(){tone(65,0.35,'sine',0.32,-25);noise(0.3,0.35);metal(900,0.2,0.08);
-  setTimeout(()=>S.goli(),120)},
- warHorn(){tone(140,0.4,'sawtooth',0.16,60);setTimeout(()=>tone(185,0.4,'sawtooth',0.16,40),120);setTimeout(()=>S.swing(),250)},
- thunder(){noise(0.7,0.4);tone(55,0.8,'sine',0.3,-20)},
- ult(){S.goliBurst(3);setTimeout(()=>S.boom(),200);S.clash(true);setTimeout(()=>S.clash(true),150)},
- heart(){tone(62,0.12,'sine',0.25);setTimeout(()=>tone(52,0.16,'sine',0.25),170)}
+function tone(f,d,type,v){try{if(!AC)return;const c=ac();const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}catch(e){}}
+const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))},age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
+// ============ DATA ============
+const CIVS={
+ japan:{name:'🇯🇵 Japan',swordDmg:1.25,gather:1,cost:1,desc:'Samurai talwar +25%'},
+ china:{name:'🇨🇳 China',swordDmg:1,gather:1.1,cost:0.9,desc:'sab 10% sasta, kaam 10% tez'},
+ india:{name:'🇮🇳 India',swordDmg:1,gather:1,cost:1,hp:1.2,extraVill:1,desc:'mota HP + 1 muft worker'}
 };
-setInterval(()=>{if(started&&!paused&&!gameOver&&!muted&&drumOn)S.drum()},500);
-function toggleSound(){muted=!muted;document.getElementById('soundBtn').textContent=muted?'🔇 Sound: OFF':'🔊 Sound: ON';if(!muted)S.click()}
-// ===== SETTINGS + PHOTO + DAILY =====
-function toggleSettings(){const p=document.getElementById('setPanel');const open=p.style.display==='none'||!p.style.display;p.style.display=open?'flex':'none';if(open)S.click()}
-function toggleFx(){fxOn=!fxOn;document.getElementById('fxBtn').textContent=fxOn?'🎵 Effects: ON':'🎵 Effects: OFF';if(fxOn)S.click()}
-function toggleDrum(){drumOn=!drumOn;document.getElementById('drumBtn').textContent=drumOn?'🥁 Dhol: ON':'🥁 Dhol: OFF';S.click()}
-function toggleVib(){vibOn=!vibOn;document.getElementById('vibBtn').textContent=vibOn?'📳 Vibration: ON':'📳 Vibration: OFF';S.click();vib(40)}
-function setDiff(d){difficulty=d;document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.d===d));document.getElementById('diffT').textContent=d;S.click();flash('⚡ Mushkil: '+d)}
-function downloadPhoto(){
- try{
-  S.click();
-  const a=document.createElement('a');
-  a.href=cv.toDataURL('image/png');
-  a.download='kali-laal-score'+score+'.png';
-  document.body.appendChild(a);a.click();
-  setTimeout(()=>a.remove(),800);
-  flash('📸 Photo download ho gayi! Score: '+score);
- }catch(e){flash('Photo me error!')}
-}
-function todayStr(){return new Date().toISOString().slice(0,10)}
-function startDaily(){
- ac();
- const t=todayStr();daily=t;mode='food';timeLeft=120;currentLevel=null;wavesToWin=0;laalStrat='balanced';
- difficulty=['easy','medium','hard'][new Date().getDate()%3];
- document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));
- document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.d===difficulty));
- S.power();started=true;
- document.getElementById('menu').style.display='none';
- document.getElementById('modeT').textContent='Daily 📅';
- document.getElementById('diffT').textContent=difficulty;
- applyBonus();
- beginPrep(15);
- flash('📅 AAJ KA CHALLENGE! 2 min khana race! Jeeto +200 bonus!');
-}
-// ===== SKINS: Raja ke naye roop =====
-const SKINS=[
- {id:'raja',name:'👑 Kali Raja',needTxt:'shuru se',ok:()=>true},
- {id:'gold',name:'✨ Sunehra Raja',needTxt:'3 jeet',ok:()=>totalWins>=3},
- {id:'fire',name:'🔥 Aag Raja',needTxt:'Level 4',ok:()=>level>=4}
+const AGES=[
+ {icon:'🔍',name:'Discovery'},
+ {icon:'🏰',name:'Colonial',cost:{f:200}},
+ {icon:'🏯',name:'Fortress',cost:{f:400,w:200}},
+ {icon:'🏭',name:'Industrial',cost:{f:600,w:400,g:200}},
+ {icon:'👑',name:'Imperial',cost:{f:1000,w:600,g:400}}
 ];
-function skinCrown(){return SKIN==='fire'?'#ff4400':SKIN==='gold'?'#fff200':'#FFD700'}
-function skinGlow(kali){if(SKIN==='fire')return '#ff5500';if(SKIN==='gold')return '#fff200';return kali?'#FFD700':'#ff2222'}
-function selectSkin(id){const s=SKINS.find(x=>x.id===id);if(!s)return;if(!s.ok()){flash('🔒 '+s.name+': pehle '+s.needTxt+' chahiye!');S.click();return}SKIN=id;try{localStorage.setItem('klSkin',id)}catch(e){}S.power();refreshSkinBtns();flash(s.name+' taiyaar! 👑')}
-function refreshSkinBtns(){document.querySelectorAll('#skinBtns .opt').forEach(b=>{const s=SKINS.find(x=>x.id===b.dataset.s);if(!s)return;b.classList.toggle('sel',SKIN===b.dataset.s);b.textContent=(s.ok()?'✅ ':'🔒 ')+s.name})}
-// ===== VICTORY LOOT BOX =====
-let lootRewards=[];
-function showLoot(){
- const r=[{t:'⭐ +150 Score',f:()=>addScoreSilent(150)},{t:'🍚 Agle khel +60 khana',f:()=>{pendingBonus.food+=60;saveBonus()}},{t:'🛡 Agle khel 15s kavach',f:()=>{pendingBonus.shield+=900;saveBonus()}}];
- for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const tmp=r[i];r[i]=r[j];r[j]=tmp}
- lootRewards=r;
- document.getElementById('lootBoxes').innerHTML=r.map((x,i)=>'<button class="opt" style="font-size:20px;padding:14px 18px" onclick="pickLoot('+i+')">🎁</button>').join('');
- document.getElementById('lootTxt').textContent='🎉 JEET KA KHAZANA! Ek dabba chuno!';
- document.getElementById('loot').style.display='flex';
- S.win();
+const UNITS={
+ villager:{hp:40,dmg:3,range:20,speed:2.1,cost:{f:50},time:10*60,icon:'👷'},
+ sword:{hp:95,dmg:12,range:26,speed:2.3,cost:{f:60,w:20},time:10*60,icon:'🗡️',minAge:1},
+ archer:{hp:65,dmg:9,range:175,speed:2.3,cost:{f:50,w:40},time:12*60,icon:'🏹',minAge:1},
+ knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'🐎',minAge:2}
+};
+const BLD={
+ tc:{name:'Town Center',w:96,h:72,hp:1500,icon:'🏰'},
+ house:{name:'Ghar',w:46,h:38,hp:350,cost:{w:50},time:12*60,pop:5,icon:'🏠'},
+ barracks:{name:'Barracks',w:84,h:62,hp:800,cost:{w:150},time:20*60,minAge:1,icon:'🏟️'},
+ market:{name:'Market',w:72,h:52,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'}
+};
+const GATHER_T=48,CARRY=15;
+// ============ STATE ============
+let units=[],blds=[],nodes=[],parts=[],floats=[];
+let res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
+let age={P1:0,AI:0},pop={P1:0,AI:0};
+let myCiv='japan',aiCiv='china',difficulty='normal';
+let started=false,paused=false,speed=1,gameOver=false,frame=0;
+let treaty=40*60; // 40s sandhi
+let sel={units:[],bld:null},placing=null,uid=1,bid=1;
+let aiPlan={t:0,attackSent:0};
+function rnd(a,b){return a+Math.random()*(b-a)}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function msg(t){document.getElementById('msg').textContent=t}
+function float(x,y,t,c){floats.push({x,y,t,c:c||'#fff',life:80})}
+function civOf(t){return t==='P1'?CIVS[myCiv]:CIVS[aiCiv]}
+function ageMult(i){return 1+0.15*i}
+// ============ MAP ============
+let decor=[];
+function farFromBases(x,y){return Math.hypot(x-250,y-800)>260&&Math.hypot(x-1350,y-200)>260}
+function genMap(){
+ nodes=[];decor=[];
+ for(let i=0;i<26;i++)decor.push({x:rnd(0,W),y:rnd(0,H),k:i%3});
+ // ped (lakdi)
+ for(let c=0;c<7;c++){const cx=rnd(300,1300),cy=rnd(150,850);if(!farFromBases(cx,cy)){c--;continue}
+  for(let i=0;i<12;i++)nodes.push({kind:'wood',x:cx+rnd(-90,90),y:cy+rnd(-70,70),amt:100,tag:0})}
+ // jungle-meva (khana, base ke paas)
+ [[250,680],[360,830],[1350,320],[1240,170]].forEach(p=>{for(let i=0;i<5;i++)nodes.push({kind:'food',x:p[0]+rnd(-60,60),y:p[1]+rnd(-50,50),amt:250,tag:0})});
+ // shikaar (haran, beech me)
+ for(let i=0;i<6;i++)nodes.push({kind:'hunt',x:rnd(600,1000),y:rnd(350,650),amt:120,tag:0});
+ // sona (4 khaan)
+ [[700,300],[900,700],[500,500],[1100,500]].forEach(p=>nodes.push({kind:'gold',x:p[0],y:p[1],amt:800,tag:0}));
 }
-function pickLoot(i){const r=lootRewards[i];if(!r)return;r.f();lootRewards=[];document.getElementById('lootTxt').textContent='💰 Mila: '+r.t+'!';document.getElementById('lootBoxes').innerHTML='<button class="btn-w" onclick="closeLoot()">✅ Le liya!</button>';S.power()}
-function closeLoot(){document.getElementById('loot').style.display='none'}
-function saveBonus(){try{localStorage.setItem('klBonus',JSON.stringify(pendingBonus))}catch(e){}}
-// ===== RANDOM MID-GAME EVENTS (versus me nahi) =====
-function triggerEvent(){
- if(mode==='versus'||gameOver||!started||paused)return;
- const ev=Math.floor(Math.random()*3);
- if(ev===0){for(let i=0;i<5;i++)foods.push({x:rnd(340,560),y:rnd(90,410),r:9,golden:true,ph:rnd(0,6.28)});showBanner('🌟 SUNEHRI BARISH!');S.power()}
- else if(ev===1){for(let i=0;i<3;i++)spawn('laal','runner',true);showBanner('⚠️ LAAL GHAT! Peeche dekho!');S.warHorn();shakeAll=6}
- else{doubleT=900;showBanner('💢 DOUBLE FRENZY 15s!');S.power()}
+// ============ SPAWN / TRAIN / BUILD ============
+function mkUnit(team,type,x,y){
+ const U=UNITS[type],cv2=civOf(team),am=ageMult(age[team]);
+ let hp=U.hp*am;if(cv2.hp)hp*=cv2.hp;
+ let dmg=U.dmg*am;if(type==='sword')dmg*=cv2.swordDmg;
+ if(team==='AI'){const m=difficulty==='easy'?0.85:difficulty==='hard'?1.15:1;hp*=m;dmg*=m}
+ const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0};
+ units.push(u);return u;
 }
-// ===== DOWNLOAD + SHARE (mobile ke liye) =====
-function downloadGame(){
- try{
-  S.click();
-  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
-  const blob=new Blob([html],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='kali-laal-chunti-game.html';
-  document.body.appendChild(a);a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);
-  flash('⬇ Download ho gaya! File ko WhatsApp par bhejo, offline bhi chalega!');
- }catch(e){flash('Download me error, browser alag try karo')}
+function popCap(t){let c=10;for(const b of blds)if(b.team===t&&b.kind==='house'&&b.done)c+=5;return Math.min(60,c)}
+function popUsed(t){let n=0;for(const u of units)if(u.team===t)n++;return n}
+function canAfford(t,cost){const r=res[t],cv2=t==='P1'?civOf(t):civOf(t);const m=cv2.cost;for(const k in cost)if(r[k]<Math.ceil(cost[k]*m))return false;return true}
+function pay(t,cost){const r=res[t],m=civOf(t).cost;for(const k in cost)r[k]-=Math.ceil(cost[k]*m)}
+function trainUnit(team,bldId,type){
+ const b=blds.find(x=>x.id===bldId);if(!b||!b.done)return;
+ const U=UNITS[type];
+ if(type!=='villager'&&age[team]<(U.minAge||0)){if(team==='P1')msg('⬆️ Pehle '+AGES[U.minAge].name+' Yug chahiye!');return}
+ if(popUsed(team)>=popCap(team)){if(team==='P1')msg('🏠 Abaadi full! Ghar banao!');return}
+ if(!canAfford(team,U.cost)){if(team==='P1')msg('💰 Resource kam!');return}
+ if(b.queue.length>=5)return;
+ pay(team,U.cost);b.queue.push({type,t:U.time});if(team==='P1')S.click();
 }
-async function shareGame(){
- const data={title:'Kali vs Laal Chunti Game',text:'🐜 Mera game khelo! Kali vs Laal Chunti! Mera score: '+score+' ⭐ Kya tum hara sakte ho? ',url:location.href};
- try{
-  if(navigator.share){await navigator.share(data);S.power()}
-  else if(navigator.clipboard){await navigator.clipboard.writeText(data.text+data.url);flash('📋 Link copy ho gaya! WhatsApp me paste karke bhejo!');S.power()}
-  else{prompt('Ye link copy karke bhejo:',location.href)}
- }catch(e){}
+function tryAge(team){
+ if(age[team]>=4)return;
+ const c=AGES[age[team]+1].cost;if(!canAfford(team,c)){if(team==='P1')msg('⬆️ Yug ke liye resource kam!');return}
+ pay(team,c);age[team]++;S.age();
+ float(team==='P1'?250:1350,team==='P1'?700:150,AGES[age[team]].icon+' '+AGES[age[team]].name+'!','#FFD700');
+ msg(civOf(team).name+' → '+AGES[age[team]].icon+' '+AGES[age[team]].name+'!');
 }
-// ===== MOBILE JOYSTICK (Raja chalane ke liye) =====
-let joyDX=0,joyDY=0,joy2DX=0,joy2DY=0;
-function bindJoy(baseId,stId,set){
- const base=document.getElementById(baseId),st=document.getElementById(stId);
- if(!base||!st)return;
- function setStick(dx,dy){const bw=base.clientWidth||120,sw=st.clientWidth||50;const R=Math.max(10,bw/2-sw/2-4);st.style.left=(bw/2-sw/2+dx*R)+'px';st.style.top=(bw/2-sw/2+dy*R)+'px'}
- setStick(0,0);
- function handle(e){
-  const r=base.getBoundingClientRect();
-  const cx=r.left+r.width/2,cy=r.top+r.height/2;
-  const t=e.touches?e.touches[0]:e;
-  let dx=(t.clientX-cx)/(r.width/2),dy=(t.clientY-cy)/(r.height/2);
-  let l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
-  set(dx,dy);setStick(dx,dy);
+function validSpot(x,y,kind){
+ const B=BLD[kind];
+ if(x<B.w/2+20||x>W-B.w/2-20||y<B.h/2+20||y>H-B.h/2-20)return false;
+ for(const b of blds)if(Math.abs(b.x-x)<(b.w+B.w)/2+14&&Math.abs(b.y-y)<(b.h+B.h)/2+14)return false;
+ for(const n of nodes)if(n.amt>0&&Math.hypot(n.x-x,n.y-y)<50)return false;
+ return true;
+}
+function placeBld(team,kind,x,y){
+ const B=BLD[kind];
+ if(kind!=='tc'&&(age[team]<(B.minAge||0)))return null;
+ if(!canAfford(team,B.cost||{}))return null;
+ if(!validSpot(x,y,kind))return null;
+ pay(team,B.cost||{});
+ const b={id:bid++,team,kind,x,y,w:B.w,h:B.h,hp:1,maxHp:B.hp,prog:0,need:B.time,done:kind==='tc',queue:[],rx:x+60,ry:y};
+ if(b.done)b.hp=b.maxHp;
+ blds.push(b);
+ // paas ka villager bhejo
+ let best=null,bd=1e9;for(const u of units)if(u.team===team&&u.type==='villager'&&u.hp>0){const d=dist(u,b);if(d<bd){bd=d;best=u}}
+ if(best){best.state='build';best.bld=b.id;best.tx=x+rnd(-40,40);best.ty=y+50}
+ return b;
+}
+function orderVillagerBuild(u,b){u.state='build';u.bld=b.id;u.tx=b.x+rnd(-40,40);u.ty=b.y+50}
+function trade(t,what){
+ const r=res[t];
+ if(what==='wf'&&r.w>=50){r.w-=50;r.f+=35;msg('50🪵 → +35🍖')}
+ else if(what==='fw'&&r.f>=60){r.f-=60;r.w+=35;msg('60🍖 → +35🪵')}
+ else if(what==='fg'&&r.f>=100&&r.w>=60){r.f-=100;r.w-=60;r.g+=45;msg('+45🪙 Sona!')}
+ else msg('🛒 Resource kam!');
+}
+// ============ INPUT: select + order ============
+let pDown=null,pDrag=null,pMoved=false;
+function worldHit(wx,wy){
+ let bu=null,bd=1e9;
+ for(const u of units){if(u.hp<=0)continue;const d=Math.hypot(u.x-wx,u.y-wy);if(d<22&&d<bd){bd=d;bu=u}}
+ let bb=null;for(const b of blds){if(Math.abs(b.x-wx)<b.w/2+8&&Math.abs(b.y-wy)<b.h/2+8){bb=b;break}}
+ let nd=null,ndd=1e9;for(const n of nodes){if(n.amt<=0)continue;const d=Math.hypot(n.x-wx,n.y-wy);if(d<26&&d<ndd){ndd=d;nd=n}}
+ return {u:bu,b:bb,n:nd};
+}
+function deselect(){sel={units:[],bld:null};placing=null;refreshPanel()}
+function refreshPanel(){/* part3 me */}
+function issueOrder(wx,wy,hit){
+ const myU=sel.units.filter(u=>u.hp>0);
+ // dushman par click = hamla
+ if(hit.u&&hit.u.team==='AI'&&myU.length){
+  for(const u of myU){if(u.type==='villager'){u.state='move';u.tx=wx;u.ty=wy}else{u.state='attack';u.target=hit.u.id;u.tgtB=null}}
+  S.order();return;
  }
- base.addEventListener('touchstart',e=>{e.preventDefault();ac();handle(e)},{passive:false});
- base.addEventListener('touchmove',e=>{e.preventDefault();handle(e)},{passive:false});
- base.addEventListener('touchend',e=>{e.preventDefault();set(0,0);setStick(0,0)});
- base.addEventListener('mousedown',e=>{const mv=ev=>handle(ev);handle(e);const up=()=>{set(0,0);setStick(0,0);window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up)};window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up)});
-}
-bindJoy('joyBase','joyStick',(x,y)=>{joyDX=x;joyDY=y});
-bindJoy('joyBase2','joyStick2',(x,y)=>{joy2DX=x;joy2DY=y});
-// har button dabane par halki thap (mobile haptic)
-document.querySelectorAll('#controls button,#p2row button,#setPanel button').forEach(b=>{b.addEventListener('pointerdown',()=>vib(8))});
-// ===== MENU =====
-document.querySelectorAll('#modeBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');mode=b.dataset.m;S.click()});
-document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
-document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>setCiv(b.dataset.c));
-function refreshMenu(){
- try{
-  document.getElementById('menuBest').textContent='🏆 Best Score: '+high;
-  document.getElementById('bestT').textContent=high;
-  document.getElementById('menuLvl').textContent=level;
-  document.getElementById('menuXp').textContent=xp;
-  document.getElementById('menuWins').textContent=totalWins;
-  const modes={fort:'🏰',food:'🍚',endless:'♾',waves:'🌊',versus:'👥',daily:'📅'};
-  document.getElementById('shelf').innerHTML=Object.keys(modes).map(m=>modes[m]+' '+(winsByMode[m]||0)).join(' &nbsp; ');
-  document.getElementById('misList').innerHTML=MS.map(m=>{const v=misVal(m.id),done=misDone[m.id];return '<div>'+(done?'✅ ':'⬜ ')+m.txt+' ('+Math.min(v,m.need)+'/'+m.need+')</div>'}).join('');
-  refreshSkinBtns();
- }catch(e){}
-}
-try{
- let pend=null;try{pend=localStorage.getItem('klPending')}catch(e){}
- if(pend!==null){try{localStorage.removeItem('klPending')}catch(e){}}
- refreshMenu();
- refreshLevels();
- let dd=null;try{dd=localStorage.getItem('klDaily')}catch(e){}
- if(dd===todayStr())document.getElementById('dailyBtn').textContent='📅 AAJ KA CHALLENGE ✅ (ho gaya!)';
- if(pend!==null&&LEVELS[parseInt(pend)])startLevel(parseInt(pend));
-}catch(e){}
-function applyBonus(){
- // level food bonus + jeet ke khazane ka bonus
- const lvBonus=Math.min(30,(level-1)*5);
- if(lvBonus>0){G.kali.food+=lvBonus;float(G.kali.base.x,G.kali.base.y-90,'🎖 Lv'+level+' bonus +'+lvBonus+'🍚','#FFD700')}
- if(pendingBonus.food>0){G.kali.food+=pendingBonus.food;float(450,150,'🎁 Khazana: +'+pendingBonus.food+'🍚!','#FFD700')}
- if(pendingBonus.shield>0){shieldT+=pendingBonus.shield;float(G.kali.base.x,G.kali.base.y-110,'🎁 Khazana: 🛡 kavach!','#38bdf8')}
- if(pendingBonus.food>0||pendingBonus.shield>0){pendingBonus={food:0,shield:0};saveBonus()}
-}
-// ===== 10-LEVEL CAMPAIGN (strategic!) =====
-const LEVELS=[
- {name:'Pehli Jung',icon:'⚔️',mode:'fort',diff:'easy',kaliFood:60,laalFood:40,kaliFort:600,laalFort:500,strat:'balanced',tip:'Soldier banao aur seedha fort par hamla! Raja ko aage rakho.'},
- {name:'Anaaj Race',icon:'🍚',mode:'food',diff:'easy',time:180,kaliFood:30,laalFood:30,kaliFort:600,laalFort:600,strat:'eco',tip:'Worker zyada banao! Laal bhi khana jama kar rahi hai.'},
- {name:'Turtle Laal',icon:'🐢',mode:'fort',diff:'medium',kaliFood:60,laalFood:60,kaliFort:600,laalFort:750,strat:'turtle',tip:'Laal defend karegi! Bomb 💣 + Chakravat 🌀 se deewar todo.'},
- {name:'Ghati Hamla',icon:'🌪️',mode:'fort',diff:'medium',kaliFood:60,laalFood:90,kaliFort:600,laalFort:600,strat:'rush',tip:'Laal tez aayegi! Pehle defend (tanks), phir palatwar.'},
- {name:'Gaon Loot',icon:'🏘️',mode:'fort',diff:'medium',kaliFood:20,laalFood:60,kaliFort:600,laalFort:600,strat:'balanced',villageStore:200,tip:'Khana kam hai! Gaon ke ghar looto (+3/vaar, +30 loot) — wahi jeet hai.'},
- {name:'Raat Yuddh',icon:'🌙',mode:'fort',diff:'medium',kaliFood:60,laalFood:60,kaliFort:600,laalFort:650,strat:'balanced',nightStart:1,tip:'Andhere me mashaalon ki roshni me lado. Healer saath rakho!'},
- {name:'Leher 5',icon:'🌊',mode:'waves',diff:'medium',kaliFood:70,laalFood:50,kaliFort:700,laalFort:600,strat:'balanced',wavesToWin:5,tip:'5 waves roko = jeet! Repair + tanks + ult taiyaar rakho.'},
- {name:'Laal Raja',icon:'😈',mode:'fort',diff:'hard',kaliFood:70,laalFood:70,kaliFort:650,laalFort:650,strat:'rush',rajaEarly:1,tip:'Laal Raja shuru se maidan me + CHARGE karta hai! Raja vs Raja!'},
- {name:'Toofan',icon:'🌧️',mode:'fort',diff:'hard',kaliFood:60,laalFood:70,kaliFort:600,laalFort:700,strat:'balanced',rainStart:1,tip:'Barish me sab slow. Tank + runner ka sahi istemal jeet dilayega.'},
- {name:'Maharaja Antim',icon:'👑',mode:'fort',diff:'hard',kaliFood:80,laalFood:100,kaliFort:700,laalFort:900,strat:'rush',rajaEarly:1,tip:'Aakhri jung! Sab kuch max. Bomb, ult, power-ups — sab jhonk do!'}
-];
-let unlocked=0,currentLevel=null,wavesToWin=0,laalStrat='balanced',selLvl=-1;
-try{unlocked=Math.min(LEVELS.length-1,parseInt(localStorage.getItem('klLevel')||'0')||0)}catch(e){}
-function playLevel(i){try{localStorage.setItem('klPending',String(i))}catch(e){}location.reload()}
-function startLevel(i){
- const L=LEVELS[i];if(!L)return;
- ac();currentLevel=i;
- mode=L.mode;difficulty=L.diff;timeLeft=L.time||180;elapsed=0;
- document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.m===L.mode));
- document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.toggle('sel',x.dataset.d===L.diff));
- G.kali.food=L.kaliFood;G.laal.food=L.laalFood;
- G.kali.fort=G.kali.maxFort=L.kaliFort;G.laal.fort=G.laal.maxFort=L.laalFort;
- wavesToWin=L.wavesToWin||0;waveN=0;waveState='break';waveT=480;
- laalStrat=L.strat||'balanced';
- if(L.villageStore)villageStore=L.villageStore;
- if(L.nightStart)dayT=0.5;
- if(L.rainStart){rainT=1800;S.thunder()}
- S.power();started=true;
- document.getElementById('menu').style.display='none';
- document.getElementById('modeT').textContent='Lv'+(i+1)+' '+L.icon+' '+L.name;
- document.getElementById('diffT').textContent=difficulty;
- if(L.rajaEarly&&!laalRaja){laalRaja=makeHero('laal');ants.push(laalRaja);float(laalRaja.x,laalRaja.y,'😈 LAAL RAJA!','red');S.warHorn()}
-if(L.wavesToWin)showBanner('🌊 '+L.wavesToWin+' WAVES ROKO = JEET!');
-  showBanner('Lv'+(i+1)+' '+L.icon+' '+L.name.toUpperCase()+'!');
-  applyBonus();
-  beginPrep(L.prep??20);
-  flash('📜 '+L.tip);
+ if(hit.b&&hit.b.team==='AI'&&myU.length){
+  const mil=myU.filter(u=>u.type!=='villager');
+  if(mil.length){for(const u of mil){u.state='attack';u.tgtB=hit.b.id;u.target=null}
+   for(const u of myU)if(u.type==='villager'){u.state='move';u.tx=wx;u.ty=wy}
+   S.order();return}
  }
-function refreshLevels(){
- const box=document.getElementById('lvlBtns');if(!box)return;
- box.innerHTML='';
- LEVELS.forEach((L,i)=>{
-  const b=document.createElement('button');
-  b.className='opt'+(selLvl===i?' sel':'');
-  b.style.opacity=i<=unlocked?1:0.45;
-  b.textContent=(i<=unlocked?(selLvl===i?'▶ ':'')+(i+1)+L.icon:'🔒 '+(i+1));
-  b.onclick=()=>{S.click();if(i>unlocked){flash('🔒 Pehle Level '+(unlocked+1)+' jeeto!');return}selLvl=i;refreshLevels();
-   document.getElementById('lvlDesc').innerHTML='<b>Lv'+(i+1)+' '+L.icon+' '+L.name+'</b> ('+L.diff+')<br>'+L.tip+'<br><button class="btn-w" style="margin-top:6px" onclick="playLevel('+i+')">▶ LEVEL KHELO</button>'};
-  box.appendChild(b);
- });
-}
-function startGame(){ac();S.power();started=true;currentLevel=null;wavesToWin=0;laalStrat='balanced';document.getElementById('menu').style.display='none';
- G.kali.wood=50;G.kali.gold=30;G.laal.wood=50;G.laal.gold=30;
- buildings=[];tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
- age={kali:0,laal:0};wonderT={kali:0,laal:0};
- laalCiv=['japan','cheen','bharat'][Math.floor(Math.random()*3)];
- if(myCiv==='bharat'){G.kali.food+=20;float(G.kali.base.x,G.kali.base.y-90,'🇮🇳 +20🍚 bonus!','#4ade80')}
- const names={fort:'Fort Todo',food:'Khana Race',endless:'Endless',waves:'Waves 🌊',versus:'Vs Dost 👥'};
- document.getElementById('modeT').textContent=names[mode]||mode;
- document.getElementById('diffT').textContent=difficulty;
- if(mode==='waves'){waveN=0;waveState='break';waveT=480;showBanner('🌊 WAVE MODE! Fort bachao!')}
- if(mode==='versus'){
-  if(!laalRaja||laalRaja.hp<=0){laalRaja=makeHero('laal');ants.push(laalRaja)}
-  document.getElementById('p2row').style.display='flex';
-  document.body.classList.add('versus-on');
-  showBanner('👥 P1 ARROWS vs P2 WASD!');
+ // sansadhan = katwao (villager)
+ if(hit.n&&myU.length){
+  const vs=myU.filter(u=>u.type==='villager');
+  if(vs.length){for(const u of vs){u.state='gather';u.node=hit.n;u.carryKind=null}S.order();return}
  }
-flash(mode==='versus'?'👥 DOST vs DOST! P1 Arrow, P2 WASD!':'⏱️ Pehle army tayyar karo!');
-  applyBonus();
-  beginPrep(mode==='versus'?25:20);
-  try{if(matchMedia('(pointer:coarse)').matches&&screen.orientation&&innerHeight>innerWidth)setTimeout(()=>flash('📱 Phone TEDHA (landscape) karo — sabse bada mazaa!'),2500)}catch(e){}
+ // building selected = rally point
+ if(sel.bld&&!myU.length){const b=blds.find(x=>x.id===sel.bld);if(b){b.rx=wx;b.ry=wy;float(wx,wy-14,'🚩','#fff')}S.order();return}
+ // khud ki building (repair/adhoori)
+ if(hit.b&&hit.b.team==='P1'&&myU.length){
+  const vs=myU.filter(u=>u.type==='villager');
+  if(vs.length&&(!hit.b.done||hit.b.hp<hit.b.maxHp)){for(const u of vs)orderVillagerBuild(u,hit.b);S.order();return}
+ }
+ // zameen = chalo
+ if(myU.length){for(const u of myU){u.state='move';u.tx=wx;u.ty=wy;u.target=null;u.tgtB=null;u.node=null}S.order()}
+ else if(!hit.u&&!hit.b) deselect();
 }
-function spawnFood(n,golden=false){for(let i=0;i<n;i++)foods.push({x:rnd(300,600),y:rnd(60,440),r:golden?9:6,golden:golden||Math.random()<0.08,mirchi:Math.random()<0.1,ph:rnd(0,6.28)})}
-spawnFood(14);
-function float(x,y,t,c='#fff'){floats.push({x,y,t,c,life:70})}
-function burst(x,y,c,n=8,pow=3){for(let i=0;i<n;i++){const a=rnd(0,6.28),sp=rnd(0.5,pow);parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-0.6,life:rnd(18,42),max:42,c,sz:rnd(2,5),grav:0.06})}}
-function puff(x,y,c='rgba(60,60,60,0.6)',n=6){for(let i=0;i<n;i++)parts.push({x:x+rnd(-8,8),y:y+rnd(-6,6),vx:rnd(-0.5,0.5),vy:rnd(-1.2,-0.3),life:rnd(30,60),max:60,c,sz:rnd(4,9),grav:-0.01,smoke:true})}
-function spark(x,y,c='#ffdd00',n=10){for(let i=0;i<n;i++){const a=rnd(0,6.28),sp=rnd(1,4.5);parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rnd(10,24),max:24,c,sz:rnd(1,3),grav:0,glow:true})}}
-
-function makeHero(team){
- const b=G[team].base;
- return {team,type:'hero',x:b.x,y:b.y,hp:350,maxHp:350,dmg:35,speed:2.6,carry:false,carryN:0,cool:0,tx:null,ty:null,boost:0,face:team==='kali'?0:Math.PI,px:b.x,py:b.y};
-}
-hero=makeHero('kali');
-ants.push(hero);
-for(let i=0;i<4;i++){spawn('kali','worker',true);spawn('laal','worker',true)}
-spawn('kali','soldier',true);spawn('laal','soldier',true);
-for(let i=0;i<4;i++){const h0=huts[i%huts.length];ants.push(mkVillager(h0))}
-if(difficulty==='hard'){/* laal raja start me banega */}
-
-function spawn(team,type,free){
- if(gameOver||!started&&!free)return;
- if(!free&&popUsed(team)>=popCap(team)){if(team==='kali'){flash('🏠 Pop full! Ghar banao!');S.click()}return}
- const U=UNITS[type]||UNITS.worker;
- const cost=U.cost;
- // ⏱️ taiyari ke dauran: har type ka 1st unit MUFT
- let freeNow=false;
- if(!free&&inPrep&&freeRoster[type]>0){freeRoster[type]--;freeNow=true;float(G[team].base.x,G[team].base.y-100,'🎁 MUFT '+type.toUpperCase()+'!','#4ade80');spark(G[team].base.x,G[team].base.y-60,'#4ade80',12);S.power()}
- if(!free&&!freeNow){
-  let cc=cost;
-  if(team==='kali'&&myCiv==='bharat'&&type==='worker')cc=Math.ceil(cost*0.7);
-  if(type==='tank'&&age[team]<1){if(team==='kali'){flash('🛡 Tank ke liye Feudal Yug chahiye!');S.click()}return}
-  if(type==='tank'&&G[team].wood<10){if(team==='kali'){flash('🪵 Tank ke liye 10 lakdi!');S.click()}return}
-  if(G[team].food<cc){if(team==='kali'){flash('🍚 Khana kam! Worker bhejo!');S.click()}return}
-  G[team].food-=cc;if(type==='tank')G[team].wood-=10;S.spawn()}
- const b=G[team].base;
- const barrackN=buildings.filter(x=>x.team===team&&x.kind==='barrack'&&x.hp>0).length;
- const barrackBonus=1+0.2*barrackN;
- const a={team,type,x:b.x+rnd(-20,20),y:b.y+rnd(-70,70),hp:U.hp*techHp(team),maxHp:U.hp*techHp(team),dmg:U.dmg*techDmg(team)*barrackBonus*(team==='laal'?DIFF[difficulty].dmg:1),speed:U.speed*techSpd(team)*(joshT>0&&team==='kali'?1.8:1)*(team==='kali'&&myCiv==='cheen'&&type==='worker'?1.2:1),carry:false,cool:0,tx:null,ty:null,boost:0,face:team==='kali'?0:Math.PI,px:b.x,py:b.y,ph:rnd(0,6.28)};
- ants.push(a);
- puff(a.x,a.y,team==='kali'?'rgba(0,0,0,0.35)':'rgba(255,80,80,0.4)',5);
- if(type!=='worker')S.unsheathe();
-}
-function repair(team){if(G[team].food>=30&&G[team].fort<G[team].maxFort){G[team].food-=30;G[team].fort=Math.min(G[team].maxFort,G[team].fort+90);S.heal();spark(G[team].base.x,G[team].base.y-70,'#7CFC00',12);float(G[team].base.x,G[team].base.y-70,'+REPAIR','#0f0')}else{flash('Repair=30 🍚');S.click()}}
-function dropBomb(){
- if(inPrep){flash('⏱️ Training chal rahi! Pehle training khatm karo!');S.click();return}
- if(!warStarted){warStarted=true;showBanner('⚔ HAMLA SHURU!')}
- if(G.kali.food<40){flash('Bomb ke liye 40 🍚!');return}
-  G.kali.food-=40;S.goliBurst(5);setTimeout(()=>S.boom(),320);shakeAll=14;vib([60,40,60]);
- craters.push({x:rally.x,y:rally.y,life:900,max:900});
- burst(rally.x,rally.y,'#ff7b00',28,5);burst(rally.x,rally.y,'#ff2222',18,4);spark(rally.x,rally.y,'#ffef00',22);puff(rally.x,rally.y,'rgba(40,40,40,0.7)',14);
- slashes.push({x:rally.x,y:rally.y,r:10,life:18,max:18});
- float(rally.x,rally.y-20,'💥 DHAMAKA!','#ff0');
- ants.forEach(a=>{if(a.team==='laal'&&Math.hypot(a.x-rally.x,a.y-rally.y)<110){a.hp-=95;if(a.hp<=0)onKill('bomb',a)}});
- if(Math.hypot(G.laal.base.x-rally.x,G.laal.base.y-rally.y)<110){G.laal.fort-=70;shakeL=10;float(G.laal.base.x,G.laal.base.y-80,'-70 FORT!','orange')}
-}
-function sugarRain(){if(G.kali.food<30){flash('Cheeni ke liye 30 🍚!');return}G.kali.food-=30;S.power();for(let i=0;i<8;i++)foods.push({x:rnd(320,580),y:rnd(80,420),r:6,ph:rnd(0,6.28)});float(450,150,'🍬 CHEENI BARISH!','#0ff');burst(450,250,'pink',20,3)}
-function josh(){if(G.kali.food<20){flash('Josh ke liye 20 🍚!');return}if(joshT>0){flash('Josh pehle se ON hai!');return}G.kali.food-=20;joshT=8*60;S.power();float(G.kali.base.x,G.kali.base.y-80,'⚡ JOSH! 2x SPEED','#ff0');spark(G.kali.base.x,G.kali.base.y,'#ffef00',16)}
-let ultCD=0;
-function rajaUlt(){
- if(!started||gameOver)return;
- if(inPrep){flash('⏱️ Training chal rahi! Pehle training khatm karo!');S.click();return}
- if(!warStarted){warStarted=true;showBanner('⚔ HAMLA SHURU!')}
- if(!hero||hero.hp<=0){flash('👑 Raja zinda nahi!');return}
- if(ultCD>0){flash('🌀 Ult taiyaar ho rahi: '+Math.ceil(ultCD/60)+'s');S.click();return}
- ultCD=1800;S.ult();shakeAll=12;vib([80,40,80]);
- slashes.push({x:hero.x,y:hero.y,r:14,life:30,max:30});
- burst(hero.x,hero.y,'#FFD700',26,5);spark(hero.x,hero.y,'#fff',18);
- float(hero.x,hero.y-30,'🌀 CHAKRAVAT!','#FFD700');
- ants.forEach(a=>{if(a.team!=='kali'&&a.hp>0&&Math.hypot(a.x-hero.x,a.y-hero.y)<135){a.hp-=90;slashes.push({x:a.x,y:a.y,r:6,life:12,max:12});if(a.hp<=0)onKill('ult',a)}});
-}
-// ===== POWER-UPS =====
-const POWERS=[
- {kind:'shield',icon:'🛡',c:'#38bdf8'},
- {kind:'freeze',icon:'❄',c:'#a5f3fc'},
- {kind:'double',icon:'💢',c:'#f472b6'},
- {kind:'feast', icon:'🍯',c:'#FFD700'}
-];
-function spawnPower(){
- if(powerups.length>=3)return;
- const p=POWERS[Math.floor(Math.random()*POWERS.length)];
- powerups.push({x:rnd(320,580),y:rnd(90,410),kind:p.kind,icon:p.icon,c:p.c,ph:rnd(0,6.28),life:1500});
- float(450,120,p.icon+' POWER AAYA!','#fff');
-}
-function collectPower(a,p){
- powerups.splice(powerups.indexOf(p),1);
- S.power();spark(a.x,a.y,p.c,14);vib(30);
- if(p.kind==='shield'){shieldT=600;float(a.x,a.y-20,'🛡 KAVACH! 10s','#38bdf8')}
- else if(p.kind==='freeze'){freezeT=480;float(a.x,a.y-20,'❄ LAAL FREEZE! 8s','#a5f3fc')}
- else if(p.kind==='double'){doubleT=600;float(a.x,a.y-20,'💢 DOUBLE WAR! 10s','#f472b6')}
- else{G[a.team].food+=40;float(a.x,a.y-20,'🍯 +40 KHANA!','#FFD700')}
-}
-// attacker/defender modifiers: double damage + kavach
-function hitDmg(att,def){
- let d=att.dmg;
- if(att.team==='kali'&&doubleT>0)d*=2;
- if(def&&def.team==='kali'&&shieldT>0)d*=0.4;
- return d;
-}
-function orderAll(cmd){
- if(cmd==='attack'){warStarted=true;rally={x:G.laal.base.x-70,y:G.laal.base.y};ants.forEach(a=>{if(a.team==='kali'&&FIGHTERS.includes(a.type)){a.tx=rally.x;a.ty=rally.y}});hero.tx=rally.x;hero.ty=rally.y;showBanner('⚔ HAMLA SHURU!');flash('⚔ SAB HAMLA! Ab jung hogi!');S.warHorn()}
- else{rally={x:G.kali.base.x+90,y:G.kali.base.y};ants.forEach(a=>{if(a.team==='kali'&&FIGHTERS.includes(a.type)){a.tx=rally.x;a.ty=rally.y}});flash('🛡 Wapas! Fort bachao!');S.click()}
-}
-function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ Chalao':'⏸ Pause';S.click()}
-function toggleSpeed(){speed=speed===1?2:1;document.getElementById('speedBtn').textContent='🚀 '+speed+'x';S.click()}
-let autoAtk=false;
-function toggleAuto(){S.click();flash('🚫 Auto-attack hataya gaya! Hamla SIRF ⚔ HAMLA button se hoga!')}
-// ===== FULLSCREEN GAMEPLAY (mobile + PC) =====
-let zoom=1,camX=W/2,camY=H/2,followCam=true,activeTouches=0;
-function zoomBy(f){zoom=Math.max(0.7,Math.min(2.5,zoom*f));clampCam();S.click()}
-function resetZoom(){zoom=1;camX=W/2;camY=H/2;S.click()}
-function toggleFollow(){followCam=!followCam;document.getElementById('followBtn').textContent=followCam?'📷 Follow: ON':'📷 Follow: OFF';S.click();flash(followCam?'📷 Camera Raja ke saath chalegi!':'📷 Camera beech me rahega')}
-function clampCam(){
- const hw=W/2/zoom,hh=H/2/zoom;
- camX=(W<=hw*2)?W/2:Math.max(hw,Math.min(W-hw,camX));
- camY=(H<=hh*2)?H/2:Math.max(hh,Math.min(H-hh,camY));
-}
-function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
-function updateFsBtn(){const b=document.getElementById('fsBtn');if(b)b.textContent=isFs()?'🗗 Exit Full':'⛶ Full Screen';document.body.classList.toggle('fs-mode',isFs()||document.body.classList.contains('fs-sticky'));const f=document.getElementById('fsFloat');if(f)f.textContent=isFs()?'🗗':'⛶'}
-async function toggleFullscreen(){
- try{S.click()}catch(e){}
- const sticky=document.body.classList.contains('fs-sticky');
- try{
-  if(isFs()){await (document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen());document.body.classList.remove('fs-sticky');}
-  else{
-   // pehle sticky compact mode lagao taaki bina permission ke bhi bada dikhe
-   document.body.classList.add('fs-sticky');
-   const el=document.documentElement;
-   if(el.requestFullscreen){await el.requestFullscreen({navigationUI:'hide'})}
-   else if(el.webkitRequestFullscreen){el.webkitRequestFullscreen()}
-   else{flash('⛶ Full Screen mode ON! Dobara dabao band karne ke liye');}
-   try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
-   flash('⛶ FULL SCREEN! Phone tedha (landscape) karo — best maze ke liye!');
+cv.addEventListener('contextmenu',e=>{e.preventDefault();if(!started||paused||gameOver)return;const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
+ if(placing){return}
+ issueOrder(p.x,p.y,hit)});
+cv.addEventListener('pointerdown',e=>{ac();if(!started||paused||gameOver)return;pDown={x:e.clientX,y:e.clientY,btn:e.button};pMoved=false;pDrag=null});
+cv.addEventListener('pointermove',e=>{if(!pDown)return;const dx=e.clientX-pDown.x,dy=e.clientY-pDown.y;
+ if(Math.hypot(dx,dy)>10){pMoved=true;
+  if(e.pointerType==='touch'){const r=cv.getBoundingClientRect();view.x-=(e.movementX||0)*VW/r.width/view.z;view.y-=(e.movementY||0)*VH/r.height/view.z;clampView()}
+  else if(pDown.btn===0){pDrag={x0:pDown.x,y0:pDown.y,x1:e.clientX,y1:e.clientY}}
+ }});
+cv.addEventListener('pointerup',e=>{if(!pDown)return;const wasTouch=e.pointerType==='touch';
+ if(pDrag&&!wasTouch){ // box select
+  const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
+  sel={units:units.filter(u=>u.team==='P1'&&u.hp>0&&u.x>a.x&&u.x<b.x&&u.y>a.y&&u.y<b.y).slice(0,30),bld:null};placing=null;S.click();refreshPanel();
+ }else if(!pMoved){const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
+  if(placing){ // building lagao
+   if(placeBld('P1',placing,p.x,p.y)){S.build();placing=null;msg(BLD[placing]?'':'') }
+   else msg('⛔ Yahan nahi! Jagah saaf chahiye.');
+   refreshPanel();return;
   }
- }catch(e){
-  // permission fail ho to bhi sticky mode me bada gameplay do
-  if(sticky)document.body.classList.remove('fs-sticky');else{document.body.classList.add('fs-sticky');flash('⛶ Bada Screen ON! Exit ke liye dobara dabao')}
+  if(e.button===2){issueOrder(p.x,p.y,hit);return}
+  // select
+  if(hit.u&&hit.u.team==='P1'){sel={units:[hit.u],bld:null};S.click()}
+  else if(hit.b&&hit.b.team==='P1'){sel={units:[],bld:hit.b.id};S.click()}
+  else if(sel.units.length||sel.bld){issueOrder(p.x,p.y,hit)}
+  refreshPanel();
  }
- updateFsBtn();
- setTimeout(()=>{try{cv.scrollIntoView({block:'center'})}catch(e){}},150);
-}
-document.addEventListener('fullscreenchange',updateFsBtn);
-document.addEventListener('webkitfullscreenchange',updateFsBtn);
-// canvas double-tap se bhi fullscreen (mobile fast entry)
-let lastTap=0;
-cv.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTap<300){toggleFullscreen()}lastTap=n},{passive:true});
-// F key se PC par bhi fullscreen
-
-function exitGame(){
- if(!started){flash('Pehle khel shuru karo!');return}
- paused=true;document.getElementById('pauseBtn').textContent='▶ Chalao';S.click();
- document.getElementById('exitScore').innerHTML='☠️ Kills: '+kills+' | ⭐ Score: '+score+' | 🏆 Best: '+high+'<br>🍚 Khana: '+Math.floor(G.kali.food)+' | 🏰 Fort: '+Math.max(0,Math.round(G.kali.fort))+(mode==='waves'?' | 🌊 Wave: '+waveN:'');
- document.getElementById('exitScreen').style.display='flex';
-}
-function resumeGame(){document.getElementById('exitScreen').style.display='none';paused=false;document.getElementById('pauseBtn').textContent='⏸ Pause';S.click()}
-function closeTab(){S.click();document.getElementById('exitScore').innerHTML+='<br><span style="color:#f88">Tab band karne ke liye browser ka X dabao — browser ne auto-close block kiya hai.</span>';try{window.close()}catch(e){}setTimeout(()=>{try{window.open('','_self');window.close()}catch(e){}},300)}
-let flashT=0;function flash(t){const m=document.getElementById('msg');m.textContent=t;m.style.animation='none';void m.offsetWidth;m.style.animation='';flashT=150}
-function screenToWorld(cx,cy){const r=cv.getBoundingClientRect();const bx=(cx-r.left)*W/r.width,by=(cy-r.top)*H/r.height;return {x:camX+(bx-W/2)/zoom,y:camY+(by-H/2)/zoom}}
- cv.addEventListener('pointerdown',e=>{ac();if(!started||paused)return;if(activeTouches>1)return;const p=screenToWorld(e.clientX,e.clientY);rally={x:p.x,y:p.y};ants.forEach(a=>{if(a.team==='kali'&&FIGHTERS.includes(a.type)){a.tx=p.x;a.ty=p.y}});if(hero&&hero.hp>0){hero.tx=p.x;hero.ty=p.y}spark(p.x,p.y,'#ffffff',6);if(!inPrep&&!warStarted&&mode!=='versus')float(p.x,p.y-14,'⚔ HAMLA dabao attack ke liye!','#ff0');S.click()});
-// mouse wheel zoom (PC) + pinch zoom (mobile)
-cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(e.deltaY<0?1.12:1/1.12)},{passive:false});
-let pinchD=0;
-cv.addEventListener('touchstart',e=>{activeTouches=e.touches.length;if(e.touches.length===2){pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}},{passive:true});
-cv.addEventListener('touchmove',e=>{activeTouches=e.touches.length;if(e.touches.length===2){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinchD>0&&d>0)zoomBy(d/pinchD);pinchD=d}},{passive:false});
-cv.addEventListener('touchend',e=>{activeTouches=e.touches.length},{passive:true});
+ pDown=null;pDrag=null});
 document.addEventListener('keydown',e=>{
- keys[e.code]=true;
- if(e.code==='Escape'){const ex=document.getElementById('exitScreen');if(ex.style.display==='flex')resumeGame();else exitGame();return}
- if(!started)return;
- if(e.code==='KeyW'&&mode!=='versus')spawn('kali','worker');
- if(e.code==='KeyS'&&mode!=='versus')spawn('kali','soldier');
- if(e.code==='KeyE')spawn('kali','runner');
- if(e.code==='KeyQ')spawn('kali','tank');
- if(e.code==='KeyH')spawn('kali','healer');
- if(e.code==='KeyU')rajaUlt();
- if(e.code==='KeyN')startBattleNow();
- if(e.code==='KeyR')repair('kali');
- if(e.code==='KeyB')dropBomb();
- if(e.code==='KeyC')sugarRain();
- if(e.code==='KeyJ')josh();
- if(e.code==='KeyF')orderAll('attack');
- if(e.code==='KeyD')orderAll('defend');
- if(e.code==='KeyT'){S.swing();S.clash(true)}
- if(e.code==='KeyG')S.goliBurst(4);
- if(e.code==='KeyY')toggleAuto();
- if(e.code==='KeyM')toggleFullscreen();
- if(e.code==='KeyV')toggleFollow();
- if(e.key==='+'||e.key==='=')zoomBy(1.2);
- if(e.key==='-'||e.key==='_')zoomBy(1/1.2);
+ if(e.code==='Escape'){if(placing){placing=null;refreshPanel()}else deselect();return}
+ if(!started||gameOver)return;
+ const sp=26/view.z;
+ if(e.code==='KeyA'||e.code==='ArrowLeft')view.x-=sp;if(e.code==='KeyD'||e.code==='ArrowRight')view.x+=sp;
+ if(e.code==='KeyW'||e.code==='ArrowUp')view.y-=sp;if(e.code==='KeyS'||e.code==='ArrowDown')view.y+=sp;
+ clampView();
  if(e.code==='Space'){e.preventDefault();togglePause()}
 });
-document.addEventListener('keyup',e=>keys[e.code]=false);
-function moveTo(a,x,y){let dx=x-a.x,dy=y-a.y;let d=Math.hypot(dx,dy);if(d<2)return;let s=a.speed*(a.boost>0?1.7:1)*(joshT>0&&a.team==='kali'?1.7:1)*timeScale;if(a.team==='laal'&&freezeT>0)s*=0.55;if(rainT>0)s*=0.9;a.x+=dx/d*s;a.y+=dy/d*s;a.face=Math.atan2(dy,dx);
- // walk dust
- if(Math.random()<0.03&&d>6)parts.push({x:a.x+rnd(-3,3),y:a.y+5,vx:rnd(-0.3,0.3),vy:rnd(-0.6,-0.1),life:22,max:22,c:'rgba(180,150,100,0.5)',sz:rnd(1.5,3),grav:-0.01,smoke:true});
+mm.addEventListener('pointerdown',e=>{const r=mm.getBoundingClientRect();view.x=(e.clientX-r.left)/r.width*W;view.y=(e.clientY-r.top)/r.height*H;clampView()});
+// ============ UPDATE ============
+function nearestNode(x,y,kind,maxD){let best=null,bd=maxD||1e9;for(const n of nodes){if(n.amt<=0)continue;if(kind&&n.kind!==kind)continue;const d=Math.hypot(n.x-x,n.y-y);if(d<bd){bd=d;best=n}}return best}
+function enemyUnitNear(u,range){let best=null,bd=range;for(const e of units){if(e.team===u.team||e.hp<=0)continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}return best}
+function enemyBldNear(u,range){let best=null,bd=range;for(const b of blds){if(b.team===u.team||b.hp<=0)continue;const d=Math.hypot(u.x-b.x,u.y-b.y);if(d<bd){bd=d;best=b}}return best}
+function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;const s=u.speed;u.x+=dx/d*Math.min(s,d);u.y+=dy/d*Math.min(s,d);u.face=Math.atan2(dy,dx);return false}
+function dealDmg(t,v,dmg){if(treaty>0||gameOver)return;v.hp-=dmg;if(v.hp<=0){v.hp=0;burst2(v.x,v.y,v.team==='P1'?'#2563eb':'#dc2626')}}
+function burst2(x,y,c){for(let i=0;i<8;i++)parts.push({x,y,vx:rnd(-2,2),vy:rnd(-2,1),life:25,c})}
+function nodeKind(n){return n.kind==='wood'?'w':n.kind==='gold'?'g':'f'}
+function updateUnit(u){
+ if(u.hp<=0)return;
+ if(u.cool>0)u.cool--;
+ if(u.type==='villager'){
+  if(u.state==='gather'){
+   let n=u.node;
+   if(!n||n.amt<=0){n=nearestNode(u.x,u.y,null,250);u.node=n;if(!n){u.state='idle';return}}
+   if(Math.hypot(u.x-n.x,u.y-n.y)>26){moveTo(u,n.x,n.y)}
+   else{u.gatherT++;if(u.gatherT>=GATHER_T){u.gatherT=0;if(n.amt>0){n.amt--;u.carry++;u.carryKind=nodeKind(n);if(u.team==='P1'&&Math.random()<0.3)S.chop()}if(u.carry>=CARRY){u.state='return'}}}
+   return;
+  }
+  if(u.state==='return'){
+   let tc=null,bd=1e9;for(const b of blds)if(b.team===u.team&&b.kind==='tc'&&b.done){const d=dist(u,b);if(d<bd){bd=d;tc=b}}
+   if(!tc)return;
+   if(dist(u,tc)>70){moveTo(u,tc.x,tc.y)}
+   else{const m=civOf(u.team).gather;const kinds={};kinds[u.carryKind||'f']=Math.round(u.carry*m);for(const k in kinds)res[u.team][k]+=kinds[k];u.carry=0;u.state='gather';if(!u.node||u.node.amt<=0)u.node=nearestNode(u.x,u.y,null,250)}
+   return;
+  }
+  if(u.state==='build'){
+   const b=blds.find(x=>x.id===u.bld);
+   if(!b){u.state='idle';return}
+   if(dist(u,b)>80){moveTo(u,b.x,b.y+50);return}
+   if(!b.done){b.prog++;if(Math.random()<0.05&&u.team==='P1')S.build();if(b.prog>=b.need){b.done=true;b.hp=b.maxHp;float(b.x,b.y-50,BLD[b.kind].icon+' taiyaar!','#4ade80')}}
+   else if(b.hp<b.maxHp){b.hp=Math.min(b.maxHp,b.hp+0.15);if(b.hp>=b.maxHp)u.state='idle'}
+   else u.state='idle';
+   return;
+  }
+  if(u.state==='move'){if(moveTo(u,u.tx,u.ty))u.state='idle';return}
+  return;
+ }
+ // foji
+ let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
+ let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
+ if(!tgt&&!tgtB){
+  const leash=u.team==='AI'?(treaty>0?0:220):70;
+  if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
+ }
+ if(tgt){u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);const d=dist(u,tgt);
+  if(d>u.range){moveTo(u,tgt.x,tgt.y)}
+  else if(u.cool<=0){u.cool=u.type==='archer'?70:32;dealDmg(u.team,tgt,u.dmg);if(u.team==='P1')S.hit();if(u.type==='archer')parts.push({x:u.x,y:u.y,vx:(tgt.x-u.x)/d*6,vy:(tgt.y-u.y)/d*6,life:12,c:'#ffe9a8'});if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
+  return;
+ }
+ if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
+  if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
+  else if(u.cool<=0){u.cool=40;dealDmg(u.team,tgtB,u.dmg*0.8);if(u.team==='P1')S.hit();if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
+  return;
+ }
+ if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle'}return}
 }
-function nearestEnemy(a,range){let best=null,bd=range;for(let b of ants){if(b.team===a.team||b.hp<=0)continue;let d=Math.hypot(a.x-b.x,a.y-b.y);if(d<bd){bd=d;best=b}}return best}
-function onKill(how,v){
- kills++;killStreak++;streakT=120;S.die();
- // score: victim ke hisaab se
- let pts=10;
- if(v){if(v.type==='hero')pts=50;else if(v.type==='tank')pts=20;else if(v.type==='soldier'||v.type==='runner')pts=12;else if(v.type==='healer')pts=15;else if(v.type==='villager')pts=6}
- if(how==='ult')pts+=10;
- // combo multiplier: lagatar kill par x5 tak!
- const mult=Math.min(5,1+Math.floor(killStreak/4));
- pts=Math.round(pts*mult);
- if(mult>1)float(450,230,'🔥 x'+mult+' COMBO!','#ff0');
- misProg.kill++;misSave();
- addScore(pts);vib(25);
- document.getElementById('killT').textContent=kills;
- if(killStreak===3){float(450,200,'🔥 TRIPLE KILL!','#ff0');showBanner('🔥 TRIPLE KILL! +'+(pts*3)+'⭐')}
- else if(killStreak===5){float(450,200,'💥 PANCH KA DHAMAKA!','#f0f');showBanner('💥 5 KILL STREAK!');S.boom();slowmoT=70;shakeAll=8}
- else if(killStreak===8){showBanner('☠️ 8 KILL RAMPAGE!');slowmoT=90;S.boom()}
- else if(killStreak===10){showBanner('👑 10 KILL MAHARAJA!');slowmoT=110;addScore(100)}
+function updateBlds(){
+ for(const b of blds){
+  if(b.hp<=0)continue;
+  if(b.done&&b.queue.length){const q=b.queue[0];q.t--;
+   if(q.t<=0){b.queue.shift();const u=mkUnit(b.team,q.type,b.x+rnd(-30,30),b.y+60);u.tx=b.rx;u.ty=b.ry;u.state='move';
+   }}
+ }
+ blds=blds.filter(b=>b.hp>0);
 }
-
-let shakeK=0,shakeL=0;
-// ===== FORT DESTRUCTION CINEMATIC: debris + shockwave rings =====
-let debris=[],rings=[],endCine=null;
-function spawnDebris(x,y,team,n=26){
- const cols=team==='kali'?['#3a3a41','#17171b','#9ca3af','#8b5a2b','#FFD700']:['#8a1a1a','#d64545','#FFD700','#5a3a15','#3d0606'];
- for(let i=0;i<n;i++){
-  const a=rnd(-Math.PI,0),sp=rnd(1,6);
-  debris.push({x:x+rnd(-30,30),y:y+rnd(-50,30),vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
-   w:rnd(5,14),h:rnd(4,10),rot:rnd(0,6.28),vr:rnd(-0.3,0.3),
-   c:cols[Math.floor(Math.random()*cols.length)],life:rnd(120,240),max:240});
+// ============ AI ============
+function aiIdleWork(){
+ for(const u of units){
+  if(u.team!=='AI'||u.type!=='villager'||u.hp<=0||u.state!=='idle')continue;
+  const counts={f:0,w:0,g:0};
+  for(const v of units)if(v.team==='AI'&&v.type==='villager'&&v.state==='gather'&&v.node)counts[nodeKind(v.node)]++;
+  const need={f:Math.max(0,3+age.AI-counts.f),w:Math.max(0,1+Math.ceil(age.AI/2)-counts.w),g:age.AI>=2?Math.max(0,1-counts.g):0};
+  let pick='f',bv=-1;for(const k in need)if(need[k]>bv){bv=need[k];pick=k}
+  const kind=pick==='w'?'wood':pick==='g'?'gold':(Math.random()<0.5?'food':'hunt');
+  let n=nearestNode(u.x,u.y,kind,1e9);
+  if(!n)n=nearestNode(u.x,u.y,null,1e9);
+  if(n){u.state='gather';u.node=n}
  }
 }
-function startCine(loser){
- if(endCine)return;
- endCine={loser,t:0};
- const b=G[loser].base,win=loser==='laal';
- slowmoT=60;shakeAll=20;vib([100,50,100]);
- showBanner(win?'💥 LAAL FORT TOOT GAYA!':'💥 KALI FORT TOOT GAYA!');
- S.boom();setTimeout(()=>S.boom(),300);setTimeout(()=>{S.cannon();S.boom()},700);
- spawnDebris(b.x,b.y,loser,30);
- burst(b.x,b.y,'#ff7b00',30,6);burst(b.x,b.y,'#ff2222',20,5);spark(b.x,b.y,'#ffef00',24);puff(b.x,b.y,'rgba(30,20,10,0.8)',16);
- rings.push({x:b.x,y:b.y,r:12,life:50,max:50});
- craters.push({x:b.x,y:b.y+40,life:1200,max:1200});
- float(b.x,b.y-90,'💥 DHADAAAM!','#ff0');
+function aiSpotNear(tx,ty,kind){
+ for(let r=120;r<420;r+=40)for(let a=0;a<8;a++){
+  const x=tx+Math.cos(a/8*6.28)*r,y=ty+Math.sin(a/8*6.28)*r*0.7;
+  if(validSpot(x,y,kind))return {x,y}
+ }
+ return null;
 }
+function aiTick(){
+ if(treaty>0||gameOver)return;
+ const A='AI';
+ const tc=blds.find(b=>b.team===A&&b.kind==='tc');
+ if(!tc)return;
+ const vills=units.filter(u=>u.team===A&&u.type==='villager').length;
+ if(vills<8+age.AI*2&&tc.queue.length<2&&canAfford(A,UNITS.villager.cost))trainUnit(A,tc.id,'villager');
+ if(age.AI<4){const nx=AGES[age.AI+1].cost;const wait=difficulty==='easy'?3600:difficulty==='hard'?600:1800;
+  if(frame>(age.AI+1)*wait&&canAfford(A,nx))tryAge(A)}
+ if(popUsed(A)>=popCap(A)-2){const s=aiSpotNear(tc.x,tc.y,'house');if(s)placeBld(A,'house',s.x,s.y)}
+ if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='barracks')){const s=aiSpotNear(tc.x,tc.y,'barracks');if(s)placeBld(A,'barracks',s.x,s.y)}
+ if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='market'&&b.hp>0)){const s=aiSpotNear(tc.x,tc.y,'market');if(s)placeBld(A,'market',s.x,s.y)}
+ const rax=blds.find(b=>b.team===A&&b.kind==='barracks'&&b.done);
+ const army=units.filter(u=>u.team===A&&u.type!=='villager').length;
+ if(rax&&army<16){
+  const pool=age.AI>=2?['sword','sword','archer','knight']:['sword','sword','archer'];
+  const t=pool[Math.floor(Math.random()*pool.length)];
+  if(rax.queue.length<3&&canAfford(A,UNITS[t].cost))trainUnit(A,rax.id,t);
+ }
+ const need=difficulty==='easy'?11:difficulty==='hard'?5:7;
+ if(army>=need+age.AI*2&&frame-aiPlan.attackSent>3600){
+  aiPlan.attackSent=frame;
+  const ptc=blds.find(b=>b.team==='P1'&&b.kind==='tc');
+  const T=ptc?{x:ptc.x,y:ptc.y}:{x:250,y:800};
+  for(const u of units)if(u.team===A&&u.type!=='villager'&&u.hp>0){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null}
+  float(tc.x,tc.y-80,'⚔ Dushman hamla!','red');
+ }
+ aiIdleWork();
+}
+// ============ RENDER ============
+let bgC=null;
+function paintBG(){
+ bgC=document.createElement('canvas');bgC.width=W;bgC.height=H;
+ const b=bgC.getContext('2d');
+ b.fillStyle='#79a845';b.fillRect(0,0,W,H);
+ for(let i=0;i<120;i++){b.fillStyle=i%2?'rgba(60,100,30,0.15)':'rgba(200,230,130,0.10)';b.beginPath();b.ellipse(rnd(0,W),rnd(0,H),rnd(20,90),rnd(15,60),rnd(0,3),0,7);b.fill()}
+ b.fillStyle='rgba(150,110,60,0.5)';b.beginPath();b.ellipse(250,800,180,140,0,0,7);b.fill();
+ b.beginPath();b.ellipse(1350,200,180,140,0,0,7);b.fill();
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawNode(n){
+ ctx.save();ctx.translate(n.x,n.y);
+ if(n.kind==='wood'){ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,12,14,5,0,0,7);ctx.fill();
+  ctx.fillStyle='#5a3a15';ctx.fillRect(-3,-4,6,16);
+  ctx.fillStyle='#2d6a1e';ctx.beginPath();ctx.arc(0,-12,15,0,7);ctx.fill();
+  ctx.fillStyle='#3f9e2f';ctx.beginPath();ctx.arc(-5,-16,8,0,7);ctx.fill()}
+ else if(n.kind==='gold'){ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,7);ctx.fill();
+  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(-5,-3,4,0,7);ctx.arc(6,2,3,0,7);ctx.fill()}
+ else if(n.kind==='food'){ctx.fillStyle='#2d5a15';ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill();
+  ctx.fillStyle='#e11d48';for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(-7+i*3.5,(i%2)*6-3,2.2,0,7);ctx.fill()}}
+ else{ctx.fillStyle='#8b5a2b';ctx.beginPath();ctx.ellipse(0,0,12,7,0.3,0,7);ctx.fill();
+  ctx.fillStyle='#a8763e';ctx.beginPath();ctx.arc(8,-6,5,0,7);ctx.fill();
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(9,-7,1.2,0,7);ctx.fill()}
+ if(n.amt<80&&(n.kind==='gold'||n.kind==='food')){ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.fillText(Math.ceil(n.amt),-8,24)}
+ ctx.restore();
+}
+function drawBld(b){
+ const col=b.team==='P1'?'#2563eb':'#dc2626';
+ ctx.save();ctx.translate(b.x,b.y);
+ if(!b.done)ctx.globalAlpha=0.6;
+ ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,b.h/2, b.w/2,10,0,0,7);ctx.fill();
+ // deewar
+ ctx.fillStyle=b.team==='P1'?'#d6c49a':'#c49a9a';rr(-b.w/2,-b.h/2,b.w,b.h,5);ctx.fill();
+ ctx.strokeStyle=col;ctx.lineWidth=3;rr(-b.w/2,-b.h/2,b.w,b.h,5);ctx.stroke();
+ // chhat
+ ctx.fillStyle=b.team==='P1'?'#8b2f2f':'#5b1d1d';
+ ctx.beginPath();ctx.moveTo(-b.w/2-6,-b.h/2+6);ctx.lineTo(0,-b.h/2-20);ctx.lineTo(b.w/2+6,-b.h/2+6);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff';ctx.font='bold '+(b.kind==='tc'?22:15)+'px sans-serif';ctx.textAlign='center';
+ ctx.fillText(BLD[b.kind].icon,0,8);ctx.textAlign='left';
+ ctx.restore();
+ // HP / progress
+ const wpx=b.w;
+ ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-wpx/2,b.y-b.h/2-22,wpx,6);
+ if(!b.done){ctx.fillStyle='#fde047';ctx.fillRect(b.x-wpx/2,b.y-b.h/2-22,wpx*Math.min(1,b.prog/b.need),6)}
+ else{const hp=b.hp/b.maxHp;ctx.fillStyle=hp>0.5?'#4ade80':hp>0.25?'#fde047':'#f87171';ctx.fillRect(b.x-wpx/2,b.y-b.h/2-22,wpx*Math.max(0,hp),6)}
+ if(b.done&&b.queue.length){ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.fillText('⏳'+b.queue.length,b.x+wpx/2+4,b.y)}
+ if(sel.bld===b.id){ctx.strokeStyle='#22c55e';ctx.lineWidth=2.5;ctx.strokeRect(b.x-b.w/2-6,b.y-b.h/2-26,b.w+12,b.h+32)}
+}
+function drawUnit(u){
+ const col=u.team==='P1'?'#2563eb':'#dc2626';
+ const isSel=sel.units.includes(u);
+ ctx.save();ctx.translate(u.x,u.y);
+ ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,9,9,3.5,0,0,7);ctx.fill();
+ if(isSel){ctx.strokeStyle='#22c55e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,14,0,7);ctx.stroke()}
+ ctx.rotate(u.face);
+ const big=u.type==='knight';
+ // jism
+ ctx.fillStyle=col;ctx.beginPath();ctx.arc(0,0,big?8:6,0,7);ctx.fill();
+ ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
+ if(u.type==='villager'){ctx.fillStyle='#c9a227';ctx.fillRect(-3,-3,6,6)}
+ if(u.type==='sword'){ctx.strokeStyle='#e5e7eb';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(4,0);ctx.lineTo(14,0);ctx.stroke()}
+ if(u.type==='archer'){ctx.strokeStyle='#7c4a12';ctx.lineWidth=2;ctx.beginPath();ctx.arc(6,0,7,-1.2,1.2);ctx.stroke()}
+ if(u.type==='knight'){ctx.fillStyle='#6b4a1f';ctx.beginPath();ctx.ellipse(-9,0,7,4,0,0,7);ctx.fill()}
+ // sir
+ ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(3,0,3.4,0,7);ctx.fill();
+ if(u.type==='village'||u.type==='villager'){/* topi */}
+ ctx.restore();
+ if(u.carry>0){ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.fillText(u.carryKind==='w'?'🪵':u.carryKind==='g'?'🪙':'🍖',u.x-5,u.y-14)}
+ if(u.hp<u.maxHp||isSel){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(u.x-11,u.y-20,22,4);
+  const hp=Math.max(0,u.hp/u.maxHp);ctx.fillStyle=hp>0.5?'#4ade80':'#f87171';ctx.fillRect(u.x-11,u.y-20,22*hp,4)}
+}
+let lastMouseW={x:0,y:0};
+cv.addEventListener('pointermove',e=>{if(!pDown){const p=s2w(e.clientX,e.clientY);lastMouseW=p}});
+function draw(){
+ ctx.save();
+ ctx.clearRect(0,0,VW,VH);
+ ctx.translate(VW/2,VH/2);ctx.scale(view.z,view.z);ctx.translate(-view.x,-view.y);
+ if(bgC)ctx.drawImage(bgC,0,0);
+ for(const n of nodes)if(n.amt>0)drawNode(n);
+ for(const b of blds)drawBld(b);
+ const sorted=[...units].sort((a,b)=>a.y-b.y);
+ for(const u of sorted)if(u.hp>0)drawUnit(u);
+ for(const p of parts){ctx.globalAlpha=Math.max(0,p.life/25);ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;p.x+=p.vx;p.y+=p.vy;p.life--}
+ parts=parts.filter(p=>p.life>0);
+ ctx.textAlign='left';
+ for(const f of floats){ctx.globalAlpha=Math.min(1,f.life/30);ctx.font='bold 15px sans-serif';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.strokeText(f.t,f.x-20,f.y);ctx.fillStyle=f.c;ctx.fillText(f.t,f.x-20,f.y);ctx.globalAlpha=1;f.y-=1;f.life--}
+ floats=floats.filter(f=>f.life>0);
+ // box select
+ if(pDrag){const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
+  ctx.strokeStyle='#22c55e';ctx.lineWidth=2/view.z;ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y)}
+ // placing ghost
+ if(placing){const B=BLD[placing],ok=validSpot(lastMouseW.x,lastMouseW.y,placing);
+  ctx.globalAlpha=0.6;ctx.fillStyle=ok?'#4ade80':'#f87171';rr(lastMouseW.x-B.w/2,lastMouseW.y-B.h/2,B.w,B.h,5);ctx.fill();ctx.globalAlpha=1}
+ // treaty banner
+ if(treaty>0&&started&&!gameOver){ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(view.x-VW/2/view.z,view.y-VH/2/view.z+40,VW/view.z,34);
+  ctx.fillStyle='#fde68a';ctx.font='bold 17px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🕊 SANDHI '+Math.ceil(treaty/60)+'s — koi ladai nahi, gaon basao!',view.x,view.y-VH/2/view.z+64);ctx.textAlign='left'}
+ ctx.restore();
+ drawMM();
+}
+function drawMM(){
+ const sx=150/W,sy=94/H;
+ mmc.clearRect(0,0,150,94);mmc.fillStyle='#3d5c22';mmc.fillRect(0,0,150,94);
+ for(const n of nodes){if(n.amt<=0)continue;mmc.fillStyle=n.kind==='wood'?'#2d6a1e':n.kind==='gold'?'#FFD700':'#e11d48';mmc.fillRect(n.x*sx-1,n.y*sy-1,2,2)}
+ for(const b of blds){mmc.fillStyle=b.team==='P1'?'#60a5fa':'#f87171';mmc.fillRect(b.x*sx-3,b.y*sy-3,6,6)}
+ for(const u of units){if(u.hp<=0)continue;mmc.fillStyle=u.team==='P1'?'#bfdbfe':'#fecaca';mmc.fillRect(u.x*sx-1,u.y*sy-1,2,2)}
+ mmc.strokeStyle='#fff';mmc.lineWidth=1;
+ const hw=VW/2/view.z*sx,hh=VH/2/view.z*sy;
+ mmc.strokeRect(view.x*sx-hw,view.y*sy-hh,hw*2,hh*2);
+}
+// ============ HUD + PANEL ============
+function costStr(c){const m=civOf('P1').cost;const p=[];if(c.f)p.push(Math.ceil(c.f*m)+'🍖');if(c.w)p.push(Math.ceil(c.w*m)+'🪵');if(c.g)p.push(Math.ceil(c.g*m)+'🪙');return p.join(' ')}
+function startPlace(kind){
+ const B=BLD[kind];
+ if(age.P1<(B.minAge||0)){msg('⬆️ Pehle '+AGES[B.minAge].name+' Yug!');return}
+ if(!canAfford('P1',B.cost||{})){msg('💰 Resource kam! '+costStr(B.cost||{}));return}
+ if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){msg('👷 Pehle VILLAGER chuno!');return}
+ placing=kind;msg('📍 '+B.name+' lagane ke liye jagah tap karo (Esc = cancel)');refreshPanel();
+}
+function orderAttack(){
+ const mil=sel.units.filter(u=>u.hp>0&&u.type!=='villager');
+ if(!mil.length){msg('🗡️ Pehle foji chuno!');return}
+ const tc=blds.find(b=>b.team==='AI'&&b.kind==='tc');
+ const T=tc?{x:tc.x,y:tc.y}:{x:1350,y:200};
+ for(const u of mil){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null}
+ S.order();msg('⚔ HAMLA! Dushman ke adde ki taraf!');
+}
+function refreshPanel(){
+ const info=document.getElementById('panelInfo'),btns=document.getElementById('panelBtns');
+ btns.innerHTML='';
+ const btn=(t,fn,dis)=>{const b=document.createElement('button');b.innerHTML=t;if(dis)b.disabled=true;b.onclick=fn;btns.appendChild(b);return b};
+ if(placing){info.innerHTML='📍 <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') — jagah tap karo. <b>Esc</b> = cancel';return}
+ const b=sel.bld!=null?blds.find(x=>x.id===sel.bld):null;
+ if(b){
+  const q=b.queue.length?(' ⏳'+q):'';
+  info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ ban raha '+Math.floor(b.prog/b.need*100)+'% (villager bhejo!)')+q;
+  if(b.kind==='tc'&&b.done){btn('👷 Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
+   btn(age.P1>=4?'👑 MAX Yug':'⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()});}
+  if(b.kind==='barracks'&&b.done){for(const t of ['sword','archer','knight']){const U=UNITS[t];
+   btn(U.icon+' '+t+'<br>'+costStr(U.cost)+(age.P1<(U.minAge||0)?'<br>🔒 Yug '+(U.minAge+1):''),()=>{trainUnit('P1',b.id,t);refreshPanel()},age.P1<(U.minAge||0))}}
+  if(b.kind==='market'&&b.done){btn('50🪵→35🍖',()=>{trade('P1','wf');refreshPanel()});btn('60🍖→35🪵',()=>{trade('P1','fw');refreshPanel()});btn('100🍖+60🪵→45🪙',()=>{trade('P1','fg');refreshPanel()})}
+  if(b.kind==='house')info.innerHTML+=' — +5 abaadi 🏠';
+  return;
+ }
+ const alive=sel.units.filter(u=>u.hp>0);
+ if(!alive.length){info.innerHTML='Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.';return}
+ const c={};for(const u of alive)c[u.type]=(c[u.type]||0)+1;
+ info.innerHTML=Object.keys(c).map(t=>UNITS[t].icon+' '+t+' ×'+c[t]).join(' &nbsp; ');
+ if(alive.some(u=>u.type==='villager')){btn('🏠 Ghar<br>'+costStr(BLD.house.cost),()=>startPlace('house'));btn('🏟️ Barracks<br>'+costStr(BLD.barracks.cost),()=>startPlace('barracks'));btn('🛒 Market<br>'+costStr(BLD.market.cost),()=>startPlace('market'))}
+ if(alive.some(u=>u.type!=='villager'))btn('⚔ HAMLA!',orderAttack);
+}
+function updateHUD(){
+ document.getElementById('resF').textContent=Math.floor(res.P1.f);
+ document.getElementById('resW').textContent=Math.floor(res.P1.w);
+ document.getElementById('resG').textContent=Math.floor(res.P1.g);
+ document.getElementById('popT').textContent=popUsed('P1')+'/'+popCap('P1');
+ document.getElementById('ageT').textContent=AGES[age.P1].icon+' '+AGES[age.P1].name;
+ const tt=Math.floor(elapsed);
+ document.getElementById('timeT').textContent=Math.floor(tt/60)+':'+String(tt%60).padStart(2,'0');
+ document.getElementById('treatyT').textContent=treaty>0?('🕊 Sandhi '+Math.ceil(treaty/60)+'s'):(civOf('P1').name+' ⚔ '+civOf('AI').name);
+}
+// ============ LOOP ============
+let elapsed=0;
 function step(){
  if(gameOver||!started||paused)return;
  for(let s=0;s<speed;s++){
-  frame++;if(joshT>0)joshT--;if(streakT>0)streakT--;else killStreak=0;
-  if(ultCD>0)ultCD--;
-  if(shieldT>0)shieldT--;if(freezeT>0)freezeT--;if(doubleT>0)doubleT--;
-  if(slowmoT>0){slowmoT--;timeScale=0.35}else timeScale=1;
-  // ⏱️ taiyari countdown — khatam hone par junng shuru
-  if(inPrep){
-   prepT--;
-   if(prepT<=0){inPrep=false;S.warHorn();shakeAll=6;vib(60);if(mode==='versus'){warStarted=true;showBanner('⚔ HAMLA SHURU! Ab lado!');flash('⚔ Training khatm! AB HAMLA — dono lado!')}else{showBanner('✅ TRAINING KHATM!');flash('✅ Training khatm! Hamla ke liye ⚔ HAMLA button dabao — usse pehle koi ladai nahi!')}}
-  }
-  // din-raat cycle (~100 sec)
-  dayT=(dayT+1/6000)%1;nightF=(1-Math.cos(dayT*6.283))/2;
-  // barish
-  if(rainT>0){rainT--;for(let rd of rainDrops){rd.y+=rd.sp;if(rd.y>H){rd.y=-10;rd.x=rnd(0,W)}}if(Math.random()<0.06)parts.push({x:rnd(0,W),y:rnd(400,480),vx:0,vy:-1,life:12,max:12,c:'rgba(180,220,255,0.6)',sz:2,grav:0.1})}
-  else if(Math.random()<0.0006){rainT=1200;S.thunder();float(450,120,'🌧 BARISH! Sab slow!','#a5f3fc')}
-  // power-ups
-  if(frame%840===0)spawnPower();
-  // gaon: ghar dobara banao + gaon-walon ki bharti
-  for(let q of hutQueue){q.t--;if(q.t<=0){huts.push({x:q.x,y:q.y,hp:220,maxHp:220,ph:rnd(0,6.28)});showBanner('🏘 Gaon ne ghar dobara banaya!');S.power()}}
-  hutQueue=hutQueue.filter(q=>q.t>0);
-  if(frame%600===0&&huts.length>0&&ants.filter(a=>a.type==='villager').length<5){
-   const h=huts[Math.floor(Math.random()*huts.length)];const v=mkVillager(h);ants.push(v);puff(v.x,v.y,'rgba(150,110,60,0.4)',4);
-  }
-  for(let p of powerups)p.life--;powerups=powerups.filter(p=>p.life>0);
-  for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
-  // 🏯 AOE economy: khet income + laal trickle + burj attack
-  if(frame%120===0){for(let b of buildings){if(b.hp<=0)continue;if(b.kind==='farm'){G[b.team].food+=6*civOf(b.team).foodRate;if(b.team==='kali'&&Math.random()<0.3)float(b.x,b.y-24,'+6 🍚','#4ade80')}}}
-  if(frame%300===0){G.laal.wood+=8;G.laal.gold+=5;if(frame%1200===0)laalAgeUp();if(frame%900===0&&mode!=='versus'&&G.laal.wood>=40&&buildings.filter(x=>x.team==='laal').length<4){const lb=G.laal.base;const pool=age.laal>=2?['barrack','tower','farm','market']:['barrack','farm','market'];buildings.push({team:'laal',kind:pool[Math.floor(Math.random()*pool.length)],x:lb.x+rnd(-40,30),y:lb.y-110,hp:220,maxHp:220,cool:0})}}
-  if(frame%300===0){for(let b of buildings){if(b.hp>0&&b.kind==='market'){G[b.team].gold+=5}}}
-  // 🛕 Wonder timer: 90s tak bachao = jeet
-  for(let t of ['kali','laal']){const w=buildings.find(b=>b.team===t&&b.kind==='wonder'&&b.hp>0);if(w){if(wonderT[t]>0){wonderT[t]--;if(wonderT[t]%600===0)float(w.x,w.y-50,'🛕 '+Math.ceil(wonderT[t]/60)+'s!','#FFD700');if(wonderT[t]<=0&&!gameOver){gameOver=true;const win=t==='kali';document.getElementById('msg').textContent=win?'🛕 WONDER JEET! Kali amar! 🎉':'🛕 Laal Wonder jeet gaya! 💔';if(win){addScore(300);S.win();recordWin(mode);showLoot()}else{S.lose()}showBanner(win?'🛕 WONDER JEET! +300⭐':'🛕 HAAR!')}}}}
-  for(let b of buildings){if(b.hp<=0||b.kind!=='tower'||inPrep||!warStarted)continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
-// surprise events har ~45s + tension heartbeat jab fort tootne wala ho
- if(frame>600&&frame%2700===0)triggerEvent();
-  if(frame%50===0&&!gameOver){
-   const tense=(G.kali.fort/G.kali.maxFort<0.2||G.laal.fort/G.laal.maxFort<0.2);
-   if(tense){S.heart();vib(20)}
-  }
-  // wave mode spawner
-if(mode==='waves'&&!inPrep){
-   if(waveState==='break'){waveT--;if(waveT<=0){waveN++;waveLeft=Math.min(14,2+waveN*2);waveTick=0;waveState='attack';warStarted=true;showBanner('🌊 WAVE '+waveN+'!');S.warHorn()}}
-   else{
-    waveTick--;if(waveTick<=0&&waveLeft>0){waveTick=45;waveLeft--;spawnWaveAnt()}
-    if(waveLeft<=0&&!ants.some(a=>a.team==='laal')){const bonus=100*waveN;addScore(bonus);G.kali.food+=30+waveN*10;S.win();
-     if(wavesToWin>0&&waveN>=wavesToWin){gameOver=true;showBanner('🌊 SAARE '+wavesToWin+' WAVES CLEAR! JEET! +'+bonus+'⭐');recordWin(mode);showLoot()}
-     else{showBanner('✅ WAVE '+waveN+' CLEAR! +'+bonus+'⭐');waveState='break';waveT=480}}
-   }
-  }
- if(mode==='food'){timeLeft-=1/60;if(timeLeft<=0){endByFood();break}}else elapsed+=1/60;
- if(foods.length<9&&Math.random()<0.04)spawnFood(1);
- if(Math.random()<0.008)spawnFood(1,true); // golden
- for(let m of motes){m.x+=m.vx;m.y+=m.vy;if(m.x<0)m.x=W;if(m.x>W)m.x=0;if(m.y<0)m.y=H;if(m.y>H)m.y=0}
- for(let c of cloudShadows){c.x+=c.vx;if(c.x-c.rx>W)c.x=-c.rx}
- for(let cr of craters)cr.life--;craters=craters.filter(c=>c.life>0);
- for(let sl of slashes){sl.r+=9;sl.life--}slashes=slashes.filter(x=>x.life>0);
- // hero move - keyboard + mobile joystick
-  if(hero&&hero.hp>0){
-   let dx=joyDX,dy=joyDY;
-   if(keys['ArrowLeft'])dx-=1;if(keys['ArrowRight'])dx+=1;
-   if(mode!=='versus'){if(keys['KeyA'])dx-=1;if(keys['KeyD'])dx+=1}
-   if(keys['ArrowUp'])dy-=1;if(keys['ArrowDown'])dy+=1;
-   if(keys['KeyI'])dy-=1;if(keys['KeyK'])dy+=1;if(keys['KeyL'])dx+=1;
-   if(dx||dy){let l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}hero.px=hero.x;hero.py=hero.y;hero.x+=dx*hero.speed*1.4*timeScale;hero.y+=dy*hero.speed*1.4*timeScale;hero.face=Math.atan2(dy,dx);hero.tx=null;hero.ty=null;
-   if(Math.random()<0.25)parts.push({x:hero.x-dx*12,y:hero.y-dy*12,vx:rnd(-0.4,0.4),vy:rnd(-0.5,0),life:20,max:20,c:joshT>0?'rgba(255,230,0,0.7)':'rgba(255,215,0,0.4)',sz:2.5,grav:0,glow:true});}
-  hero.x=Math.max(10,Math.min(W-10,hero.x));hero.y=Math.max(10,Math.min(H-10,hero.y));
- } else if(hero&&hero.hp<=0){heroRespawn--;if(heroRespawn<=0){hero.hp=hero.maxHp;hero.x=G.kali.base.x;hero.y=G.kali.base.y;hero.px=hero.x;hero.py=hero.y;ants.push(hero);float(hero.x,hero.y,'👑 RAJA WAPAS!','#ff0');spark(hero.x,hero.y,'#FFD700',20);S.power()}}
-  // P2: Laal Raja (versus me WASD + right joystick)
-  if(mode==='versus'&&laalRaja&&laalRaja.hp>0&&(laalRaja.chargeT||0)<=0){
-   let dx2=joy2DX,dy2=joy2DY;
-   if(keys['KeyA'])dx2-=1;if(keys['KeyD'])dx2+=1;if(keys['KeyW'])dy2-=1;if(keys['KeyS'])dy2+=1;
-   if(dx2||dy2){let l=Math.hypot(dx2,dy2);if(l>1){dx2/=l;dy2/=l}laalRaja.px=laalRaja.x;laalRaja.py=laalRaja.y;laalRaja.x+=dx2*laalRaja.speed*1.4*timeScale;laalRaja.y+=dy2*laalRaja.speed*1.4*timeScale;laalRaja.face=Math.atan2(dy2,dx2);laalRaja.tx=null;laalRaja.ty=null}
-   laalRaja.x=Math.max(10,Math.min(W-10,laalRaja.x));laalRaja.y=Math.max(10,Math.min(H-10,laalRaja.y));
-  }
-function spawnWaveAnt(){
- const pool=['soldier','soldier','runner'];
- if(waveN>=3)pool.push('tank');
- if(waveN>=2)pool.push('runner');
- const hasH=ants.some(a=>a.team==='laal'&&a.type==='healer');
- if(waveN>=4&&!hasH)pool.push('healer');
- spawn('laal',pool[Math.floor(Math.random()*pool.length)],true);
-}
-  // auto + AI (versus me P2 khud khelta hai, waves me wave-spawner)
-  const d=DIFF[difficulty];
-  if(auto&&!inPrep&&frame%100===0){const kw=ants.filter(a=>a.team==='kali'&&a.type==='worker').length;if(kw<4&&G.kali.food>=10)spawn('kali','worker')}
-  if(mode==='versus'&&frame%100===0){const lw2=ants.filter(a=>a.team==='laal'&&a.type==='worker').length;if(lw2<3)spawn('laal','worker',true)}
-  if(mode!=='versus'&&mode!=='waves'&&!inPrep&&Math.random()<d.ai*(laalStrat==='rush'?1.3:1)){
-   const lw=ants.filter(a=>a.team==='laal'&&a.type==='worker').length,ls=ants.filter(a=>a.team==='laal'&&FIGHTERS.includes(a.type)).length;
-   const lt=ants.filter(a=>a.team==='laal'&&a.type==='tank').length,lh=ants.filter(a=>a.team==='laal'&&a.type==='healer').length;
-   if(laalStrat==='eco'&&G.laal.food>=10&&(lw<5||Math.random()<0.5))spawn('laal','worker');
-   else if(laalStrat==='rush'&&G.laal.food>=20&&Math.random()<0.7)spawn('laal','soldier');
-   else if(G.laal.food>=35&&lt<2&&Math.random()<0.15)spawn('laal','tank');
-   else if(G.laal.food>=25&&lh<1&&Math.random()<0.2)spawn('laal','healer');
-   else if(G.laal.food>=12&&Math.random()<0.25)spawn('laal','runner');
-   else if(G.laal.food>=20&&(ls<lw+1||Math.random()<0.45))spawn('laal','soldier');else if(G.laal.food>=10)spawn('laal','worker');
-   if(G.laal.food>(laalStrat==='turtle'?50:90)&&G.laal.fort<(laalStrat==='turtle'?550:450))repair('laal');
-   if(difficulty==='hard'&&!laalRaja&&frame>600&&!inPrep){laalRaja=makeHero('laal');laalRaja.x=G.laal.base.x;laalRaja.px=laalRaja.x;ants.push(laalRaja);float(laalRaja.x,laalRaja.y,'😈 LAAL RAJA AAYA!','red');S.warHorn()}
-  }
- for(let a of ants){
-  if(a.hp<=0)continue;a.cool--;
-  if(a.boost>0)a.boost--;
-  // store prev for facing smoothing
-  a.px=a.px??a.x;a.py=a.py??a.y;
-  if(a.type==='worker'){
-   if(!a.carry){
-    const foc=(a.team==='kali')?workerFocus:'food';
-    if(foc==='wood'){
-     let best=null,bd=1e9;for(let t of trees){if(t.hp<=0)continue;let dd=Math.hypot(a.x-t.x,a.y-t.y);if(dd<bd){bd=dd;best=t}}
-     if(best){moveTo(a,best.x,best.y);if(bd<16){a.carry=true;a.carryKind='wood';best.hp-=12;spark(a.x,a.y,'#a3e635',5);if(best.hp<=0){float(best.x,best.y,'🪵 Ped khatm!','#a3e635');setTimeout(()=>{best.hp=120;best.x=rnd(200,700);best.y=rnd(70,430)},18000)}}}
-     else{let best2=null,bd2=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd2){bd2=dd;best2=f}}if(best2){moveTo(a,best2.x,best2.y);if(bd2<13){a.carry=true;a.carryKind='food';a.carryGolden=best2.golden;foods.splice(foods.indexOf(best2),1)}}}
-    }else if(foc==='gold'){
-     let best=null,bd=1e9;for(let m of mines){if(m.hp<=0)continue;let dd=Math.hypot(a.x-m.x,a.y-m.y);if(dd<bd){bd=dd;best=m}}
-     if(best){moveTo(a,best.x,best.y);if(bd<18){a.carry=true;a.carryKind='gold';best.hp-=8;spark(a.x,a.y,'#FFD700',5);if(best.hp<=0){float(best.x,best.y,'🪙 Khan khatm!','#FFD700');setTimeout(()=>{best.hp=200},24000)}}}
-     else{let best2=null,bd2=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd2){bd2=dd;best2=f}}if(best2){moveTo(a,best2.x,best2.y);if(bd2<13){a.carry=true;a.carryKind='food';a.carryGolden=best2.golden;foods.splice(foods.indexOf(best2),1)}}}
-    }else{
-     let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
-     if(best){moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryKind='food';a.carryGolden=best.golden;if(best.mirchi){a.boost=600;float(a.x,a.y,'🌶 SPEED!','red')}foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#aaffaa',5)}}
-    }
-   }else{const b=G[a.team].base;moveTo(a,b.x,b.y);if(Math.hypot(a.x-b.x,a.y-b.y)<32){a.carry=false;const civ=civOf(a.team);
-    if(a.carryKind==='wood'){let v=20*civ.woodRate;if(inPrep)v*=2;G[a.team].wood+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#365314':'#f66',4,2)}
-    else if(a.carryKind==='gold'){let v=12;if(inPrep)v*=2;G[a.team].gold+=v;S.eat();spark(b.x,b.y,'#FFD700',6)}
-    else{let v=a.carryGolden?45:15;v*=civ.foodRate;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}}
-   let en=nearestEnemy(a,42);if(!inPrep&&en&&a.cool<=0){en.hp-=hitDmg(a,en);S.hit();slashes.push({x:en.x,y:en.y,r:4,life:10,max:10});a.cool=32;if(en.hp<=0){burst(en.x,en.y,'red',10,3);onKill('bite',en)}}
-   }else if(a.type==='healer'){
-    // ⚕ healer: zakhmi sathi ko dhoondhkar heal karo
-    let hurt=null,hd=130;
-    for(let b of ants){if(b.team!==a.team||b===a||b.hp<=0||b.hp>=b.maxHp)continue;let dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd<hd){hd=dd;hurt=b}}
-    if(hurt){a.px=a.x;a.py=a.y;moveTo(a,hurt.x,hurt.y);if(hd<44&&a.cool<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+14);a.cool=40;S.heal();spark(hurt.x,hurt.y-8,'#4ade80',5)}}
-    else{const hb=G[a.team].base;if(Math.hypot(a.x-hb.x,a.y-hb.y)>70){a.px=a.x;a.py=a.y;moveTo(a,hb.x,hb.y)}}
-    let en2=nearestEnemy(a,30);if(!inPrep&&en2&&a.cool<=0){en2.hp-=hitDmg(a,en2);a.cool=40;if(en2.hp<=0){burst(en2.x,en2.y,'red',8,2);onKill('bite',en2)}}
-   }else if(a.type==='villager'){
-    // 🏘 gaon-wala: khana jama karo, khatra dekhkar ghar ki taraf bhago!
-    const hut=huts.length?huts.reduce((m,h)=>Math.hypot(a.x-h.x,a.y-h.y)<Math.hypot(a.x-m.x,a.y-m.y)?h:m,huts[0]):null;
-    const flee=nearestEnemy(a,85);
-    if(flee&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y)}
-    else if(a.carry&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y);if(Math.hypot(a.x-hut.x,a.y-hut.y)<28){a.carry=false;const gv=a.carryGolden?45:15;villageStore+=gv;S.eat();spark(hut.x,hut.y-26,'#c4b5fd',5);if(Math.random()<0.25)float(hut.x,hut.y-44,'🌾+'+gv,'#e9d5ff')}}
-    else if(!a.carry){let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#d6bcfa',4)}}}
-    let en3=nearestEnemy(a,30);if(!inPrep&&en3&&a.cool<=0){en3.hp-=4;a.cool=40;if(en3.hp<=0){burst(en3.x,en3.y,'#c4b5fd',8,2);onKill('bite',en3)}}
-   }else{
-    // hero + soldier + runner + tank
-    // 😈 LAAL RAJA charge attack (versus me nahi — wahan P2 khud chalata hai)
-    if(a===laalRaja&&mode!=='versus'&&!inPrep&&warStarted){
-     if(a.chargeCD===undefined){a.chargeCD=400;a.chargeT=0}
-     if(a.chargeCD>0)a.chargeCD--;
-     if(a.chargeT>0){
-      a.chargeT--;a.px=a.x;a.py=a.y;
-      let dx=a.cxx-a.x,dy=a.cyy-a.y,dd=Math.hypot(dx,dy)||1;
-      const cs=4.8*timeScale;a.x+=dx/dd*Math.min(cs,dd);a.y+=dy/dd*Math.min(cs,dd);a.face=Math.atan2(dy,dx);
-      if(Math.random()<0.5)parts.push({x:a.x,y:a.y,vx:rnd(-1,1),vy:rnd(-1,0.5),life:18,max:18,c:'rgba(255,60,60,0.7)',sz:3,grav:0,glow:true});
-      for(let b of ants){if(b.team==='kali'&&b.hp>0&&Math.hypot(a.x-b.x,a.y-b.y)<28&&a.cool<=0){b.hp-=25;a.cool=12;S.clash(true);slashes.push({x:b.x,y:b.y,r:5,life:10,max:10});burst(b.x,b.y,'red',5,2);if(b.hp<=0){burst(b.x,b.y,'red',10,3);onKill('charge',b)}}}
-      if(a.chargeT<=0||dd<6){a.chargeT=0}
-      continue;
-     }else if(a.chargeCD<=0){
-      let tgt=(hero&&hero.hp>0)?hero:nearestEnemy(a,420);
-      if(tgt){a.cxx=tgt.x;a.cyy=tgt.y;a.chargeT=50;a.chargeCD=650;S.warHorn();setTimeout(()=>S.goliBurst(2),200);float(a.x,a.y-30,'😈 CHARGE!','red');vib(50)}
-     }
-    }
-   let en=nearestEnemy(a,a.type==='hero'?260:230);
-   let ebase=a.team==='kali'?G.laal.base:G.kali.base,eTeam=a.team==='kali'?'laal':'kali';
-   let tx=a.tx??(a.team==='kali'?rally.x:ebase.x),ty=a.ty??(a.team==='kali'?rally.y:ebase.y);
-    if(a.team==='laal'){if(inPrep||!warStarted){tx=G.laal.base.x-70;ty=G.laal.base.y}else if(a.type!=='hero'){const aggro=laalStrat==='turtle'?70:(laalStrat==='rush'?200:130);if(en&&Math.hypot(a.x-en.x,a.y-en.y)<aggro){tx=en.x;ty=en.y}else if(laalStrat==='turtle'){tx=G.laal.base.x+50;ty=G.laal.base.y}else{tx=ebase.x;ty=ebase.y}}}
-   if(a===hero&&a.tx==null&&en&&Math.hypot(a.x-en.x,a.y-en.y)<200){tx=en.x;ty=en.y}
-   if((a.type==='hero')&&!en){
-    let best=null,bd=90;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
-    if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<14){let v=best.golden?45:15;G[a.team].food+=v;S.eat();foods.splice(foods.indexOf(best),1);burst(a.x,a.y,'green',5,2)}continue}
-   }
-    if(en&&!inPrep&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
-     if(a.cool<=0){en.hp-=hitDmg(a,en);a.face=Math.atan2(en.y-a.y,en.x-a.x);a.cool=a.type==='hero'?14:26;S.swing();S.clash(a.type==='hero');slashes.push({x:en.x,y:en.y,r:5,life:12,max:12});burst(en.x,en.y,'#ff0',3,2);if(en.hp<=0){burst(en.x,en.y,'red',10,3);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0');puff(en.x,en.y,'rgba(120,0,0,0.5)',6);onKill('sword',en)}}
-    }else if(warStarted&&en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx)){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
-     else{a.px=a.x;a.py=a.y;moveTo(a,tx,ty);if(warStarted&&Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){let fd=a.dmg*(a.type==='hero'?0.9:0.6);if(a.team==='kali'&&doubleT>0)fd*=2;G[eTeam].fort-=fd;a.cool=30;S.cannon();vib(40);burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4,3);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
-    // 🏘 gaon ka ghar looto: paas ho to thoko, +3🍚 har vaar
-    if(a.cool<=0&&huts.length){
-     let hh=null,hd=46;
-     for(let h of huts){let dd=Math.hypot(a.x-h.x,a.y-h.y);if(dd<hd){hd=dd;hh=h}}
-     if(hh){hh.hp-=a.dmg*0.6;a.cool=30;S.hit();spark(hh.x,hh.y-22,'#ffd27f',4);G[a.team].food+=3;
-      if(Math.random()<0.3)float(hh.x,hh.y-52,'+3 🍚','#ffd27f');
-      if(hh.hp<=0)destroyHut(hh,a.team)}
-    }
-    // 🏯 dushman imarat todo (sirf jung me)
-    if(warStarted&&a.cool<=0){
-     let bb=null,bd=48;for(let b of buildings){if(b.team===a.team||b.hp<=0)continue;let dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd<bd){bd=dd;bb=b}}
-     if(bb){bb.hp-=a.dmg*0.8;a.cool=30;S.hit();spark(bb.x,bb.y,'orange',5);if(bb.hp<=0){burst(bb.x,bb.y,'#8b5a2b',14,4);float(bb.x,bb.y-24,'🏯 Toot gaya!','#ff0');addScore(30)}}
-    }
-  }
- }
- ants=ants.filter(a=>a.hp>0);
- if(hero&&hero.hp<=0&&ants.includes(hero)===false){heroRespawn=600;float(G.kali.base.x,G.kali.base.y,'Raja gir gaya! 10s...','red')}
-  if(!gameOver&&!endCine&&(G.kali.fort<=0||G.laal.fort<=0)){
-   startCine(G.kali.fort<=0?'kali':'laal');
-  }
-  if(endCine&&!endCine.done){
-   endCine.t++;
-   const bb=G[endCine.loser].base;
-   if(endCine.t%12===0){spawnDebris(bb.x+rnd(-30,30),bb.y+rnd(-40,20),endCine.loser,4);puff(bb.x+rnd(-35,35),bb.y+rnd(-50,30),'rgba(60,50,40,0.6)',2)}
-   if(endCine.t%20===0){shakeAll=8;if(endCine.loser==='kali')shakeK=8;else shakeL=8}
-   if(endCine.t===60){rings.push({x:bb.x,y:bb.y,r:12,life:45,max:45});S.boom()}
-   if(endCine.t>=150){
-    gameOver=true;endCine.done=true;
-    const kaliLost=endCine.loser==='kali';
-    if(kaliLost){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose();showBanner('💔 HAAR! Score '+score+' ⭐');gainXP(score)}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';addScore(150);S.win();showBanner('🎉 JEET! +150 ⭐');recordWin(mode);showLoot()}
-    try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
-   }
-  }
+  frame++;
+  if(treaty>0){treaty--;if(treaty===0){msg('⚔ SANDHI KHATM! Dushman hamla karega — foj taiyaar rakho!');S.age()}}
+  else elapsed+=1/60;
+  if(frame%150===0)aiTick();
+  for(const u of units)updateUnit(u);
+  // halki dooriyan (bheed na lage)
+  for(let i=0;i<units.length;i++){const a=units[i];if(a.hp<=0)continue;
+   for(let j=i+1;j<units.length;j++){const c=units[j];if(c.hp<=0)continue;
+    const dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);
+    if(d>0.1&&d<12){const p=(12-d)/d*0.3;a.x-=dx*p;a.y-=dy*p;c.x+=dx*p;c.y+=dy*p}}}
+  updateBlds();
+  units=units.filter(u=>u.hp>0);
+  // jeet/haar
+  const myTC=blds.some(b=>b.team==='P1'&&b.kind==='tc'),aiTC=blds.some(b=>b.team==='AI'&&b.kind==='tc');
+  if(!myTC){endGame(false);break}
+  if(!aiTC){endGame(true);break}
  }
  updateHUD();
+ if(frame%30===0)refreshPanel();
 }
-function endByFood(){gameOver=true;let k=Math.floor(G.kali.food),l=Math.floor(G.laal.food);let bonus=0;
- if(k>l){bonus=100;if(daily===todayStr()){bonus+=200;try{localStorage.setItem('klDaily',daily)}catch(e){}float(450,180,'📅 DAILY HO GAYA! +200','#0ff')}addScore(bonus)}
- document.getElementById('msg').textContent=k>l?`🎉 JEET! ${k} vs ${l} khana! +${bonus}⭐`:k<l?`💔 HAAR! ${l} vs ${k}`:'🤝 DRAW!';
- if(k>=l){S.win();showBanner(k>l?'🎉 JEET! +'+bonus+' ⭐':'🤝 DRAW!');if(k>l){recordWin(daily?'daily':'food');showLoot()}}else{S.lose();gainXP(score)}
- try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
+function endGame(win){
+ gameOver=true;
+ document.getElementById('endTitle').textContent=win?'🎉 FATEH! JEET!' :'💔 SHIKAST! HAAR!';
+ document.getElementById('endDesc').textContent=win?'Dushman ka Town Center toot gaya! '+civOf('P1').name+' amar rahe!':'Tumhara Town Center toot gaya. Phir se koshish karo!';
+ document.getElementById('endScreen').style.display='flex';
+ if(win)S.win();else S.lose();
 }
-
-// ================= HIGH-QUALITY RENDER =================
-function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-function draw(){
- ctx.save();if(shakeAll>0){ctx.translate(rnd(-shakeAll,shakeAll)/2,rnd(-shakeAll,shakeAll)/2);shakeAll--}
- ctx.clearRect(-30,-30,W+60,H+60);
- // 📷 camera: Raja follow ya beech me
- if(followCam&&hero&&hero.hp>0&&started&&!gameOver&&!paused){camX+=(hero.x-camX)*0.12;camY+=(hero.y-camY)*0.12}
- else{camX+=(W/2-camX)*0.08;camY+=(H/2-camY)*0.08}
- clampCam();
- ctx.fillStyle='#3d5c22';ctx.fillRect(-30,-30,W+60,H+60);
- ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-camX,-camY);
- // cached ground
- ctx.drawImage(bgC,0,0);
- // ☀️ dynamic sunlight: din me upar se roshni, raat me mashaalon
- if(nightF<0.5){
-  const sg=ctx.createLinearGradient(0,0,W*0.3,H);
-  sg.addColorStop(0,`rgba(255,245,200,${0.10*(1-nightF*2)})`);sg.addColorStop(1,'rgba(255,245,200,0)');
-  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
- }
- // cloud shadows drifting
- for(let c of cloudShadows){ctx.fillStyle='rgba(0,0,0,0.08)';ctx.beginPath();ctx.ellipse(c.x,c.y,c.rx,c.ry,0,0,7);ctx.fill()}
- // craters
- for(let c of craters){const a=Math.min(1,c.life/c.max*1.2);ctx.fillStyle=`rgba(20,10,5,${0.55*a})`;ctx.beginPath();ctx.ellipse(c.x,c.y,34,22,0,0,7);ctx.fill();ctx.fillStyle=`rgba(0,0,0,${0.5*a})`;ctx.beginPath();ctx.ellipse(c.x,c.y,20,12,0,0,7);ctx.fill();ctx.strokeStyle=`rgba(255,120,0,${0.35*a})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(c.x,c.y,36,24,0,0,7);ctx.stroke()}
- // swaying grass + flowers
- const tG=frame/40;
- for(let g of grassTufts){
-  const sway=Math.sin(tG+g.ph)*3*g.s;
-  ctx.strokeStyle=g.dark?'#3f6b1e':'#5a8f2a';ctx.lineWidth=2;ctx.lineCap='round';
-  ctx.beginPath();
-  ctx.moveTo(g.x,g.y);ctx.quadraticCurveTo(g.x+sway,g.y-8*g.s,g.x+sway*1.4,g.y-12*g.s);
-  ctx.moveTo(g.x+4,g.y);ctx.quadraticCurveTo(g.x+4+sway,g.y-6*g.s,g.x+4+sway*1.3,g.y-10*g.s);
-  ctx.moveTo(g.x-4,g.y);ctx.quadraticCurveTo(g.x-4+sway,g.y-7*g.s,g.x-4+sway*1.2,g.y-11*g.s);
-  ctx.moveTo(g.x+8,g.y);ctx.quadraticCurveTo(g.x+8+sway*0.7,g.y-4*g.s,g.x+8+sway,g.y-7*g.s);
-  ctx.moveTo(g.x-8,g.y);ctx.quadraticCurveTo(g.x-8+sway*0.7,g.y-5*g.s,g.x-8+sway,g.y-8*g.s);
-  ctx.stroke();
-  // beej ka dana (sirf halki ghaas par)
-  if(!g.dark){ctx.fillStyle='#d9c27a';ctx.beginPath();ctx.arc(g.x+sway*1.4,g.y-12*g.s,1.8,0,7);ctx.fill()}
-  // subah ki os (din me chamak)
-  if(nightF<0.25&&((g.x*7+g.y*13)|0)%5===0){ctx.fillStyle='rgba(200,240,255,0.85)';ctx.beginPath();ctx.arc(g.x+2,g.y-6*g.s,1.2,0,7);ctx.fill()}
- }
- // clover (teen-patti) + khumbhi
- for(let c of clovers){
-  const cb=Math.sin(frame/35+c.ph)*1;
-  ctx.strokeStyle='#2d5a15';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+cb,c.y-5*c.s);ctx.stroke();
-  ctx.fillStyle='#3f9e2f';
-  for(let k=0;k<3;k++){const aa=k/3*6.28+c.ph;ctx.beginPath();ctx.arc(c.x+cb+Math.cos(aa)*2.5*c.s,c.y-6*c.s+Math.sin(aa)*2.5*c.s,2.2*c.s,0,7);ctx.fill()}
-  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.beginPath();ctx.arc(c.x+cb-1,c.y-7*c.s,0.8,0,7);ctx.fill();
- }
- for(let s of shrooms){
-  const sw2=Math.sin(frame/40+s.ph)*1;
-  ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(s.x,s.y+1,6*s.s,2.4,0,0,7);ctx.fill();
-  ctx.fillStyle='#e8dcc0';ctx.fillRect(s.x-2*s.s,s.y-8*s.s,4*s.s,8*s.s);
-  ctx.fillStyle='#d43d3d';ctx.beginPath();ctx.arc(s.x+sw2,s.y-8*s.s,6*s.s,Math.PI,0);ctx.fill();
-  ctx.fillStyle='#a82e2e';ctx.beginPath();ctx.arc(s.x+sw2,s.y-8*s.s,6*s.s,Math.PI*1.15,Math.PI*1.85);ctx.fill();
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x-2*s.s+sw2,s.y-10*s.s,1.4,0,7);ctx.arc(s.x+2*s.s+sw2,s.y-9*s.s,1.2,0,7);ctx.arc(s.x+sw2,s.y-12*s.s,1,0,7);ctx.fill();
- }
- for(let f of flowers){
-  const bob=Math.sin(frame/30+f.ph)*1.5;
-  ctx.strokeStyle='#2d5a15';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(f.x,f.y-10+bob);ctx.stroke();
-  ctx.fillStyle=f.c;for(let p=0;p<5;p++){const a=p/5*6.28+frame/60;ctx.beginPath();ctx.arc(f.x+Math.cos(a)*4,f.y-12+bob+Math.sin(a)*4,3,0,7);ctx.fill()}
-  ctx.fillStyle='#ffef00';ctx.beginPath();ctx.arc(f.x,f.y-12+bob,3,0,7);ctx.fill();
- }
- // josh banner + status pills (screen-space UI, camera se bahar)
- ctx.save();ctx.setTransform(1,0,0,1,0,0);
- if(joshT>0){ctx.save();ctx.shadowColor='#ffea00';ctx.shadowBlur=18;ctx.fillStyle='#3a2a00';rr(370,74,180,28,10);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ff0';ctx.font='bold 16px sans-serif';ctx.fillText('⚡ JOSH ON! '+(joshT/60).toFixed(0)+'s',382,93);ctx.restore()}
- // active effects + wave + weather pills
- {let px=300,py=112;ctx.font='bold 13px sans-serif';
-  const pill=(t,c)=>{ctx.fillStyle='rgba(0,0,0,0.65)';const w=ctx.measureText(t).width+16;rr(px,py-16,w,22,8);ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.5;rr(px,py-16,w,22,8);ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(t,px+8,py);px+=w+6};
-  if(shieldT>0)pill('🛡 '+(shieldT/60).toFixed(0)+'s','#38bdf8');
-  if(doubleT>0)pill('💢 '+(doubleT/60).toFixed(0)+'s','#f472b6');
-  if(freezeT>0)pill('❄ '+(freezeT/60).toFixed(0)+'s','#a5f3fc');
-  if(killStreak>=4)pill('🔥 x'+Math.min(5,1+Math.floor(killStreak/4)),'#ff0');
-  if(mode==='waves')pill(waveState==='break'?'🌊 Wave '+(waveN+1)+' in '+(waveT/60).toFixed(0)+'s':'🌊 WAVE '+waveN+' ('+ants.filter(a=>a.team==='laal').length+' left)','#67e8f9');
-  if(huts.length>0)pill('🏘 '+huts.length+' 🌾'+villageStore,'#d6a756');
-  pill(ageName('kali'),'#FFD700');
-  if(wonderT.kali>0)pill('🛕 '+Math.ceil(wonderT.kali/60)+'s','#FFD700');
-  if(daily)pill('📅 DAILY','#FFD700');
-  if(inPrep)pill('⏱️ TAIYAARI '+Math.max(0,Math.ceil(prepT/60))+'s','#22c55e');
-  pill(nightF>0.5?'🌙 Raat':'☀ Din',nightF>0.5?'#818cf8':'#fde047');
-  if(rainT>0)pill('🌧 Barish','#a5f3fc');
- }
- ctx.restore();
- drawRally();
- // foods + powerups HQ
- for(let f of foods)drawFood(f);
- for(let p of powerups)drawPower(p);
- // 🏯 AOE nodes: ped + sona + imaratein
- for(let t of trees){if(t.hp<=0)continue;ctx.save();ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(t.x,t.y+14,14,5,0,0,7);ctx.fill();ctx.fillStyle='#5a3a15';ctx.fillRect(t.x-3,t.y-2,6,16);ctx.fillStyle='#2d6a1e';ctx.beginPath();ctx.arc(t.x,t.y-12,15,0,7);ctx.fill();ctx.fillStyle='#3f9e2f';ctx.beginPath();ctx.arc(t.x-4,t.y-16,8,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.fillText('🪵',t.x-7,t.y+4);ctx.restore()}
- for(let m of mines){if(m.hp<=0)continue;ctx.save();ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(m.x,m.y,22,14,0,0,7);ctx.fill();ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(m.x-5,m.y-3,4,0,7);ctx.arc(m.x+6,m.y+2,3,0,7);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 11px sans-serif';ctx.fillText('🪙',m.x-8,m.y+5);ctx.restore()}
- for(let b of buildings){if(b.hp<=0)continue;ctx.save();const big=b.kind==='wonder';const w2=big?34:22,h2=big?48:34;ctx.fillStyle=b.team==='kali'?'#3a2d16':'#3d0a0a';rr(b.x-w2,b.y-20,w2*2,h2,6);ctx.fill();ctx.strokeStyle=big?'#FFD700':'#c68a2e';ctx.lineWidth=big?3:2;rr(b.x-w2,b.y-20,w2*2,h2,6);ctx.stroke();ctx.font=big?'bold 26px sans-serif':'bold 18px sans-serif';ctx.fillText(b.kind==='barrack'?'🏟':b.kind==='farm'?'🌾':b.kind==='tower'?'🗼':b.kind==='market'?'🛒':b.kind==='wonder'?'🛕':'🏠',b.x-(big?17:13),b.y+6);if(big&&wonderT[b.team]>0){ctx.fillStyle='#FFD700';ctx.font='bold 12px sans-serif';ctx.fillText(Math.ceil(wonderT[b.team]/60)+'s',b.x-12,b.y-32)}ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-20,b.y-28,40,5);ctx.fillStyle='#4ade80';ctx.fillRect(b.x-20,b.y-28,40*Math.max(0,b.hp/b.maxHp),5);ctx.restore()}
- // forts HQ (behind ants? draw base then ants then top flag for depth)
- drawFortBase(G.kali.base.x,G.kali.base.y,'kali',shakeK);
- drawFortBase(G.laal.base.x,G.laal.base.y,'laal',shakeL);
- // gaon ke ghar
- for(let h of huts)drawHut(h);
- if(shakeK>0)shakeK--;if(shakeL>0)shakeL--;
- // ants sorted by y for depth
- let sorted=[...ants].sort((a,b)=>a.y-b.y);
- for(let a of sorted)drawAnt(a);
- // 🐜 ants ke neeche soft contact shadow (ground par padi hui)
- for(let a of sorted){
-  const rr2=(a.type==='hero'?14:({worker:6,runner:5,soldier:8,tank:11,healer:7,villager:6}[a.type]??7));
-  ctx.fillStyle='rgba(0,0,0,0.18)';ctx.beginPath();ctx.ellipse(a.x,a.y+rr2*0.9+3,rr2+2,4.5,0,0,7);ctx.fill();
- }
- // fort tops (flags wave over ants) + torch flames
- drawFortTop(G.kali.base.x,G.kali.base.y,'kali');
- drawFortTop(G.laal.base.x,G.laal.base.y,'laal');
- // slashes
- for(let s of slashes){const k=s.life/s.max;ctx.save();ctx.globalAlpha=k;ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.shadowColor='#ffdd00';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(s.x,s.y,s.r,frame/6,frame/6+4.5);ctx.stroke();ctx.strokeStyle='rgba(255,200,0,0.7)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(s.x,s.y,s.r+3,frame/6,frame/6+4.5);ctx.stroke();ctx.restore()}
- // particles HQ
- for(let p of parts){
-  const k=Math.max(0,p.life/p.max);
-  ctx.save();
-  if(p.smoke){ctx.globalAlpha=k*0.8;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz*(1.6-k*0.6),0,7);ctx.fill()}
-  else if(p.glow){ctx.globalAlpha=k;ctx.shadowColor=p.c;ctx.shadowBlur=12;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,7);ctx.fill()}
-  else{ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.55)';ctx.beginPath();ctx.arc(p.x-p.sz*0.3,p.y-p.sz*0.3,p.sz*0.35,0,7);ctx.fill()}
-  ctx.restore();
-  p.x+=p.vx;p.y+=p.vy;p.vy+=(p.grav??0.05);p.life--;
- }
- parts=parts.filter(p=>p.life>0);
- // malba physics (game over ke baad bhi girta rahega)
- for(let db of debris){db.vy+=0.35;db.x+=db.vx;db.y+=db.vy;db.rot+=db.vr;if(db.y>H-8){db.y=H-8;db.vy*=-0.35;db.vx*=0.7;db.vr*=0.6}db.life--}
- debris=debris.filter(d=>d.life>0);
- for(let db of debris){ctx.save();ctx.translate(db.x,db.y);ctx.rotate(db.rot);ctx.globalAlpha=Math.min(1,db.life/60);ctx.fillStyle=db.c;ctx.fillRect(-db.w/2,-db.h/2,db.w,db.h);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(-db.w/2,-db.h/2,db.w,2);ctx.restore()}
- // shockwave rings
- for(let rg of rings){rg.r+=11;rg.life--}
- rings=rings.filter(r=>r.life>0);
- for(let rg of rings){const k=Math.max(0,rg.life/rg.max);ctx.save();ctx.globalAlpha=k;ctx.strokeStyle='#ffdd88';ctx.lineWidth=5*k+1;ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r,0,7);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r*0.85,0,7);ctx.stroke();ctx.restore()}
- // motes sparkle
- for(let m of motes){ctx.fillStyle=`rgba(255,255,220,${0.25+0.2*Math.sin(frame/25+m.ph)})`;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fill()}
- // floats with pop scale
- ctx.textAlign='left';
- for(let f of floats){
-  const pop=f.life>55?(70-f.life)/15:1;
-  ctx.save();ctx.translate(f.x,f.y);ctx.scale(pop,pop);
-  ctx.font='bold 15px sans-serif';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(f.t,-20,0);ctx.fillStyle=f.c;ctx.fillText(f.t,-20,0);
-  ctx.restore();f.y-=1;f.life--;
- }
- floats=floats.filter(f=>f.life>0);
- // barish ki boondein (world me — zoom ke saath)
- if(rainT>0){ctx.save();ctx.strokeStyle='rgba(170,210,255,0.55)';ctx.lineWidth=2;ctx.lineCap='round';for(let rd of rainDrops){ctx.beginPath();ctx.moveTo(rd.x,rd.y);ctx.lineTo(rd.x-3,rd.y+14);ctx.stroke()}ctx.restore()}
- ctx.restore();
- // ---- screen-space overlays (zoom se bahar) ----
- // raat ka andhera (mashaalon ki roshni me jung!)
- if(nightF>0.01){ctx.fillStyle=`rgba(8,8,35,${0.45*nightF})`;ctx.fillRect(0,0,W,H)}
- // tension: fort tootne wala ho to laal dhak-dhak kinari
- if(!gameOver&&started&&(G.kali.fort/G.kali.maxFort<0.2||G.laal.fort/G.laal.maxFort<0.2)){ctx.save();ctx.strokeStyle=`rgba(255,0,0,${0.35+0.25*Math.sin(frame/8)})`;ctx.lineWidth=16;ctx.strokeRect(6,6,W-12,H-12);ctx.restore()}
- // vignette + cinematic top light
- const vg=ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.85);
- vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.38)');
- ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
- ctx.fillStyle='rgba(255,255,200,0.05)';ctx.fillRect(0,0,W,60);
- // 🎬 color grade: din me garam, raat me thanda
- if(nightF>0.02){ctx.fillStyle=`rgba(40,60,140,${0.10*nightF})`;ctx.fillRect(0,0,W,H)}
- else{ctx.fillStyle='rgba(255,200,120,0.04)';ctx.fillRect(0,0,W,H)}
- // combo banner (sabse upar, hamesha saaf) if(bannerT>0){bannerT--;const bk=Math.min(1,bannerT/20,(160-bannerT)/15+0.3);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,bk));ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(bannerTxt,W/2,240);const bg2=ctx.createLinearGradient(0,200,0,250);bg2.addColorStop(0,'#fff7cc');bg2.addColorStop(1,'#ff9d00');ctx.fillStyle=bg2;ctx.fillText(bannerTxt,W/2,240);ctx.textAlign='left';ctx.restore()}
- // ⏱️ TAIYAARI: countdown ring + dono taraf ki army power
- if(inPrep&&!gameOver){
-  const secs=Math.max(0,Math.ceil(prepT/60));
-  const frac=Math.max(0,prepT/prepLen);
-  ctx.save();
-  ctx.fillStyle='rgba(0,0,0,0.42)';ctx.fillRect(0,0,W,56);
-  ctx.font='bold 15px sans-serif';ctx.fillStyle='#fde68a';ctx.textAlign='center';
-  ctx.fillText('⏱️ TRAINING TIME — koi ladai nahi! Sirf army train karo',W/2,22);
-  // ring
-  ctx.beginPath();ctx.arc(W/2,86,22,-Math.PI/2,-Math.PI/2+Math.PI*2*frac);
-  ctx.strokeStyle=secs<=5?'#ff4444':'#22c55e';ctx.lineWidth=7;ctx.lineCap='round';ctx.stroke();
-  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(secs+'s',W/2,92);
-  // army power bars
-  const kP=armyPower('kali'),lP=armyPower('laal'),mx=Math.max(60,kP,lP);
-  const bar=(x,label,p,c)=>{
-   ctx.textAlign='left';ctx.font='bold 12px sans-serif';ctx.fillStyle='#fff';ctx.fillText(label+' '+p+' ⚔',x,136);
-   ctx.fillStyle='rgba(0,0,0,0.6)';rr(x,142,190,11,5);ctx.fill();
-   ctx.fillStyle=c;rr(x,142,190*Math.min(1,p/mx),11,5);ctx.fill();
-  };
-  bar(24,'⬛ Kali',kP,'#e5e7eb');
-  bar(W-214,'🟥 Laal',lP,'#e11d1d');
-  ctx.textAlign='center';ctx.font='bold 13px sans-serif';ctx.fillStyle='#fde68a';
-  ctx.fillText('🎁 Har type 1 MUFT! 🍚 2× | Ready ho to ⚔ HAMLA SHURU dabao',W/2,170);
-  ctx.restore();
- }
- if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillText('⏸ PAUSED',340,260);ctx.shadowBlur=0}
- if(flashT>0)flashT--;else if(!gameOver)document.getElementById('msg').textContent='';
- let tt=mode==='food'?Math.max(0,timeLeft):elapsed;
- document.getElementById('timeT').textContent=Math.floor(tt/60)+':'+String(Math.floor(tt%60)).padStart(2,'0');
+function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('bPause').textContent=paused?'▶':'⏸'}
+function toggleSpeed(){speed=speed===1?2:1;document.getElementById('bSpeed').textContent='🚀 '+speed+'x'}
+function loop(){step();if(started)draw();requestAnimationFrame(loop)}
+// ============ MENU + START ============
+document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');myCiv=b.dataset.c;S.click()});
+document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
+function startGame(){
+ ac();S.click();
+ units=[];blds=[];parts=[];floats=[];uid=1;bid=1;frame=0;elapsed=0;gameOver=false;paused=false;speed=1;
+ res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
+ age={P1:0,AI:0};treaty=40*60;sel={units:[],bld:null};placing=null;aiPlan={t:0,attackSent:0};
+ const civs=['japan','china','india'].filter(c=>c!==myCiv);
+ aiCiv=civs[Math.floor(Math.random()*civs.length)];
+ genMap();paintBG();
+ blds.push({id:bid++,team:'P1',kind:'tc',x:250,y:800,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:250,ry:700});
+ blds.push({id:bid++,team:'AI',kind:'tc',x:1350,y:200,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:1350,ry:300});
+ const nv=civOf('P1').extraVill?4:3;
+ for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',250+rnd(-60,60),800+rnd(-60,60));u.state='idle'}
+ for(let i=0;i<3;i++){const u=mkUnit('AI','villager',1350+rnd(-60,60),200+rnd(-60,60));u.state='idle'}
+ view={x:300,y:750,z:0.85};
+ started=true;
+ document.getElementById('menu').style.display='none';
+ document.getElementById('bPause').textContent='⏸';
+ msg('🕊 40s Sandhi! Villager se khana/lakdi jama karo, Ghar banao, Yug badhao!');
+ float(250,700,'🏰 Tumhara gaon!','#4ade80');
+ updateHUD();refreshPanel();
 }
-function drawRally(){
- const p=1+Math.sin(frame/10)*0.12;
- ctx.save();
- ctx.fillStyle='rgba(255,220,0,0.14)';ctx.beginPath();ctx.ellipse(rally.x,rally.y,26*p,16*p,0,0,7);ctx.fill();
- ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.setLineDash([6,4]);ctx.lineDashOffset=-frame/2;
- ctx.beginPath();ctx.ellipse(rally.x,rally.y,18*p,18*p,0,0,7);ctx.stroke();ctx.setLineDash([]);
- ctx.strokeStyle='rgba(255,220,0,0.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(rally.x,rally.y,24*p,24*p,0,0,7);ctx.stroke();
- // mini flag
- ctx.strokeStyle='#222';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(rally.x,rally.y);ctx.lineTo(rally.x,rally.y-26);ctx.stroke();
- const w=Math.sin(frame/8)*4;
- ctx.fillStyle='#e11d1d';ctx.beginPath();ctx.moveTo(rally.x,rally.y-26);ctx.quadraticCurveTo(rally.x+12,rally.y-24+w,rally.x+22,rally.y-20+w);ctx.lineTo(rally.x,rally.y-14);ctx.closePath();ctx.fill();
- ctx.fillStyle='#000';ctx.font='bold 13px sans-serif';ctx.fillText('⚔',rally.x-7,rally.y+5);
- ctx.restore();
-}
-function drawFood(f){
- const bob=Math.sin(frame/20+f.ph)*2;
- ctx.save();ctx.translate(f.x,f.y+bob);
- // shadow
- ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,6,8,3.5,0,0,7);ctx.fill();
- if(f.golden){
-  const pu=1+Math.sin(frame/8)*0.12;
-  ctx.shadowColor='#FFD700';ctx.shadowBlur=22;
-  const g=ctx.createRadialGradient(-2,-2,1,0,0,11*pu);
-  g.addColorStop(0,'#fff8c0');g.addColorStop(0.5,'#FFD700');g.addColorStop(1,'#a16207');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,9*pu,0,7);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,9*pu,frame/15,frame/15+4);ctx.stroke();
-  ctx.fillStyle='#5a3a00';ctx.font='bold 11px sans-serif';ctx.fillText('★',-4.5,4);
-  // sparkle rays
-  ctx.strokeStyle='rgba(255,240,150,0.9)';ctx.lineWidth=1.5;
-  for(let i=0;i<4;i++){const a=frame/20+i*1.57;ctx.beginPath();ctx.moveTo(Math.cos(a)*12,Math.sin(a)*12);ctx.lineTo(Math.cos(a)*16,Math.sin(a)*16);ctx.stroke()}
- }else if(f.mirchi){
-  ctx.shadowColor='red';ctx.shadowBlur=10;
-  ctx.fillStyle='#c81e1e';ctx.beginPath();ctx.ellipse(0,0,7,5,-0.3,0,7);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle='#ff6b6b';ctx.beginPath();ctx.ellipse(-2,-1.5,3,1.8,-0.3,0,7);ctx.fill();
-  ctx.strokeStyle='#166534';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(6,-2);ctx.quadraticCurveTo(10,-6,12,-8);ctx.stroke();
-  ctx.fillStyle='#166534';ctx.beginPath();ctx.ellipse(6,-2,3,2,0.5,0,7);ctx.fill();
- }else{
-  ctx.shadowColor='rgba(0,255,100,0.4)';ctx.shadowBlur=8;
-  const g=ctx.createRadialGradient(-2,-2,1,0,0,8);
-  g.addColorStop(0,'#d8ffb0');g.addColorStop(0.5,'#4caf50');g.addColorStop(1,'#1b5e20');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,f.r,0,7);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(-2,-2,2,0,7);ctx.fill();
-  ctx.fillStyle='rgba(0,0,0,0.15)';ctx.beginPath();ctx.arc(1,2,3,0,7);ctx.fill();
- }
-  ctx.restore();
-}
-function drawPower(p){
- const bob=Math.sin(frame/18+p.ph)*3;
- const blink=p.life<240?(Math.sin(frame/4)>0?1:0.35):1;
- ctx.save();ctx.translate(p.x,p.y+bob);ctx.globalAlpha=blink;
- ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,10,12,4,0,0,7);ctx.fill();
- const pu=1+Math.sin(frame/10+p.ph)*0.1;
- ctx.shadowColor=p.c;ctx.shadowBlur=20;
- const g=ctx.createRadialGradient(-3,-3,1,0,0,15*pu);
- g.addColorStop(0,'#ffffff');g.addColorStop(0.5,p.c);g.addColorStop(1,'rgba(0,0,0,0.4)');
- ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,13*pu,0,7);ctx.fill();
- ctx.shadowBlur=0;
- ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,13*pu,frame/14,frame/14+4.5);ctx.stroke();
- ctx.font='15px sans-serif';ctx.fillText(p.icon,-8,6);
- ctx.restore();
-}
-function fortHP(team){return G[team].fort/G[team].maxFort}
-function drawFortBase(x,y,team,sh){
- const kali=team==='kali';
- const hp=fortHP(team);
- const wallC=kali?'#2a2a30':'#8a1a1a', darkC=kali?'#111':'#5a0d0d', trimC=kali?'#d1d5db':'#FFD700';
- ctx.save();ctx.translate(rnd(-sh,sh),rnd(-sh,sh));
- // toot raha fort: dheere dhasna + halka fade
- const breaking=endCine&&endCine.loser===team;
- const bt=breaking?Math.min(1,endCine.t/120):0;
- if(bt>0){ctx.translate(Math.sin(endCine.t/6)*3*bt,bt*24);ctx.globalAlpha=1-bt*0.2}
- // ground shadow + glow
- ctx.fillStyle='rgba(0,0,0,0.35)';ctx.beginPath();ctx.ellipse(x,y+56,56,14,0,0,7);ctx.fill();
- // ☀️ fort ka lambha saya (dhoop ke hisaab se)
- ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(x+18,y+58,52,12,0.3,0,7);ctx.fill();
- if(team==='kali'){ctx.shadowColor='rgba(255,255,255,0.15)';ctx.shadowBlur=18}else{ctx.shadowColor='rgba(255,40,40,0.35)';ctx.shadowBlur=18}
- // side towers
- for(let s of [-38,38]){
-  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(x+s-13,y-44,30,104);
-  const tg=ctx.createLinearGradient(x+s-12,0,x+s+18,0);
-  if(kali){tg.addColorStop(0,'#3f3f46');tg.addColorStop(0.5,'#1c1c20');tg.addColorStop(1,'#0a0a0c')}else{tg.addColorStop(0,'#c0392b');tg.addColorStop(0.5,'#7a1010');tg.addColorStop(1,'#3d0606')}
-  ctx.fillStyle=tg;ctx.fillRect(x+s-12,y-46,30,102);
-  // battlements
-  ctx.fillStyle=darkC;for(let i=0;i<3;i++)ctx.fillRect(x+s-12+i*10,y-56,8,12);
-  // window slit
-  ctx.fillStyle='#000';rr(x+s-4,y-10,8,22,3);ctx.fill();
-  ctx.fillStyle=trimC;ctx.fillRect(x+s-4,y-10,8,3);
-  // roof cone
-  ctx.fillStyle=kali?'#52525b':'#4a0d0d';ctx.beginPath();ctx.moveTo(x+s-15,y-56);ctx.lineTo(x+s+3,y-78);ctx.lineTo(x+s+21,y-56);ctx.closePath();ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.beginPath();ctx.moveTo(x+s-15,y-56);ctx.lineTo(x+s+3,y-78);ctx.lineTo(x+s+3,y-56);ctx.closePath();ctx.fill();
- }
- ctx.shadowBlur=0;
- // main keep
- const mg=ctx.createLinearGradient(x-30,0,x+30,0);
- if(kali){mg.addColorStop(0,'#3a3a41');mg.addColorStop(0.5,'#17171b');mg.addColorStop(1,'#000')}else{mg.addColorStop(0,'#d64545');mg.addColorStop(0.5,'#8a1a1a');mg.addColorStop(1,'#4a0a0a')}
- ctx.fillStyle=mg;rr(x-32,y-48,64,104,6);ctx.fill();
- ctx.strokeStyle=trimC;ctx.lineWidth=2;rr(x-32,y-48,64,104,6);ctx.stroke();
- // 🧱 brick texture: har ek brick par halki chamak + andhera edge
- for(let by=y-30;by<y+50;by+=12){for(let bx=x-32+((by/12)%2)*10;bx<x+32;bx+=20){
-  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(bx,by,18,2);
-  ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(bx,by+10,18,2);
- }}
- // brick lines
- ctx.strokeStyle=kali?'rgba(255,255,255,0.10)':'rgba(0,0,0,0.25)';ctx.lineWidth=1;
- for(let by=y-30;by<y+50;by+=12){ctx.beginPath();ctx.moveTo(x-32,by);ctx.lineTo(x+32,by);ctx.stroke()}
- for(let by=y-30;by<y+50;by+=12){for(let bx=x-32+((by/12)%2)*10;bx<x+32;bx+=20){ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx,by+12);ctx.stroke()}}
- // top banner plate
- ctx.fillStyle=kali?'#0a0a0a':'#e11d1d';rr(x-32,y-62,64,22,4);ctx.fill();
- ctx.strokeStyle=trimC;ctx.lineWidth=1.5;rr(x-32,y-62,64,22,4);ctx.stroke();
- ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(kali?'KALI FORT':'LAAL FORT',x,y-47);ctx.textAlign='left';
- // golden studs
- ctx.fillStyle=trimC;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(x-16+i*16,y-62,2.5,0,7);ctx.fill()}
- // gate arch
- ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(x,y+40,15,18,0,0,7);ctx.fill();
- const dg=ctx.createLinearGradient(x-12,0,x+12,0);
- dg.addColorStop(0,'#5a3a15');dg.addColorStop(0.5,'#a06a25');dg.addColorStop(1,'#4a2e0e');
- ctx.fillStyle=dg;ctx.beginPath();ctx.ellipse(x,y+42,11,14,0,0,7);ctx.fill();
- ctx.strokeStyle='#2a1a05';ctx.lineWidth=2;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(x+i*5,y+30);ctx.lineTo(x+i*5,y+54);ctx.stroke()}
- ctx.fillStyle='#FFD700';for(let yy=34;yy<=50;yy+=6){ctx.beginPath();ctx.arc(x-7,y+yy,1.5,0,7);ctx.arc(x+7,y+yy,1.5,0,7);ctx.fill()}
- // 🚪 darwaza par lakdi ki grain + dhoop ka gradient
- const woodG=ctx.createLinearGradient(x-11,y+30,x+11,y+54);
- woodG.addColorStop(0,'rgba(255,220,150,0.15)');woodG.addColorStop(0.5,'rgba(0,0,0,0)');woodG.addColorStop(1,'rgba(0,0,0,0.25)');
- ctx.fillStyle=woodG;ctx.beginPath();ctx.ellipse(x,y+42,11,14,0,0,7);ctx.fill();
- // damage cracks + fire when low
- if(hp<0.66){ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-20,y-20);ctx.lineTo(x-8,y-2);ctx.lineTo(x-16,y+14);ctx.stroke()}
- if(hp<0.33){ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x+18,y-30);ctx.lineTo(x+6,y-8);ctx.lineTo(x+14,y+20);ctx.stroke();
-  // fire licks
-  for(let i=0;i<2;i++){const fx=x+rnd(-24,24),fy=y-60+rnd(-6,6);const fl=8+Math.sin(frame/5+i*2)*3;const fg=ctx.createRadialGradient(fx,fy,1,fx,fy,fl*2);fg.addColorStop(0,'#ffff00');fg.addColorStop(0.5,'#ff7b00');fg.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=fg;ctx.beginPath();ctx.arc(fx,fy,fl,0,7);ctx.fill()}
-  if(Math.random()<0.15)puff(x+rnd(-25,25),y-55,'rgba(50,50,50,0.6)',1);
- }
- // fort HP mini bar on fort
- ctx.fillStyle='rgba(0,0,0,0.7)';rr(x-30,y+60,60,7,3);ctx.fill();
- const hpg=ctx.createLinearGradient(x-30,0,x+30,0);
- if(kali){hpg.addColorStop(0,'#e5e7eb');hpg.addColorStop(1,'#9ca3af')}else{hpg.addColorStop(0,'#ff6b6b');hpg.addColorStop(1,'#b91c1c')}
- ctx.fillStyle=hpg;const hw=60*Math.max(0,hp);rr(x-30,y+60,hw,7,3);ctx.fill();
- // malbe ka dher (tootne par ugta hai)
- if(bt>0){
-  ctx.fillStyle=kali?'#3f3f46':'#7a2a2a';
-  ctx.beginPath();ctx.moveTo(x-54,y+58);ctx.quadraticCurveTo(x-20,y+58-bt*48,x,y+58-bt*30);ctx.quadraticCurveTo(x+25,y+58-bt*42,x+54,y+58);ctx.closePath();ctx.fill();
-  ctx.fillStyle='rgba(0,0,0,0.35)';
-  for(let ri=0;ri<Math.floor(8*bt);ri++){ctx.fillRect(x+rnd(-46,46),y+58-rnd(0,Math.max(1,bt*34)),rnd(4,10),rnd(3,7))}
-  ctx.fillStyle=trimC;
-  for(let ri=0;ri<Math.floor(4*bt);ri++){ctx.beginPath();ctx.arc(x+rnd(-40,40),y+58-rnd(0,Math.max(1,bt*30)),2,0,7);ctx.fill()}
-  if(Math.random()<bt*0.5){const fx=x+rnd(-35,35),fy=y+52-rnd(0,bt*30);const fg=ctx.createRadialGradient(fx,fy,1,fx,fy,16);fg.addColorStop(0,'#ffff00');fg.addColorStop(0.5,'#ff7b00');fg.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=fg;ctx.beginPath();ctx.arc(fx,fy,11,0,7);ctx.fill()}
- }
- ctx.restore();
-}
-function drawFortTop(x,y,team){
- const kali=team==='kali';
- ctx.save();
- // gira hua jhanda + bujhi mashaal (fort tootne par)
- if(endCine&&endCine.loser===team&&endCine.t>40){
-  ctx.translate(x+28,y+42);ctx.rotate(1.25);
-  ctx.strokeStyle='#3a2a10';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-36);ctx.stroke();
-  ctx.fillStyle=kali?'#333':'#b91c1c';ctx.fillRect(0,-36,28,13);
-  ctx.fillStyle=kali?'#fff':'#FFD700';ctx.font='bold 10px sans-serif';ctx.fillText(kali?'K':'L',10,-26);
-  ctx.restore();
-  if(Math.random()<0.25)parts.push({x:x+rnd(-30,30),y:y+30,vx:rnd(-0.3,0.3),vy:rnd(-1,-0.4),life:40,max:40,c:'rgba(70,70,70,0.6)',sz:rnd(4,8),grav:-0.01,smoke:true});
-  return;
- }
- // flag pole + waving flag
- const sway=Math.sin(frame/12+x)*4;
- ctx.strokeStyle='#3a2a10';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-62);ctx.lineTo(x,y-96);ctx.stroke();
- ctx.fillStyle=kali?'#111':'#e11d1d';
- ctx.beginPath();ctx.moveTo(x,y-96);
- ctx.quadraticCurveTo(x+20,y-94+sway,x+38,y-88+sway);
- ctx.lineTo(x+38,y-72+sway);ctx.quadraticCurveTo(x+20,y-78+sway,x,y-76);ctx.closePath();ctx.fill();
- ctx.strokeStyle=kali?'#fff':'#FFD700';ctx.lineWidth=1.5;ctx.stroke();
- ctx.fillStyle=kali?'#fff':'#FFD700';ctx.font='bold 11px sans-serif';ctx.fillText(kali?'K':'L',x+12,y-74+sway*0.5);
- // torches flicker (raat me badi roshni)
- for(let s of [-32,32]){
-  const fl=(4+Math.sin(frame/6+s)*1.5+Math.random()*1.5)*(1+nightF*0.9);
-  ctx.fillStyle='#3a2a10';ctx.fillRect(x+s-2,y-2,4,14);
-  const fg=ctx.createRadialGradient(x+s,y-8,1,x+s,y-8,fl*3);
-  fg.addColorStop(0,'#fff7a0');fg.addColorStop(0.4,'#ffb300');fg.addColorStop(1,'rgba(255,60,0,0)');
-  ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x+s,y-8,fl*2.2,0,7);ctx.fill();
-  ctx.fillStyle='#ffef00';ctx.beginPath();ctx.ellipse(x+s,y-7,2.5,fl*0.8,0,0,7);ctx.fill();
-   if(Math.random()<0.06)parts.push({x:x+s,y:y-14,vx:rnd(-0.3,0.3),vy:rnd(-1,-0.5),life:25,max:25,c:'rgba(255,150,0,0.8)',sz:2,grav:-0.02,glow:true});
-  }
-  ctx.restore();
-}
-function drawHut(h){
- const dmg=h.hp/h.maxHp;
- ctx.save();
- // zameen par saya
- ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(h.x,h.y+24,34,9,0,0,7);ctx.fill();
- // ☀️ ghar ka lambha saya
- ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(h.x+14,h.y+26,32,8,0.3,0,7);ctx.fill();
- // mitti ki gol deewar
- const wg=ctx.createRadialGradient(h.x-8,h.y-8,4,h.x,h.y,30);
- wg.addColorStop(0,'#c09a5c');wg.addColorStop(0.6,'#8b5a2b');wg.addColorStop(1,'#4a2e0e');
- ctx.fillStyle=wg;ctx.beginPath();ctx.arc(h.x,h.y,26,Math.PI,0);ctx.closePath();ctx.fill();
- ctx.strokeStyle='#3a2410';ctx.lineWidth=2;ctx.stroke();
- // 🧱 mitti ki texture: chhoti chhoti dhaariyan
- ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;
- for(let ty=h.y-18;ty<h.y+20;ty+=7){ctx.beginPath();ctx.moveTo(h.x-24,ty);ctx.quadraticCurveTo(h.x,ty+3,h.x+24,ty);ctx.stroke()}
- // ghaas-phus ki chhat (layered)
- for(let li=0;li<3;li++){
-  ctx.strokeStyle=['#e3c878','#d4af5a','#b8933f'][li];ctx.lineWidth=7;ctx.lineCap='round';
-  ctx.beginPath();ctx.arc(h.x,h.y+2,30-li*6,Math.PI*1.08,Math.PI*1.92);ctx.stroke();
- }
- // ☀️ chhat par dhoop ka gradient
- const thG=ctx.createLinearGradient(h.x-30,h.y-30,h.x+30,h.y+10);
- thG.addColorStop(0,'rgba(255,240,180,0.25)');thG.addColorStop(1,'rgba(0,0,0,0.15)');
- ctx.fillStyle=thG;ctx.beginPath();ctx.arc(h.x,h.y+2,30,Math.PI*1.08,Math.PI*1.92);ctx.closePath();ctx.fill();
- ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(h.x,h.y-30,4,0,7);ctx.fill();
- // darwaza + raat me garm roshni
- ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.ellipse(h.x,h.y+2,8,13,0,0,7);ctx.fill();
- if(nightF>0.3){ctx.shadowColor='#ffb300';ctx.shadowBlur=12+nightF*10;ctx.fillStyle='#ffca55';ctx.beginPath();ctx.ellipse(h.x,h.y+4,5,9,0,0,7);ctx.fill();ctx.shadowBlur=0}
- // 🚪 darwaza par lakdi ki grain
- ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=1;
- for(let gy=h.y-6;gy<h.y+14;gy+=5){ctx.beginPath();ctx.moveTo(h.x-6,gy);ctx.lineTo(h.x+6,gy+2);ctx.stroke()}
- // khidki
- ctx.fillStyle=nightF>0.3?'#ffca55':'#3a2a10';ctx.beginPath();ctx.arc(h.x+15,h.y-6,4,0,7);ctx.fill();
- // 🪟 khidki ka frame
- ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(h.x+15,h.y-6,4,0,7);ctx.stroke();
- // chimni + dhuaan
- ctx.fillStyle='#5a4a3a';ctx.fillRect(h.x+12,h.y-38,7,16);
- // ☀️ chimni ka saya
- ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(h.x+16,h.y-38,4,16);
- if(Math.random()<0.08)parts.push({x:h.x+15,y:h.y-40,vx:rnd(-0.2,0.3),vy:rnd(-0.9,-0.4),life:45,max:45,c:'rgba(200,200,200,0.5)',sz:rnd(3,6),grav:-0.015,smoke:true});
- // 🌾 bhandar ka dher (jitna anaaj, utna bada!)
- if(villageStore>0){const sh=Math.min(12,3+villageStore/15);ctx.fillStyle='#e3c878';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.5;ctx.stroke();
-  // ☀️ dher par dhoop
-  ctx.fillStyle='rgba(255,240,180,0.2)';ctx.beginPath();ctx.arc(h.x-20,h.y+18,sh,Math.PI*1.1,Math.PI*1.9);ctx.fill();}
- // tutan-phutan
- if(dmg<0.66){ctx.strokeStyle='rgba(30,15,5,0.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(h.x-12,h.y-18);ctx.lineTo(h.x-4,h.y-6);ctx.lineTo(h.x-10,h.y+2);ctx.stroke()}
- if(dmg<0.33){ctx.strokeStyle='rgba(30,15,5,0.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(h.x+10,h.y-20);ctx.lineTo(h.x+16,h.y-8);ctx.lineTo(h.x+12,h.y+4);ctx.stroke()}
- if(dmg<0.33&&Math.random()<0.2)puff(h.x+rnd(-18,18),h.y-20,'rgba(120,90,50,0.6)',1);
- // HP bar
- ctx.fillStyle='rgba(0,0,0,0.7)';rr(h.x-24,h.y-52,48,6,3);ctx.fill();
- const hg=ctx.createLinearGradient(h.x-24,0,h.x+24,0);hg.addColorStop(0,'#e3c878');hg.addColorStop(1,'#8b5a2b');
- ctx.fillStyle=hg;if(dmg>0){rr(h.x-24,h.y-52,48*Math.max(0,dmg),5,2);ctx.fill()}
- // ☀️ HP bar par dhoop
- ctx.fillStyle='rgba(255,255,255,0.15)';if(dmg>0){rr(h.x-24,h.y-52,48*Math.max(0,dmg),2,1);ctx.fill()}
- ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('🏘',h.x,h.y-56);ctx.textAlign='left';
- ctx.restore();
-}
-function drawAnt(a){
- const heroA=a.type==='hero';
- const RM={worker:6,runner:5,soldier:8,tank:11,healer:7,villager:6};
- const r=heroA?14:(RM[a.type]??7);
- const kali=a.team==='kali',vil=a.team==='village';
- const ang=a.face??0;
- const run=Math.hypot((a.x-(a.px??a.x)),(a.y-(a.py??a.y)));
- const moving=run>0.05?1:0;
- const wig=frame*(moving?0.9:0.25)+ (a.ph||0);
- ctx.save();ctx.translate(a.x,a.y);
- // shadow
- ctx.fillStyle='rgba(0,0,0,0.30)';ctx.beginPath();ctx.ellipse(0,r*0.9+3,r+2,4.5,0,0,7);ctx.fill();
- // ☀️ body ka upar se soft highlight (3D feel)
- ctx.fillStyle='rgba(255,255,255,0.10)';ctx.beginPath();ctx.ellipse(-2,-r*0.5,r*0.7,r*0.4,0,0,7);ctx.fill();
- // josh / boost aura
- if(joshT>0&&a.team==='kali'){ctx.strokeStyle='rgba(255,230,0,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.lineDashOffset=-frame;ctx.beginPath();ctx.arc(0,0,r+7,0,7);ctx.stroke();ctx.setLineDash([])}
- if(a.boost>0){ctx.shadowColor='red';ctx.shadowBlur=12}
- // hero aura ring (skin ke rang me)
- if(heroA){
-  const glowC=(a===hero)?skinGlow(kali):(kali?'#FFD700':'#ff2222');
-  ctx.save();ctx.shadowColor=glowC;ctx.shadowBlur=16;
-  ctx.strokeStyle=glowC;ctx.globalAlpha=0.9;ctx.lineWidth=2.5;
-  ctx.setLineDash([8,6]);ctx.lineDashOffset=frame*1.5;
-  ctx.beginPath();ctx.arc(0,0,r+9,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore();
-  if(SKIN==='fire'&&a===hero&&Math.random()<0.3)parts.push({x:a.x+rnd(-8,8),y:a.y+rnd(-4,4),vx:rnd(-0.3,0.3),vy:rnd(-1.2,-0.4),life:20,max:20,c:'#ff7b00',sz:3,grav:-0.02,glow:true});
- }
- // 🛡 kavach bubble (kali) / ❄ freeze tint (laal) / 😈 charge trail
- if(a.team==='kali'&&shieldT>0){ctx.save();ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2.5;ctx.shadowColor='#38bdf8';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(0,0,r+6,0,7);ctx.stroke();ctx.restore()}
- if(a.team==='laal'&&freezeT>0){ctx.save();ctx.fillStyle='rgba(165,243,252,0.35)';ctx.beginPath();ctx.arc(0,0,r+3,0,7);ctx.fill();ctx.restore()}
- if(a.chargeT>0){ctx.save();ctx.fillStyle='rgba(255,40,40,0.35)';ctx.beginPath();ctx.ellipse(-14,0,14,8,0,0,7);ctx.fill();ctx.restore()}
- if(a.type==='healer'){ctx.save();ctx.strokeStyle='rgba(74,222,128,0.8)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.lineDashOffset=frame;ctx.beginPath();ctx.arc(0,0,r+5,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
- ctx.rotate(ang);
- const bob=moving?Math.sin(wig*1.4)*0.8:Math.sin(wig*0.4)*0.4;
- ctx.translate(0,bob*0.3);
- // cape for hero
- if(heroA){const wv=Math.sin(frame/10)*3;ctx.fillStyle=kali?'#7c1d1d':'#3b0a0a';ctx.beginPath();ctx.moveTo(-6,-7);ctx.quadraticCurveTo(-20-wv,0,-6,7);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(255,255,255,0.15)';ctx.beginPath();ctx.moveTo(-6,-5);ctx.quadraticCurveTo(-16-wv,0,-6,5);ctx.closePath();ctx.fill()}
- // legs: 3 pairs, animated opposite phase
- ctx.lineCap='round';
- for(let l=-1;l<=1;l++){
-  const ph=Math.sin(wig*2.2+l*1.8)*(moving?3.2:1.2);
-   ctx.strokeStyle=kali?'#1a1a1e':(vil?'#4a2e0e':'#7a1010');ctx.lineWidth=heroA?2.8:2;
-  // upper legs
-  ctx.beginPath();ctx.moveTo(1,l*4);ctx.lineTo(-3+ph*0.4,l*6+ph);ctx.lineTo(-8,l*7+ph*1.4);ctx.stroke();
-ctx.beginPath();ctx.moveTo(1,l*4);ctx.lineTo(6+ph*0.3,l*6-ph);ctx.lineTo(11,l*7-ph*1.2);ctx.stroke();
-   // ☀️ taang par halki chamak
-   ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1;
-   ctx.beginPath();ctx.moveTo(1,l*4-1);ctx.lineTo(6+ph*0.3,l*6-ph-1);ctx.stroke();
-  }
- // abdomen (back)
- const abdG=ctx.createRadialGradient(-8,-3,1,-8,0,12);
- if(kali){abdG.addColorStop(0,heroA?'#4b4b55':'#3a3a40');abdG.addColorStop(1,'#050507')}else if(vil){abdG.addColorStop(0,'#b08a4f');abdG.addColorStop(1,'#4a2e0e')}else{abdG.addColorStop(0,heroA?'#ff6b6b':'#f04444');abdG.addColorStop(1,heroA?'#7a0d0d':'#5a0d0d')}
- ctx.fillStyle=abdG;ctx.beginPath();ctx.ellipse(-9,0,heroA?10:7.5,heroA?8:5.5,0,0,7);ctx.fill();
- ctx.strokeStyle=heroA?'#FFD700':'rgba(255,255,255,0.7)';ctx.lineWidth=heroA?2:1;ctx.stroke();
- // ✨ abdomen par glossy highlight (kitni chamak!)
- ctx.fillStyle='rgba(255,255,255,0.22)';ctx.beginPath();ctx.ellipse(-11,-3,3.5,2,-0.3,0,7);ctx.fill();
- // stripes
- ctx.strokeStyle=kali?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.35)';ctx.lineWidth=1.2;
- ctx.beginPath();ctx.moveTo(-12,-4);ctx.quadraticCurveTo(-9,0,-12,4);ctx.moveTo(-7,-5);ctx.quadraticCurveTo(-4,0,-7,5);ctx.stroke();
- // worker: peeth par gehri dhaari
- if(a.type==='worker'){ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-15,0);ctx.quadraticCurveTo(-9,-2.5,-3,0);ctx.stroke()}
- // runner: bijli ka nishan
- if(a.type==='runner'){ctx.fillStyle='#fef08a';ctx.beginPath();ctx.moveTo(-8,-3.5);ctx.lineTo(-5,-3.5);ctx.lineTo(-7,-0.5);ctx.lineTo(-4,-0.5);ctx.lineTo(-8.5,3);ctx.lineTo(-6.5,-0.2);ctx.lineTo(-9.5,-0.2);ctx.closePath();ctx.fill()}
- // healer: chakkar kaatti pattiyan
- if(a.type==='healer'){for(let oi=0;oi<2;oi++){const oa=frame/20+oi*Math.PI+(a.ph||0);const lx=Math.cos(oa)*12,ly=Math.sin(oa)*9;ctx.fillStyle='#4ade80';ctx.beginPath();ctx.ellipse(lx,ly,3,1.8,oa,0,7);ctx.fill();ctx.fillStyle='#166534';ctx.beginPath();ctx.arc(lx,ly,0.8,0,7);ctx.fill()}}
- // tank armor plate + rivets
- if(a.type==='tank'){ctx.fillStyle=kali?'#6b7280':'#f87171';ctx.beginPath();ctx.ellipse(-9,-4,7,3.5,-0.2,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#111';for(let rv=-2;rv<=1;rv++){ctx.beginPath();ctx.arc(-9+rv*4,-5,1.1,0,7);ctx.fill()}
-  // saamne takkar-mar (battering wedge)
-  ctx.fillStyle=kali?'#374151':'#991b1b';ctx.beginPath();ctx.moveTo(5,-6.5);ctx.lineTo(14,0);ctx.lineTo(5,6.5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.moveTo(5,-6.5);ctx.lineTo(14,0);ctx.lineTo(9,0);ctx.closePath();ctx.fill()}
- // thorax
- ctx.fillStyle=kali?'#232328':(vil?'#6b4a1f':'#b91c1c');ctx.beginPath();ctx.arc(0,0,heroA?6.5:4.5,0,7);ctx.fill();
- ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=1;ctx.stroke();
- // head
- const headG=ctx.createRadialGradient(6,-2,1,8,0,9);
- if(kali){headG.addColorStop(0,'#3d3d46');headG.addColorStop(1,'#0a0a0c')}else if(vil){headG.addColorStop(0,'#c09a5c');headG.addColorStop(1,'#5a3a15')}else{headG.addColorStop(0,'#ff7b7b');headG.addColorStop(1,'#7a0d0d')}
- ctx.fillStyle=headG;ctx.beginPath();ctx.arc(heroA?11:8,0,heroA?7:5,0,7);ctx.fill();
- ctx.strokeStyle=heroA?'#FFD700':'#fff';ctx.lineWidth=heroA?2:1;ctx.stroke();
- // 👁 aankhon par chamak (life!)
- ctx.fillStyle='rgba(255,255,255,0.9)';ctx.beginPath();ctx.arc(heroA?12.5:9.5,-3,0.9,0,7);ctx.arc(heroA?12.5:9.5,3,0.9,0,7);ctx.fill();
- // soldier: lohe ka top + kalgi
- if(a.type==='soldier'){const hx=8,hr=5;ctx.fillStyle=kali?'#4b5563':'#7f1d1d';ctx.beginPath();ctx.arc(hx,0,hr+0.6,Math.PI*1.02,Math.PI*1.98);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#e11d1d';ctx.beginPath();ctx.moveTo(hx-2,-hr);ctx.lineTo(hx+2,-hr);ctx.lineTo(hx,-hr-4);ctx.closePath();ctx.fill()}
- // hero: sunehre kandhe (pauldrons)
- if(heroA){ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(1,-7,2.6,0,7);ctx.arc(1,7,2.6,0,7);ctx.fill();ctx.strokeStyle='#7a4a00';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#b45309';ctx.beginPath();ctx.arc(1,-7,1,0,7);ctx.arc(1,7,1,0,7);ctx.fill()}
- // mandibles / jaws
- ctx.strokeStyle=kali?'#d1d5db':'#fecaca';ctx.lineWidth=heroA?2.2:1.6;
- const jaw=Math.sin(frame/8)*1+(a.cool>0?2:0);
- ctx.beginPath();ctx.moveTo(heroA?16:12,-2);ctx.quadraticCurveTo(heroA?22:17,-3+jaw,heroA?24:19,-1+jaw);ctx.stroke();
- ctx.beginPath();ctx.moveTo(heroA?16:12,2);ctx.quadraticCurveTo(heroA?22:17,3-jaw,heroA?24:19,1-jaw);ctx.stroke();
- // ☀️ mandibles par chamak
- ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.9;
- ctx.beginPath();ctx.moveTo(heroA?16:12,-2.4);ctx.quadraticCurveTo(heroA?22:17,-3.4+jaw,heroA?24:19,-1.4+jaw);ctx.stroke();
- if(a.type==='soldier'){ctx.fillStyle='#e5e7eb';ctx.font=(heroA?'9px':'7px')+' sans-serif';ctx.fillText('⚔',2,-6)}
- ctx.shadowBlur=0;
- // antennae waving
- const aw=Math.sin(frame/7+(a.ph||0))*2;
- ctx.strokeStyle=kali?'#9ca3af':'#fecaca';ctx.lineWidth=1.4;
- ctx.beginPath();ctx.moveTo(heroA?14:10,-3);ctx.quadraticCurveTo(heroA?20:15,-8+aw,heroA?23:18,-10+aw);ctx.stroke();
- ctx.beginPath();ctx.moveTo(heroA?14:10,3);ctx.quadraticCurveTo(heroA?20:15,8-aw,heroA?23:18,10-aw);ctx.stroke();
- ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(heroA?23:18,-10+aw,1.4,0,7);ctx.arc(heroA?23:18,10-aw,1.4,0,7);ctx.fill();
- // ☀️ antennae par dhoop ki lakeer
- ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=0.8;
- ctx.beginPath();ctx.moveTo(heroA?14:10,-3.6);ctx.quadraticCurveTo(heroA?20:15,-8.6+aw,heroA?23:18,-10.6+aw);ctx.stroke();
- // straw hat (gaon-wale ki pehchan)
- if(vil){ctx.fillStyle='#e3c878';ctx.beginPath();ctx.ellipse(5,-1,7.5,3,0,0,7);ctx.fill();ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(5,-1,4,Math.PI,0);ctx.fill();ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(5,-1,7.5,3,0,0,7);ctx.stroke()}
- // eyes (forward = +x after rotate)
- ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(heroA?12:9,-2.5,heroA?2.6:1.8,0,7);ctx.arc(heroA?12:9,2.5,heroA?2.6:1.8,0,7);ctx.fill();
- ctx.fillStyle='#000';ctx.beginPath();ctx.arc(heroA?12.8:9.6,-2.5,heroA?1.3:0.9,0,7);ctx.arc(heroA?12.8:9.6,2.5,heroA?1.3:0.9,0,7);ctx.fill();
- ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(heroA?13.2:9.9,-2.8,0.5,0,7);ctx.arc(heroA?13.2:9.9,2.2,0.5,0,7);ctx.fill();
- // 👃 nose dot
- ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.arc(heroA?15:11,0,0.8,0,7);ctx.fill();
- // runner headband + speed lines
- if(a.type==='runner'){ctx.fillStyle='#22d3ee';ctx.fillRect(3,-6.5,9,2.6);ctx.fillStyle='#0e7490';ctx.fillRect(3,-4.2,9,1);if(moving){ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1.5;for(let sl2=0;sl2<2;sl2++){ctx.beginPath();ctx.moveTo(-12-sl2*5,-3+sl2*6);ctx.lineTo(-18-sl2*5,-3+sl2*6);ctx.stroke()}}}
- ctx.restore();
- // carried food floats above (not rotated)
- if(a.carry){
-  const cb=Math.sin(frame/12)*2;
-  ctx.save();ctx.translate(a.x,a.y-13+cb);
-  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,8,6,2.5,0,0,7);ctx.fill();
-  // gaon-wale ki tokri
-  if(a.type==='villager'){ctx.fillStyle='#8b5a2b';ctx.beginPath();ctx.moveTo(-5,1);ctx.lineTo(5,1);ctx.lineTo(3,7);ctx.lineTo(-3,7);ctx.closePath();ctx.fill();ctx.strokeStyle='#4a2e0e';ctx.lineWidth=1;ctx.stroke()}
-  if(a.carryGolden){ctx.shadowColor='#FFD700';ctx.shadowBlur=12;ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(0,0,5.5,0,7);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#5a3a00';ctx.font='bold 8px sans-serif';ctx.fillText('★',-3,3)}
-  else{const g2=ctx.createRadialGradient(-1,-1,0.5,0,0,6);g2.addColorStop(0,'#d8ffb0');g2.addColorStop(1,'#2e7d32');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(0,0,5,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(-1.5,-1.5,1.4,0,7);ctx.fill()}
-  // tiny hands
-  ctx.strokeStyle=a.team==='kali'?'#222':'#7a1010';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-4,6);ctx.lineTo(-1,1);ctx.moveTo(4,6);ctx.lineTo(1,1);ctx.stroke();
-  ctx.restore();
- }
- if(a.boost>0){ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.fillText('🌶',a.x+9,a.y-9)}
- // 👑 RAJA ka bada chamkila taj + naam patti (bheed me turant pehchano!)
- if(heroA){
-  const kaliH=a.team==='kali';
-  const bobY=Math.sin(frame/15)*1.5;
-  // bouncing arrow marker (sabse upar)
-  const ay=a.y-r-62+Math.abs(Math.sin(frame/8))*6;
-  ctx.save();ctx.translate(a.x,ay);
-  ctx.shadowColor=kaliH?'#FFD700':'#ff2222';ctx.shadowBlur=12;
-  ctx.fillStyle=kaliH?'#FFD700':'#ff4444';
-  ctx.beginPath();ctx.moveTo(-7,0);ctx.lineTo(7,0);ctx.lineTo(0,8);ctx.closePath();ctx.fill();
-  ctx.restore();
-  // naam patti
-  const nm=kaliH?'👑 KALI RAJA':'😈 LAAL RAJA';
-  ctx.save();ctx.font='bold 11px sans-serif';
-  const nw=ctx.measureText(nm).width+14;
-  const ny=a.y-r-58+bobY*0.4;
-  ctx.fillStyle=kaliH?'rgba(5,5,8,0.88)':'rgba(60,5,5,0.88)';
-  rr(a.x-nw/2,ny-14,nw,20,7);ctx.fill();
-  ctx.strokeStyle=kaliH?'#FFD700':'#ff5555';ctx.lineWidth=2;
-  rr(a.x-nw/2,ny-14,nw,20,7);ctx.stroke();
-  ctx.fillStyle=kaliH?'#FFD700':'#ffb4b4';ctx.textAlign='center';
-  ctx.fillText(nm,a.x,ny+1);ctx.textAlign='left';
-  ctx.restore();
-  // bada taj (skin ke rang me, 3 nok + moti + nagine, pulse glow)
-  const cy=a.y-r-32+bobY;
-  ctx.save();ctx.translate(a.x,cy);
-  const crC=(a===hero&&kaliH)?skinCrown():(kaliH?'#FFD700':'#ff6666');
-  ctx.shadowColor=crC;ctx.shadowBlur=14+6*Math.sin(frame/10);
-  ctx.fillStyle=crC;
-  ctx.beginPath();
-  ctx.moveTo(-14,7);ctx.lineTo(-14,-5);ctx.lineTo(-7,1);ctx.lineTo(0,-9);ctx.lineTo(7,1);ctx.lineTo(14,-5);ctx.lineTo(14,7);ctx.closePath();ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.strokeStyle=kaliH?'#7a4a00':'#5a0d0d';ctx.lineWidth=1.5;ctx.stroke();
-  // band + gems
-  ctx.fillStyle=kaliH?'#b45309':'#7f1d1d';ctx.fillRect(-14,4,28,4);
-  ctx.fillStyle='#e11d1d';ctx.beginPath();ctx.arc(0,0,3,0,7);ctx.fill();
-  ctx.fillStyle='#22c55e';ctx.beginPath();ctx.arc(-8,0,2,0,7);ctx.arc(8,0,2,0,7);ctx.fill();
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,-9,2.2,0,7);ctx.arc(-14,-5,2,0,7);ctx.arc(14,-5,2,0,7);ctx.fill();
-  ctx.restore();
- }
-  // healer cross badge (screen-space, bobs)
-  if(a.type==='healer'){
-   const hy=a.y-r-14+Math.sin(frame/12)*1.5;
-   ctx.save();ctx.translate(a.x,hy);
-   ctx.shadowColor='#4ade80';ctx.shadowBlur=10;
-   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,6.5,0,7);ctx.fill();
-   ctx.shadowBlur=0;ctx.fillStyle='#16a34a';ctx.fillRect(-1.8,-4.2,3.6,8.4);ctx.fillRect(-4.2,-1.8,8.4,3.6);
-   ctx.restore();
-  }
- // HP bar rounded with border (Raja ki HP body ke just upar — taj ke neeche)
- const w=heroA?38:18;
- const bx=a.x-w/2,by=a.y-r-(heroA?13:(a.type==='tank'?16:14));
- ctx.fillStyle='rgba(0,0,0,0.75)';rr(bx-1,by-1,w+2,6,3);ctx.fill();
- const hpk=Math.max(0,a.hp/a.maxHp);
- const hg2=ctx.createLinearGradient(bx,0,bx+w,0);
- if(hpk>0.5){hg2.addColorStop(0,'#4ade80');hg2.addColorStop(1,'#16a34a')}else if(hpk>0.25){hg2.addColorStop(0,'#fde047');hg2.addColorStop(1,'#f59e0b')}else{hg2.addColorStop(0,'#f87171');hg2.addColorStop(1,'#b91c1c')}
- ctx.fillStyle=hg2;if(hpk>0){rr(bx,by,w*hpk,4,2);ctx.fill()}
-}
-function updateHUD(){
- document.getElementById('kaliHpT').textContent=Math.max(0,Math.round(G.kali.fort));
- document.getElementById('laalHpT').textContent=Math.max(0,Math.round(G.laal.fort));
- document.getElementById('kaliFood').textContent=Math.floor(G.kali.food);
- document.getElementById('laalFood').textContent=Math.floor(G.laal.food);
- try{
-  document.getElementById('kaliWood').textContent=Math.floor(G.kali.wood);
-  document.getElementById('kaliGold').textContent=Math.floor(G.kali.gold);
-  document.getElementById('laalWood').textContent=Math.floor(G.laal.wood);
-  document.getElementById('laalGold').textContent=Math.floor(G.laal.gold);
-  document.getElementById('kaliPop').textContent=popUsed('kali')+'/'+popCap('kali');
-  document.getElementById('civT').textContent=CIVS[myCiv].name+' | '+ageName('kali')+' | 👷:'+(workerFocus==='food'?'🍚':workerFocus==='wood'?'🪵':'🪙')+' | ⚔'+tech.kali.sword+' 🛡'+tech.kali.armor+' 👟'+tech.kali.speed+(wonderT.kali>0?' | 🛕'+Math.ceil(wonderT.kali/60)+'s':'');
-  const ba=document.getElementById('bAge');if(ba)ba.textContent=age.kali>=3?'👑 Max Yug':'🏰 '+(AGES[age.kali+1].icon+' '+AGES[age.kali+1].name);
- }catch(e){}
- document.getElementById('kaliHpB').style.width=(G.kali.fort/G.kali.maxFort*100)+'%';
- document.getElementById('laalHpB').style.width=(G.laal.fort/G.laal.maxFort*100)+'%';
- const cnt=(t,y)=>ants.filter(a=>a.team===t&&a.type===y).length;
- document.getElementById('kaliW').textContent=cnt('kali','worker');
- document.getElementById('kaliS').textContent=cnt('kali','soldier')+cnt('kali','runner')+cnt('kali','tank');
- document.getElementById('kaliH').textContent=cnt('kali','healer');
- document.getElementById('laalW').textContent=cnt('laal','worker');
- document.getElementById('laalS').textContent=cnt('laal','soldier')+cnt('laal','runner')+cnt('laal','tank');
- document.getElementById('laalH').textContent=cnt('laal','healer');
- document.getElementById('heroT').textContent=hero?(hero.hp>0?Math.round(hero.hp)+' ❤':'Respawn...'):'-';
- document.getElementById('scoreT').textContent=score;
- document.getElementById('bestT').textContent=high;
- document.getElementById('lvlT').textContent=level;
- document.getElementById('zoomT').textContent=Math.round(zoom*100)+'%';
- // ⏱️ prep button: sirf taiyari me
- const pb=document.getElementById('prepBtn');
- if(pb)pb.style.display=inPrep?'inline-block':'none';
- if(inPrep)pb.innerHTML='✅ TRAINING KHATM — READY! ('+Math.max(0,Math.ceil(prepT/60))+'s)';
- const ba2=document.getElementById('bAttack');
- if(ba2){if(!inPrep&&!warStarted&&started&&!gameOver){ba2.style.outline='3px solid #22c55e';ba2.textContent='⚔ HAMLA — AB ATTACK KARO!'}else{ba2.style.outline='none';ba2.innerHTML='⚔ Hamla <kbd>F</kbd>'}}
- const ub=document.getElementById('ultBtn');
- if(ub){if(ultCD>0){ub.innerHTML='🌀 '+Math.ceil(ultCD/60)+'s';ub.classList.remove('ready');ub.style.opacity=0.6}else{ub.innerHTML='🌀 Chakravat <kbd>U</kbd>';ub.classList.add('ready');ub.style.opacity=1}}
- // smart buttons: paise na hon to halke dikho (mobile par saaf pata chale)
- const food=G.kali.food;
- const dim=(id,ok)=>{const b=document.getElementById(id);if(b)b.style.opacity=ok?1:0.42};
- dim('bWorker',food>=10);dim('bSoldier',food>=20);dim('bRunner',food>=12);
- dim('bTank',food>=35&&G.kali.wood>=10);dim('bHealer',food>=25);
- dim('bRepair',food>=30&&G.kali.fort<G.kali.maxFort);
- dim('bBomb',food>=40);dim('bSugar',food>=30);dim('bJosh',food>=20&&joshT<=0);
- dim('bBarrack',G.kali.wood>=40);dim('bFarm',G.kali.wood>=30);dim('bTower',G.kali.wood>=50&&G.kali.gold>=20);dim('bHouse',G.kali.wood>=20);
- dim('tSword',tech.kali.sword<2);dim('tArmor',tech.kali.armor<2);dim('tSpeed',tech.kali.speed<2);
- // taiyari me muft units highlight
- if(inPrep){['bWorker','bSoldier','bRunner','bTank','bHealer'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.outline='3px solid #22c55e'})}
- else{['bWorker','bSoldier','bRunner','bTank','bHealer'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.outline='none'})}
-}
-function loop(){step();draw();requestAnimationFrame(loop)}
 loop();
 </script>
 </body>
