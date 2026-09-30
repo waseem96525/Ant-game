@@ -57,7 +57,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare), Right-click = bhejo / katwao / hamla. <kbd>WASD</kbd> = camera, wheel = zoom.<br>
 📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Minimap (neeche-right) tap = camera bhejo.<br>
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
-🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj | 🛒 Market = trade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
+🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
 🕊 Shuru me <b>40s Taiyaari-Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b>
 </div>
 </div>
@@ -109,19 +109,25 @@ const UNITS={
  villager:{hp:40,dmg:3,range:20,speed:2.1,cost:{f:50},time:10*60,icon:'👷'},
  sword:{hp:95,dmg:12,range:26,speed:2.3,cost:{f:60,w:20},time:10*60,icon:'🗡️',minAge:1},
  archer:{hp:65,dmg:9,range:175,speed:2.3,cost:{f:50,w:40},time:12*60,icon:'🏹',minAge:1},
- knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'🐎',minAge:2}
+ knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'🐎',minAge:2},
+ spear:{hp:85,dmg:8,range:30,speed:2.3,cost:{f:50,w:25},time:10*60,icon:'🔱',minAge:1},
+ elephant:{hp:420,dmg:24,range:32,speed:1.7,cost:{f:200,g:100},time:20*60,icon:'🐘',minAge:2,pop:2},
+ cannon:{hp:130,dmg:14,range:230,speed:1.6,cost:{f:100,g:150},time:18*60,icon:'💣',minAge:3,pop:2}
 };
 const BLD={
  tc:{name:'Town Center',w:96,h:72,hp:1500,icon:'🏰'},
  house:{name:'Ghar',w:46,h:38,hp:350,cost:{w:50},time:12*60,pop:5,icon:'🏠'},
  barracks:{name:'Barracks',w:84,h:62,hp:800,cost:{w:150},time:20*60,minAge:1,icon:'🏟️'},
- market:{name:'Market',w:72,h:52,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'}
+ market:{name:'Market',w:72,h:52,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'},
+ tower:{name:'Burj',w:42,h:66,hp:700,cost:{w:100},time:18*60,minAge:1,icon:'🗼'},
+ farm:{name:'Khet',w:72,h:52,hp:400,cost:{w:60},time:12*60,minAge:1,icon:'🌾'}
 };
 const GATHER_T=48,CARRY=15;
 // ============ STATE ============
 let units=[],blds=[],nodes=[],parts=[],floats=[];
 let res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
 let age={P1:0,AI:0},pop={P1:0,AI:0};
+let tech={P1:{atk:0,def:0},AI:{atk:0,def:0}};
 let myCiv='japan',aiCiv='china',difficulty='normal';
 let started=false,paused=false,speed=1,gameOver=false,frame=0;
 let treaty=40*60; // 40s sandhi
@@ -159,24 +165,33 @@ function genMap(){
 // ============ SPAWN / TRAIN / BUILD ============
 function mkUnit(team,type,x,y){
  const U=UNITS[type],cv2=civOf(team),am=ageMult(age[team]);
- let hp=U.hp*am;if(cv2.hp)hp*=cv2.hp;
- let dmg=U.dmg*am;if(type==='sword')dmg*=cv2.swordDmg;
+ let hp=U.hp*am*(1+0.15*tech[team].def);if(cv2.hp)hp*=cv2.hp;
+ let dmg=U.dmg*am*(1+0.15*tech[team].atk);if(type==='sword')dmg*=cv2.swordDmg;
  if(team==='AI'){const m=difficulty==='easy'?0.85:difficulty==='hard'?1.15:1;hp*=m;dmg*=m}
  const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0};
  units.push(u);return u;
 }
 function popCap(t){let c=10;for(const b of blds)if(b.team===t&&b.kind==='house'&&b.done)c+=5;return Math.min(60,c)}
-function popUsed(t){let n=0;for(const u of units)if(u.team===t)n++;return n}
+function popUsed(t){let n=0;for(const u of units)if(u.team===t)n+=(UNITS[u.type].pop||1);return n}
+function trueCost(team,type){const c={};for(const k in UNITS[type].cost)c[k]=UNITS[type].cost[k];if(civOf(team)===CIVS.india&&type==='elephant'){c.f=Math.ceil(c.f*0.8);c.g=Math.ceil(c.g*0.8)}return c}
 function canAfford(t,cost){const r=res[t],cv2=t==='P1'?civOf(t):civOf(t);const m=cv2.cost;for(const k in cost)if(r[k]<Math.ceil(cost[k]*m))return false;return true}
 function pay(t,cost){const r=res[t],m=civOf(t).cost;for(const k in cost)r[k]-=Math.ceil(cost[k]*m)}
 function trainUnit(team,bldId,type){
  const b=blds.find(x=>x.id===bldId);if(!b||!b.done)return;
- const U=UNITS[type];
+ const U=UNITS[type],C=trueCost(team,type);
  if(type!=='villager'&&age[team]<(U.minAge||0)){if(team==='P1')msg('⬆️ Pehle '+AGES[U.minAge].name+' Yug chahiye!');return}
- if(popUsed(team)>=popCap(team)){if(team==='P1')msg('🏠 Abaadi full! Ghar banao!');return}
- if(!canAfford(team,U.cost)){if(team==='P1')msg('💰 Resource kam!');return}
+ if(popUsed(team)+(U.pop||1)>popCap(team)){if(team==='P1')msg('🏠 Abaadi full! Ghar banao!');return}
+ if(!canAfford(team,C)){if(team==='P1')msg('💰 Resource kam!');return}
  if(b.queue.length>=5)return;
- pay(team,U.cost);b.queue.push({type,t:U.time});if(team==='P1')S.click();
+ pay(team,C);b.queue.push({type,t:U.time});if(team==='P1')S.click();
+}
+const TECHCOST={atk:{f:100,g:75},def:{f:75,w:100}};
+function resTech(team,k){
+ if(tech[team][k]>=4){if(team==='P1')msg('✅ Max upgrade!');return}
+ const c={};for(const key in TECHCOST[k])c[key]=TECHCOST[k][key]*(tech[team][k]+1);
+ if(!canAfford(team,c)){if(team==='P1')msg('💰 Resource kam!');return}
+ pay(team,c);tech[team][k]++;
+ if(team==='P1'){S.age();msg(k==='atk'?'⚔ Hathiyar +15% hamla!':'🛡️ Zirah +15% HP!')}
 }
 function tryAge(team){
  if(age[team]>=4)return;
@@ -200,7 +215,7 @@ function placeBld(team,kind,x,y){
  if(!canAfford(team,B.cost||{}))return null;
  if(!validSpot(x,y,kind))return null;
  pay(team,B.cost||{});
- const b={id:bid++,team,kind,x,y,w:B.w,h:B.h,hp:1,maxHp:B.hp,prog:0,need:B.time,done:kind==='tc',queue:[],rx:x+60,ry:y};
+ const b={id:bid++,team,kind,x,y,w:B.w,h:B.h,hp:1,maxHp:B.hp,prog:0,need:B.time,done:kind==='tc',queue:[],rx:x+60,ry:y,cool:0};
  if(b.done)b.hp=b.maxHp;
  blds.push(b);
  // paas ka villager bhejo
@@ -331,7 +346,7 @@ function updateUnit(u){
    const b=blds.find(x=>x.id===u.bld);
    if(!b){u.state='idle';return}
    if(dist(u,b)>80){moveTo(u,b.x,b.y+50);return}
-   if(!b.done){b.prog++;if(Math.random()<0.05&&u.team==='P1')S.build();if(b.prog>=b.need){b.done=true;b.hp=b.maxHp;float(b.x,b.y-50,BLD[b.kind].icon+' taiyaar!','#4ade80')}}
+   if(!b.done){b.prog++;if(Math.random()<0.05&&u.team==='P1')S.build();if(b.prog>=b.need){b.done=true;b.hp=b.maxHp;float(b.x,b.y-50,BLD[b.kind].icon+' taiyaar!','#4ade80');if(b.kind==='farm')nodes.push({kind:'food',x:b.x,y:b.y+48,amt:999999,tag:0,farm:b.id})}}
    else if(b.hp<b.maxHp){b.hp=Math.min(b.maxHp,b.hp+0.15);if(b.hp>=b.maxHp)u.state='idle'}
    else u.state='idle';
    return;
@@ -348,12 +363,12 @@ function updateUnit(u){
  }
  if(tgt){u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);const d=dist(u,tgt);
   if(d>u.range){moveTo(u,tgt.x,tgt.y)}
-  else if(u.cool<=0){u.cool=u.type==='archer'?70:32;dealDmg(u.team,tgt,u.dmg);if(u.team==='P1')S.hit();if(u.type!=='archer')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});if(u.type==='archer')parts.push({x:u.x,y:u.y,vx:(tgt.x-u.x)/d*6,vy:(tgt.y-u.y)/d*6,life:12,c:'#ffe9a8'});if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
+  else if(u.cool<=0){u.cool=u.type==='archer'?70:u.type==='cannon'?110:32;let dd=u.dmg;if(u.type==='spear'&&tgt.type==='knight')dd*=3;dealDmg(u.team,tgt,dd);if(u.team==='P1')S.hit();if(u.type!=='archer'&&u.type!=='cannon')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});if(u.type==='archer')parts.push({x:u.x,y:u.y,vx:(tgt.x-u.x)/d*6,vy:(tgt.y-u.y)/d*6,life:12,c:'#ffe9a8'});if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});parts.push({x:mx,y:my,vx:rnd(-0.5,0.5),vy:rnd(-1.2,-0.4),life:30,c:'rgba(120,120,120,0.6)'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,3)}if(u.type==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5);if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
   return;
  }
  if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
   if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
-  else if(u.cool<=0){u.cool=40;dealDmg(u.team,tgtB,u.dmg*0.8);slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});if(u.team==='P1')S.hit();if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
+  else if(u.cool<=0){u.cool=u.type==='cannon'?110:40;const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);dealDmg(u.team,tgtB,bd2);if(u.type==='cannon'){const mx=u.x+Math.cos(u.face)*20,my=u.y+Math.sin(u.face)*20;parts.push({x:mx,y:my,vx:0,vy:0,life:10,c:'#fff7a0'});burst2(mx,my,'#ff7b00');shake=Math.max(shake,4)}slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});if(u.team==='P1')S.hit();if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
   return;
  }
  if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle'}return}
@@ -364,7 +379,14 @@ function updateBlds(){
   if(b.done&&b.queue.length){const q=b.queue[0];q.t--;
    if(q.t<=0){b.queue.shift();const u=mkUnit(b.team,q.type,b.x+rnd(-30,30),b.y+60);u.tx=b.rx;u.ty=b.ry;u.state='move';
    }}
+  // 🗼 Burj teer chalata hai
+  if(b.done&&b.kind==='tower'&&treaty<=0){
+   if(b.cool>0)b.cool--;
+   if(b.cool<=0){let tgt=null,bd=215;for(const e of units){if(e.team===b.team||e.hp<=0)continue;const d=Math.hypot(e.x-b.x,e.y-b.y-30);if(d<bd){bd=d;tgt=e}}
+    if(tgt){b.cool=80;dealDmg(b.team,tgt,11*(1+0.15*tech[b.team].atk));parts.push({x:b.x,y:b.y-60,vx:(tgt.x-b.x)/Math.max(1,bd)*7,vy:(tgt.y-(b.y-60))/Math.max(1,bd)*7,life:14,c:'#ffe9a8'});if(b.team==='P1'&&Math.random()<0.4)S.hit()}}}
  }
+ const deadFarms=blds.filter(b=>b.hp<=0&&b.kind==='farm').map(b=>b.id);
+ if(deadFarms.length)for(let i=nodes.length-1;i>=0;i--)if(nodes[i].farm&&deadFarms.includes(nodes[i].farm))nodes.splice(i,1);
  blds=blds.filter(b=>b.hp>0);
 }
 // ============ AI ============
@@ -400,12 +422,16 @@ function aiTick(){
  if(popUsed(A)>=popCap(A)-2){const s=aiSpotNear(tc.x,tc.y,'house');if(s)placeBld(A,'house',s.x,s.y)}
  if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='barracks')){const s=aiSpotNear(tc.x,tc.y,'barracks');if(s)placeBld(A,'barracks',s.x,s.y)}
  if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='market'&&b.hp>0)){const s=aiSpotNear(tc.x,tc.y,'market');if(s)placeBld(A,'market',s.x,s.y)}
+ if(age.AI>=1&&blds.filter(b=>b.team===A&&b.kind==='tower').length<3&&res.AI.w>150){const s=aiSpotNear(tc.x,tc.y,'tower');if(s)placeBld(A,'tower',s.x,s.y)}
+ if(age.AI>=1&&blds.filter(b=>b.team===A&&b.kind==='farm').length<3&&res.AI.f<300&&res.AI.w>120){const s=aiSpotNear(tc.x,tc.y,'farm');if(s)placeBld(A,'farm',s.x,s.y)}
+ if(age.AI>=1&&res.AI.f>500&&res.AI.g>200){if(tech.AI.atk<age.AI)resTech(A,'atk');else if(tech.AI.def<age.AI)resTech(A,'def')}
  const rax=blds.find(b=>b.team===A&&b.kind==='barracks'&&b.done);
  const army=units.filter(u=>u.team===A&&u.type!=='villager').length;
- if(rax&&army<16){
-  const pool=age.AI>=2?['sword','sword','archer','knight']:['sword','sword','archer'];
+ if(rax&&army<18){
+  const pool=age.AI>=3?['sword','spear','archer','knight','elephant','cannon']:age.AI>=2?['sword','sword','spear','archer','knight','elephant']:['sword','sword','spear','archer'];
   const t=pool[Math.floor(Math.random()*pool.length)];
-  if(rax.queue.length<3&&canAfford(A,UNITS[t].cost))trainUnit(A,rax.id,t);
+  const cannons=units.filter(u=>u.team===A&&u.type==='cannon').length;
+  if(!(t==='cannon'&&cannons>=2)&&rax.queue.length<3&&canAfford(A,trueCost(A,t)))trainUnit(A,rax.id,t);
  }
  const need=difficulty==='easy'?11:difficulty==='hard'?5:7;
  if(army>=need+age.AI*2&&frame-aiPlan.attackSent>3600){
@@ -457,7 +483,7 @@ function drawNode(n){
   ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(-6,-4,4.5,0,7);ctx.arc(6,1,3.4,0,7);ctx.arc(1,-7,2.4,0,7);ctx.fill();
   const tw=0.5+0.5*Math.sin(frame/18+n.x);ctx.fillStyle='rgba(255,255,220,'+(0.5+0.5*tw)+')';ctx.beginPath();ctx.arc(-7,-5,1.6,0,7);ctx.arc(5,0,1.3,0,7);ctx.fill();
  }else if(n.kind==='food'){
-  const full=n.amt/250;
+  const full=Math.min(1,n.amt/250);
   ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(0,10,13,4,0,0,7);ctx.fill();
   ctx.fillStyle='#2d5a15';ctx.beginPath();ctx.arc(0,0,12+3*full,0,7);ctx.fill();
   ctx.fillStyle='#3f7d22';ctx.beginPath();ctx.arc(-3,-3,8+2*full,0,7);ctx.fill();
@@ -482,6 +508,35 @@ function drawBld(b){
  const dark=b.team==='P1'?'#1e3a8a':'#7f1d1d';
  ctx.save();ctx.translate(b.x,b.y);
  if(!b.done){ctx.globalAlpha=0.75;ctx.translate(0,(1-Math.min(1,b.prog/b.need))*22)}
+ if(b.kind==='farm'){
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(0,b.h/2+4,b.w/2+6,9,0,0,7);ctx.fill();
+  ctx.fillStyle='#7a5228';rr(-b.w/2,-b.h/2,b.w,b.h,5);ctx.fill();
+  ctx.strokeStyle='#4a3311';ctx.lineWidth=2.5;rr(-b.w/2,-b.h/2,b.w,b.h,5);ctx.stroke();
+  for(let ri=0;ri<4;ri++){const ry=-b.h/2+10+ri*((b.h-16)/3);
+   ctx.strokeStyle='#4a2e12';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-b.w/2+6,ry);ctx.lineTo(b.w/2-6,ry);ctx.stroke();
+   ctx.fillStyle='#3f9e2f';for(let px=-b.w/2+10;px<b.w/2-6;px+=9){ctx.beginPath();ctx.arc(px,ry-4,2.6,0,7);ctx.fill()}
+   ctx.fillStyle='#d9f99d';for(let px=-b.w/2+10;px<b.w/2-6;px+=18){ctx.beginPath();ctx.arc(px,ry-5,1.2,0,7);ctx.fill()}}
+  // bijooka (scarecrow)
+  ctx.strokeStyle='#5b3a1a';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(18,-b.h/2+6);ctx.lineTo(18,b.h/2-6);ctx.moveTo(10,-b.h/2+16);ctx.lineTo(26,-b.h/2+16);ctx.stroke();
+  ctx.fillStyle='#d9b64a';ctx.beginPath();ctx.arc(18,-b.h/2+2,4,0,7);ctx.fill();
+  ctx.fillStyle='#e11d48';ctx.beginPath();ctx.arc(18,-b.h/2+2,4,Math.PI,0);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('🌾',-b.w/2+9,4);ctx.textAlign='left';
+ }else if(b.kind==='tower'){
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,b.h/2+4,b.w/2+10,9,0,0,7);ctx.fill();
+  const sg=ctx.createLinearGradient(-b.w/2,0,b.w/2,0);sg.addColorStop(0,'#8a857a');sg.addColorStop(0.5,'#a8a39a');sg.addColorStop(1,'#6b665e');
+  ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(-b.w/2+4,b.h/2);ctx.lineTo(-b.w/2+10,-b.h/2+12);ctx.lineTo(b.w/2-10,-b.h/2+12);ctx.lineTo(b.w/2-4,b.h/2);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#3f3b34';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=1;for(let ly=-b.h/2+20;ly<b.h/2-6;ly+=10){ctx.beginPath();ctx.moveTo(-b.w/2+7,ly);ctx.lineTo(b.w/2-7,ly);ctx.stroke()}
+  ctx.fillStyle='#5a5550';ctx.fillRect(-b.w/2-2,-b.h/2+2,b.w+4,10);
+  ctx.fillStyle='#5a5550';for(let mi=0;mi<4;mi++)ctx.fillRect(-b.w/2-2+mi*((b.w+4)/4),-b.h/2-6,(b.w+4)/4-3,6);
+  ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.arc(0,-b.h/2+24,4,0,7);ctx.fill();
+  ctx.fillStyle='#1a0f05';rr(-7,b.h/2-20,14,20,5);ctx.fill();
+  ctx.strokeStyle=col;ctx.lineWidth=2;rr(-7,b.h/2-20,14,20,5);ctx.stroke();
+  ctx.fillStyle=col;ctx.fillRect(-2,-b.h/2+8,4,10);
+  const fl=Math.sin(frame/12+b.x)*4;
+  ctx.strokeStyle='#3a2a10';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(0,-b.h/2-8);ctx.lineTo(0,-b.h/2-30);ctx.stroke();
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,-b.h/2-30);ctx.quadraticCurveTo(11,-b.h/2-28+fl,20,-b.h/2-23+fl);ctx.lineTo(20,-b.h/2-13+fl);ctx.quadraticCurveTo(11,-b.h/2-18+fl,0,-b.h/2-16);ctx.closePath();ctx.fill();
+ }else{
  // saya + pathar ki neev
  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,b.h/2+4,b.w/2+6,10,0,0,7);ctx.fill();
  ctx.fillStyle='#7a756a';rr(-b.w/2-4,-b.h/2+2,b.w+8,b.h,4);ctx.fill();
@@ -519,8 +574,9 @@ function drawBld(b){
  if(b.kind==='market'){for(let si=0;si<5;si++){ctx.fillStyle=si%2?'#e11d48':'#fff';ctx.fillRect(-b.w/2+4+si*((b.w-8)/5),b.h/2-30,(b.w-8)/5,10)}}
  // barracks par dhal-talwar ka nishan
  if(b.kind==='barracks'){ctx.strokeStyle='#e5e7eb';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-14,2);ctx.lineTo(2,-12);ctx.moveTo(14,2);ctx.lineTo(-2,-12);ctx.stroke()}
- // taameer ke dauran baans ka dhancha
- if(!b.done){ctx.globalAlpha=1;ctx.strokeStyle='#8b6a2b';ctx.lineWidth=3;
+ // taameer ke dauran baans ka dhancha (ghar/barrack/market/TC par)
+ } // else (generic building) band
+ if(!b.done&&b.kind!=='farm'&&b.kind!=='tower'){ctx.globalAlpha=1;ctx.strokeStyle='#8b6a2b';ctx.lineWidth=3;
   ctx.beginPath();ctx.moveTo(-b.w/2-8,b.h/2);ctx.lineTo(-b.w/2-8,-b.h/2-8);ctx.moveTo(b.w/2+8,b.h/2);ctx.lineTo(b.w/2+8,-b.h/2-8);ctx.moveTo(-b.w/2-8,-b.h/2-8);ctx.lineTo(b.w/2+8,-b.h/2-8);ctx.stroke()}
  ctx.restore();
  // HP / progress
@@ -563,10 +619,13 @@ function drawUnit(u){
  if(u.type==='sword'){const jb=u.cool>20? -0.9:0;ctx.save();ctx.translate(4,4);ctx.rotate(jb);ctx.fillStyle='#9aa3ad';ctx.fillRect(0,-1.5,13,3);ctx.fillStyle='#5b3a10';ctx.fillRect(-2,-3,3,6);ctx.restore()}
  if(u.type==='archer'){ctx.strokeStyle='#7c4a12';ctx.lineWidth=2;ctx.beginPath();ctx.arc(5,0,7,-1.2,1.2);ctx.stroke();ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(5+7*Math.cos(-1.2),7*Math.sin(-1.2));ctx.lineTo(5+7*Math.cos(1.2),7*Math.sin(1.2));ctx.stroke()}
  if(u.type==='knight'){ctx.strokeStyle='#8b8f96';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(2,-6);ctx.lineTo(16,-6);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(16,-8.5);ctx.lineTo(21,-6);ctx.lineTo(16,-3.5);ctx.closePath();ctx.fill()}
+ if(u.type==='spear'){const jb2=u.cool>20?-0.7:0;ctx.save();ctx.translate(3,3);ctx.rotate(jb2);ctx.strokeStyle='#7c4a12';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(17,0);ctx.stroke();ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(17,-3);ctx.lineTo(23,0);ctx.lineTo(17,3);ctx.closePath();ctx.fill();ctx.restore()}
+ if(u.type==='elephant'){ctx.fillStyle='#8a8f98';ctx.beginPath();ctx.ellipse(-4,0,13,8,0,0,7);ctx.fill();ctx.strokeStyle='#4a4d55';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle=col;ctx.fillRect(-11,-10,14,5);ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.strokeRect(-11,-10,14,5);ctx.strokeStyle='#7a7f88';ctx.lineCap='round';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(8,-2);ctx.quadraticCurveTo(13,2,11,7);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(6,-6);ctx.lineTo(10,-8);ctx.lineTo(8,-3);ctx.closePath();ctx.fill();ctx.strokeStyle='#3a2a15';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-11,6);ctx.lineTo(-11+lp,12);ctx.moveTo(1,7);ctx.lineTo(1-lp,12);ctx.stroke();ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(-3,-12,3,0,7);ctx.fill();ctx.fillStyle=dark;ctx.fillRect(-6,-16,6,2)}
+ if(u.type==='cannon'){ctx.fillStyle='#3a2a10';ctx.beginPath();ctx.arc(-7,2,5,0,7);ctx.fill();ctx.beginPath();ctx.arc(1,4,5,0,7);ctx.fill();ctx.strokeStyle='#8b6a2b';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(-7,2,5,0,7);ctx.stroke();ctx.beginPath();ctx.arc(1,4,5,0,7);ctx.stroke();ctx.strokeStyle='#2a2a2e';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(16,0);ctx.stroke();ctx.fillStyle='#55555e';ctx.beginPath();ctx.arc(16,0,3.2,0,7);ctx.fill()}
  if(u.type==='villager'){const ch=u.state==='gather'?Math.sin(frame/4.5)*5:0;ctx.strokeStyle='#6b4a1f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(3,3);ctx.lineTo(9,(u.mv?2+Math.sin(wig)*2:4)+ch);ctx.stroke()}
- // sir + topi
- ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(4,0,3.6,0,7);ctx.fill();
- ctx.fillStyle='#000';ctx.beginPath();ctx.arc(5.4,-1.2,0.8,0,7);ctx.fill();
+ // sir + topi (haathi par mahout pehle se bana hai)
+ if(u.type!=='elephant'){ctx.fillStyle='#f2c89b';ctx.beginPath();ctx.arc(4,0,3.6,0,7);ctx.fill();
+ ctx.fillStyle='#000';ctx.beginPath();ctx.arc(5.4,-1.2,0.8,0,7);ctx.fill()}
  if(u.type==='villager'){ctx.fillStyle='#d9b64a';ctx.beginPath();ctx.ellipse(4,-1,6,2.6,0,0,7);ctx.fill();ctx.fillStyle='#b8933f';ctx.beginPath();ctx.arc(4,-1,3,Math.PI,0);ctx.fill()}
  else{ctx.fillStyle=dark;ctx.fillRect(0,-4.5,6,2);ctx.fillStyle=col;ctx.fillRect(0,-4.5,6,1)}
  ctx.restore();
@@ -662,8 +721,10 @@ function refreshPanel(){
   info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ ban raha '+Math.floor(b.prog/b.need*100)+'% (villager bhejo!)')+q;
   if(b.kind==='tc'&&b.done){btn('👷 Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
    btn(age.P1>=4?'👑 MAX Yug':'⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()});}
-  if(b.kind==='barracks'&&b.done){for(const t of ['sword','archer','knight']){const U=UNITS[t];
-   btn(U.icon+' '+t+'<br>'+costStr(U.cost)+(age.P1<(U.minAge||0)?'<br>🔒 Yug '+(U.minAge+1):''),()=>{trainUnit('P1',b.id,t);refreshPanel()},age.P1<(U.minAge||0))}}
+  if(b.kind==='barracks'&&b.done){for(const t of ['sword','spear','archer','knight','elephant','cannon']){const U=UNITS[t];
+   btn(U.icon+' '+t+((U.pop||1)>1?' (2👥)':'')+'<br>'+costStr(trueCost('P1',t))+(age.P1<(U.minAge||0)?'<br>🔒 Yug '+(U.minAge+1):''),()=>{trainUnit('P1',b.id,t);refreshPanel()},age.P1<(U.minAge||0))}
+   btn('⚔ Hathiyar Lv'+tech.P1.atk+'<br>'+costStr({f:100*(tech.P1.atk+1),g:75*(tech.P1.atk+1)}),()=>{resTech('P1','atk');refreshPanel()},tech.P1.atk>=4);
+   btn('🛡️ Zirah Lv'+tech.P1.def+'<br>'+costStr({f:75*(tech.P1.def+1),w:100*(tech.P1.def+1)}),()=>{resTech('P1','def');refreshPanel()},tech.P1.def>=4)}
   if(b.kind==='market'&&b.done){btn('50🪵→35🍖',()=>{trade('P1','wf');refreshPanel()});btn('60🍖→35🪵',()=>{trade('P1','fw');refreshPanel()});btn('100🍖+60🪵→45🪙',()=>{trade('P1','fg');refreshPanel()})}
   if(b.kind==='house')info.innerHTML+=' — +5 abaadi 🏠';
   return;
@@ -672,7 +733,7 @@ function refreshPanel(){
  if(!alive.length){info.innerHTML='Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.';return}
  const c={};for(const u of alive)c[u.type]=(c[u.type]||0)+1;
  info.innerHTML=Object.keys(c).map(t=>UNITS[t].icon+' '+t+' ×'+c[t]).join(' &nbsp; ');
- if(alive.some(u=>u.type==='villager')){btn('🏠 Ghar<br>'+costStr(BLD.house.cost),()=>startPlace('house'));btn('🏟️ Barracks<br>'+costStr(BLD.barracks.cost),()=>startPlace('barracks'));btn('🛒 Market<br>'+costStr(BLD.market.cost),()=>startPlace('market'))}
+ if(alive.some(u=>u.type==='villager')){btn('🏠 Ghar<br>'+costStr(BLD.house.cost),()=>startPlace('house'));btn('🏟️ Barracks<br>'+costStr(BLD.barracks.cost),()=>startPlace('barracks'));btn('🛒 Market<br>'+costStr(BLD.market.cost),()=>startPlace('market'));btn('🗼 Burj<br>'+costStr(BLD.tower.cost),()=>startPlace('tower'));btn('🌾 Khet<br>'+costStr(BLD.farm.cost),()=>startPlace('farm'))}
  if(alive.some(u=>u.type!=='villager'))btn('⚔ HAMLA!',orderAttack);
 }
 function updateHUD(){
@@ -742,8 +803,8 @@ function startGame(){
  const civs=['japan','china','india'].filter(c=>c!==myCiv);
  aiCiv=civs[Math.floor(Math.random()*civs.length)];
  genMap();paintBG();
- blds.push({id:bid++,team:'P1',kind:'tc',x:250,y:800,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:250,ry:700});
- blds.push({id:bid++,team:'AI',kind:'tc',x:1350,y:200,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:1350,ry:300});
+ blds.push({id:bid++,team:'P1',kind:'tc',x:250,y:800,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:250,ry:700,cool:0});
+ blds.push({id:bid++,team:'AI',kind:'tc',x:1350,y:200,w:96,h:72,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:1350,ry:300,cool:0});
  const nv=civOf('P1').extraVill?4:3;
  for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',250+rnd(-60,60),800+rnd(-60,60));u.state='idle'}
  for(let i=0;i<3;i++){const u=mkUnit('AI','villager',1350+rnd(-60,60),200+rnd(-60,60));u.state='idle'}
