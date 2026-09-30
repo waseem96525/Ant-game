@@ -65,7 +65,15 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 .btn-fs{background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff}
 #fsExit{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:60;display:none;width:52px;height:52px;border-radius:50%;font-size:22px;font-weight:900;background:rgba(0,0,0,.65);color:#fff;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.6)}
 #fsFloat{position:fixed;right:10px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:40;display:none;width:56px;height:56px;border-radius:50%;font-size:24px;background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.55)}
-@media(pointer:coarse){#fsFloat{display:block}}
+#controls button,#p2row button,#setPanel button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+@media(pointer:coarse){
+ #controls button{flex:1 1 30%;font-size:15px;padding:14px 8px;min-height:58px}
+ #p2row button{font-size:14px;min-height:54px}
+ #joyBase{width:150px;height:150px}
+ #joyStick{width:62px;height:62px;left:44px;top:44px}
+ #joyBase2{width:150px;height:150px}
+ #joyStick2{width:62px;height:62px;left:44px;top:44px}
+}
 #rotateHint{position:fixed;inset:0;z-index:59;display:none;align-items:center;justify-content:center;pointer-events:none;text-align:center}
 #rotateHint span{background:rgba(0,0,0,.78);border:2px solid #FFD700;border-radius:16px;padding:18px 22px;font-size:20px;font-weight:900;color:#fde68a;animation:msgPop .6s infinite alternate}
 @media(orientation:portrait){body.fs-mode #rotateHint{display:flex}}
@@ -106,18 +114,19 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <div class="team laal"><div>🟥 Laal Fort: <span id="laalHpT">500</span> | 🍚 <span id="laalFood">50</span></div><div class="bar"><i id="laalHpB" style="width:100%;background:#e11d1d;color:#ff5555"></i></div><div>W:<span id="laalW">0</span> S:<span id="laalS">0</span> ⚕:<span id="laalH">0</span></div></div>
 </div>
 <div id="controls">
-<button class="btn-w" onclick="spawn('kali','worker')">+Worker <kbd>W</kbd> 10🍚</button>
-<button class="btn-s" onclick="spawn('kali','soldier')">+Soldier <kbd>S</kbd> 20🍚</button>
-<button class="btn-s" onclick="spawn('kali','runner')">🏃 Runner <kbd>E</kbd> 12🍚</button>
-<button class="btn-s" onclick="spawn('kali','tank')">🛡 Tank <kbd>Q</kbd> 35🍚</button>
-<button class="btn-w" onclick="spawn('kali','healer')">⚕ Healer <kbd>H</kbd> 25🍚</button>
-<button class="btn-r" onclick="repair('kali')">🔧 <kbd>R</kbd> 30🍚</button>
+<button class="btn-w" id="bWorker" onclick="spawn('kali','worker')">+Worker <kbd>W</kbd> 10🍚</button>
+<button class="btn-s" id="bSoldier" onclick="spawn('kali','soldier')">+Soldier <kbd>S</kbd> 20🍚</button>
+<button class="btn-s" id="bRunner" onclick="spawn('kali','runner')">🏃 Runner <kbd>E</kbd> 12🍚</button>
+<button class="btn-s" id="bTank" onclick="spawn('kali','tank')">🛡 Tank <kbd>Q</kbd> 35🍚</button>
+<button class="btn-w" id="bHealer" onclick="spawn('kali','healer')">⚕ Healer <kbd>H</kbd> 25🍚</button>
+<button class="btn-r" id="bRepair" onclick="repair('kali')">🔧 <kbd>R</kbd> 30🍚</button>
 <button class="btn-fun" id="ultBtn" onclick="rajaUlt()">🌀 Chakravat <kbd>U</kbd></button>
-<button class="btn-fun" onclick="dropBomb()">💣 Bomb <kbd>B</kbd> 40🍚</button>
-<button class="btn-fun" onclick="sugarRain()">🍬 Cheeni <kbd>C</kbd> 30🍚</button>
-<button class="btn-fun" onclick="josh()">⚡ Josh <kbd>J</kbd> 20🍚</button>
+<button class="btn-fun" id="bBomb" onclick="dropBomb()">💣 Bomb <kbd>B</kbd> 40🍚</button>
+<button class="btn-fun" id="bSugar" onclick="sugarRain()">🍬 Cheeni <kbd>C</kbd> 30🍚</button>
+<button class="btn-fun" id="bJosh" onclick="josh()">⚡ Josh <kbd>J</kbd> 20🍚</button>
 <button class="btn-b" onclick="orderAll('attack')">⚔ Hamla <kbd>F</kbd></button>
 <button class="btn-b" onclick="orderAll('defend')">🛡 Wapas <kbd>D</kbd></button>
+<button class="btn-b" id="autoBtn" onclick="toggleAuto()">🎯 Auto: OFF <kbd>Y</kbd></button>
 <button class="btn-fun" onclick="S.swing();S.clash(true)">🗡 Talwar <kbd>T</kbd></button>
 <button class="btn-fun" onclick="S.goliBurst(4)">🔫 Goli <kbd>G</kbd></button>
 <button class="btn-o" id="soundBtn" onclick="toggleSound()">🔊 Sound: ON</button>
@@ -185,7 +194,7 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 🌙 <b>Din-Raat + 🌧 Barish</b> apne aap badalte hain — raat me mashaalon ki roshni, barish me sab slow. ⭐ Score har kill par, 🏆 best save rehta hai. 📸 Photo se jeet ki tasveer lo!<br>
 💣 <b>Bomb:</b> Rally point par dhamaka (pehle goliyan, phir DHAMAKA)! 🍬 <b>Cheeni:</b> 8 dane. ⚡ <b>Josh:</b> 8 sec speed.<br>
 🗡 <b>Talwar:</b> Soldier/Raja ki har takkar par talwar ki jhanjhanahat! 🔫 <b>Goli:</b> Fort par hamle + Bomb me goliyon ki thain-thain! <kbd>T</kbd>/<kbd>G</kbd> dabakar test karo.<br>
-📱 <b>Mobile:</b> Canvas par TAP = hamla, joystick = Raja move. <b>⛶ Full Screen</b> dabao (ya canvas double-tap / <kbd>M</kbd>) — phone tedha (landscape) karo, game sabse bada dikhega! ✕ se wapas.<br>
+📱 <b>Mobile:</b> Canvas par TAP = hamla, joystick = Raja move. <b>🎯 Auto ON</b> karo to foji khud ladenge — tap-tap nahi! Khana kam ho to button apne aap halka dikhega. <b>⛶ Full Screen</b> dabao (ya canvas double-tap / <kbd>M</kbd>) — phone tedha (landscape) karo, game sabse bada dikhega! ✕ se wapas.<br>
 🔍 <b>Zoom:</b> 🔍+ / 🔍− button, mouse wheel, ya 2-ungli pinch se <b>zoom in/out</b>! <kbd>+</kbd>/<kbd>−</kbd> keys bhi, 📷 Follow se camera Raja ke saath chalega. <kbd>V</kbd> se follow on/off.<br>
 ⬇ <b>Download:</b> Upar <b>Download Game</b> dabao - ek html file milegi. Usko WhatsApp se bhejo, dost bina net ke bhi khelega! 📲 <b>Share</b> se link bhejo.
 </div>
@@ -543,7 +552,8 @@ let joyDX=0,joyDY=0,joy2DX=0,joy2DY=0;
 function bindJoy(baseId,stId,set){
  const base=document.getElementById(baseId),st=document.getElementById(stId);
  if(!base||!st)return;
- function setStick(dx,dy){st.style.left=(35+dx*30)+'px';st.style.top=(35+dy*30)+'px'}
+ function setStick(dx,dy){const bw=base.clientWidth||120,sw=st.clientWidth||50;const R=Math.max(10,bw/2-sw/2-4);st.style.left=(bw/2-sw/2+dx*R)+'px';st.style.top=(bw/2-sw/2+dy*R)+'px'}
+ setStick(0,0);
  function handle(e){
   const r=base.getBoundingClientRect();
   const cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -559,6 +569,8 @@ function bindJoy(baseId,stId,set){
 }
 bindJoy('joyBase','joyStick',(x,y)=>{joyDX=x;joyDY=y});
 bindJoy('joyBase2','joyStick2',(x,y)=>{joy2DX=x;joy2DY=y});
+// har button dabane par halki thap (mobile haptic)
+document.querySelectorAll('#controls button,#p2row button,#setPanel button').forEach(b=>{b.addEventListener('pointerdown',()=>vib(8))});
 // ===== MENU =====
 document.querySelectorAll('#modeBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');mode=b.dataset.m;S.click()});
 document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
@@ -690,6 +702,8 @@ function orderAll(cmd){
 }
 function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ Chalao':'⏸ Pause';S.click()}
 function toggleSpeed(){speed=speed===1?2:1;document.getElementById('speedBtn').textContent='🚀 '+speed+'x';S.click()}
+let autoAtk=false;
+function toggleAuto(){autoAtk=!autoAtk;document.getElementById('autoBtn').innerHTML=autoAtk?'🎯 Auto: ON <kbd>Y</kbd>':'🎯 Auto: OFF <kbd>Y</kbd>';S.click();vib(20);flash(autoAtk?'🎯 Auto-Hamla ON! Foji khud dushman dhoondhenge!':'🎯 Auto-Hamla OFF! Tap karke hamla karao!')}
 // ===== FULLSCREEN GAMEPLAY (mobile + PC) =====
 let zoom=1,camX=W/2,camY=H/2,followCam=true,activeTouches=0;
 function zoomBy(f){zoom=Math.max(0.7,Math.min(2.5,zoom*f));clampCam();S.click()}
@@ -766,6 +780,7 @@ document.addEventListener('keydown',e=>{
  if(e.code==='KeyD')orderAll('defend');
  if(e.code==='KeyT'){S.swing();S.clash(true)}
  if(e.code==='KeyG')S.goliBurst(4);
+ if(e.code==='KeyY')toggleAuto();
  if(e.code==='KeyM')toggleFullscreen();
  if(e.code==='KeyV')toggleFollow();
  if(e.key==='+'||e.key==='=')zoomBy(1.2);
@@ -961,7 +976,7 @@ function spawnWaveAnt(){
    }
     if(en&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
      if(a.cool<=0){en.hp-=hitDmg(a,en);a.face=Math.atan2(en.y-a.y,en.x-a.x);a.cool=a.type==='hero'?14:26;S.swing();S.clash(a.type==='hero');slashes.push({x:en.x,y:en.y,r:5,life:12,max:12});burst(en.x,en.y,'#ff0',3,2);if(en.hp<=0){burst(en.x,en.y,'red',10,3);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0');puff(en.x,en.y,'rgba(120,0,0,0.5)',6);onKill('sword',en)}}
-   }else if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx)){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
+    }else if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx||(autoAtk&&a.team==='kali'&&FIGHTERS.includes(a.type)))){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
      else{a.px=a.x;a.py=a.y;moveTo(a,tx,ty);if(Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){let fd=a.dmg*(a.type==='hero'?0.9:0.6);if(a.team==='kali'&&doubleT>0)fd*=2;G[eTeam].fort-=fd;a.cool=30;S.cannon();vib(40);burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4,3);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
     // 🏘 gaon ka ghar looto: paas ho to thoko, +3🍚 har vaar
     if(a.cool<=0&&huts.length){
@@ -1539,6 +1554,13 @@ function updateHUD(){
  document.getElementById('zoomT').textContent=Math.round(zoom*100)+'%';
  const ub=document.getElementById('ultBtn');
  if(ub){if(ultCD>0){ub.innerHTML='🌀 '+Math.ceil(ultCD/60)+'s';ub.classList.remove('ready');ub.style.opacity=0.6}else{ub.innerHTML='🌀 Chakravat <kbd>U</kbd>';ub.classList.add('ready');ub.style.opacity=1}}
+ // smart buttons: paise na hon to halke dikho (mobile par saaf pata chale)
+ const food=G.kali.food;
+ const dim=(id,ok)=>{const b=document.getElementById(id);if(b)b.style.opacity=ok?1:0.42};
+ dim('bWorker',food>=10);dim('bSoldier',food>=20);dim('bRunner',food>=12);
+ dim('bTank',food>=35);dim('bHealer',food>=25);
+ dim('bRepair',food>=30&&G.kali.fort<G.kali.maxFort);
+ dim('bBomb',food>=40);dim('bSugar',food>=30);dim('bJosh',food>=20&&joshT<=0);
 }
 function loop(){step();draw();requestAnimationFrame(loop)}
 loop();
