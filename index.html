@@ -99,7 +99,7 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <h1><img src="ant-icon.svg" alt="ant" width="40" height="40" style="vertical-align:middle;border-radius:10px"> Kali vs Laal — DHAMAKA Edition 💥🔊</h1>
 <div id="topInfo">
 <div>🎮 <b id="modeT">-</b> | ⚡ <b id="diffT">-</b> | ⏱ <b id="timeT">0:00</b> | ☠️ Kills: <b id="killT">0</b></div>
-<div>⭐ <b id="scoreT">0</b> | 🏆 <b id="bestT">0</b> | 👑 Raja HP: <b id="heroT">-</b></div>
+<div>⭐ <b id="scoreT">0</b> | 🏆 <b id="bestT">0</b> | 🎖 Lv<b id="lvlT">1</b> | 👑 Raja HP: <b id="heroT">-</b></div>
 </div>
 <div id="hud">
 <div class="team kali"><div>⬛ Kali Fort: <span id="kaliHpT">500</span> | 🍚 <span id="kaliFood">50</span></div><div class="bar"><i id="kaliHpB" style="width:100%;background:#e5e7eb;color:#fff"></i></div><div>W:<span id="kaliW">0</span> S:<span id="kaliS">0</span> ⚕:<span id="kaliH">0</span></div></div>
@@ -197,10 +197,26 @@ body.fs-mode #joyBase2{bottom:calc(160px + env(safe-area-inset-bottom));opacity:
 <button class="opt" data-d="easy">😊 Easy</button>
 <button class="opt sel" data-d="medium">😐 Medium</button>
 <button class="opt" data-d="hard">😈 Hard + Laal Raja!</button></div></div>
+<div class="opt-row"><b>🎖 Level <span id="menuLvl">1</span> (<span id="menuXp">0</span> XP) | 🏆 Jeet: <span id="menuWins">0</span></b>
+<div id="shelf" style="font-size:13px;margin-top:4px"></div></div>
+<div class="opt-row"><b>3. Raja Skin:</b><div class="opt-btns" id="skinBtns">
+<button class="opt" data-s="raja" onclick="selectSkin('raja')">👑 Kali Raja</button>
+<button class="opt" data-s="gold" onclick="selectSkin('gold')">✨ Sunehra Raja</button>
+<button class="opt" data-s="fire" onclick="selectSkin('fire')">🔥 Aag Raja</button></div>
+<div style="font-size:12px;color:#cbb">✨ = 3 jeet | 🔥 = Level 4</div></div>
+<div class="opt-row"><b>🎯 Aaj ke Mission (+100⭐ har ek):</b><div id="misList" style="font-size:13px;line-height:1.7"></div></div>
 <button id="startBtn" onclick="startGame()">▶ KHEL SHURU 🔊💥</button>
 <button id="dailyBtn" onclick="startDaily()" style="width:100%;font-size:15px;background:linear-gradient(180deg,#67e8f9,#0284c7);margin-top:8px;padding:12px">📅 AAJ KA CHALLENGE</button>
 <div id="menuBest" style="margin-top:8px;font-size:14px;color:#fde68a">🏆 Best Score: 0</div>
 <div style="font-size:12px;color:#cbb;margin-top:6px">👥 Versus me: P1 Kali Raja = Arrow keys, P2 Laal Raja = WASD / 2 joystick. Foji button se banao!</div>
+</div></div>
+<div id="loot" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:80;align-items:center;justify-content:center;padding:15px">
+<div style="background:linear-gradient(180deg,#3a2a08,#1a1206);border:2px solid #FFD700;border-radius:16px;padding:24px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 60px rgba(255,200,0,.4)">
+<h2 style="margin:0 0 8px">🎉 JEET KA KHAZANA!</h2>
+<div id="lootTxt" style="color:#fde68a">Ek dabba chuno!</div>
+<div id="lootBoxes" style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
+</div>
+</div>
 </div></div>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -233,7 +249,54 @@ try{high=parseInt(localStorage.getItem('klHigh')||'0')||0}catch(e){}
 let fxOn=true,drumOn=true,vibOn=true;
 function vib(p){if(!vibOn)return;try{if(navigator.vibrate)navigator.vibrate(p)}catch(e){}}
 function showBanner(t){bannerTxt=t;bannerT=160}
-function addScore(n){score+=n;try{if(score>high){high=score;localStorage.setItem('klHigh',String(high))}}catch(e){}}
+function addScore(n){score+=n;misBest=Math.max(misBest,score);misCheck();try{if(score>high){high=score;localStorage.setItem('klHigh',String(high))}}catch(e){}}
+// ===== ADDICTION: XP/Level, Missions, Skins, Trophies, Loot =====
+const LV=[0,200,500,1000,1700,2600,4000,6000];
+let xp=0,level=1,totalWins=0,winsByMode={},SKIN='raja';
+let pendingBonus={food:0,shield:0};
+let misProg={kill:0,win:0},misBest=0,misDone={};
+const MS=[
+ {id:'kill20',txt:'⚔ 20 kills karo',need:20},
+ {id:'win1',txt:'🏆 1 jeet haasil karo',need:1},
+ {id:'score500',txt:'⭐ Ek game me 500 score',need:500}
+];
+try{
+ xp=parseInt(localStorage.getItem('klXP')||'0')||0;
+ totalWins=parseInt(localStorage.getItem('klWins')||'0')||0;
+ winsByMode=JSON.parse(localStorage.getItem('klWinsByMode')||'{}');
+ SKIN=localStorage.getItem('klSkin')||'raja';
+ pendingBonus=JSON.parse(localStorage.getItem('klBonus')||'{"food":0,"shield":0}');
+ const md=JSON.parse(localStorage.getItem('klMis')||'null');
+ if(md&&md.date===todayStr()){misProg=md.prog;misDone=md.done||{}}
+}catch(e){}
+function getLevel(x){let l=1;for(let i=0;i<LV.length;i++)if(x>=LV[i])l=i+1;return l}
+level=getLevel(xp);
+function gainXP(n){
+ const before=getLevel(xp);xp+=n;
+ try{localStorage.setItem('klXP',String(xp))}catch(e){}
+ const after=getLevel(xp);level=after;
+ if(after>before){showBanner('🎖 LEVEL UP! Lv '+after+'!');S.win();float(450,280,'🎖 LEVEL '+after+'! Agle khel me +'+Math.min(30,(after-1)*5)+'🍚 bonus!','#FFD700')}
+}
+function misVal(id){return id==='kill20'?misProg.kill:id==='win1'?misProg.win:misBest}
+function misCheck(){
+ let changed=false;
+ for(let m of MS){
+  if(!misDone[m.id]&&misVal(m.id)>=m.need){
+   misDone[m.id]=1;changed=true;addScoreSilent(100);
+   showBanner('🎯 MISSION: '+m.txt+' ✅ +100⭐');S.win();
+  }
+ }
+ if(changed)misSave();
+}
+function addScoreSilent(n){score+=n;try{if(score>high){high=score;localStorage.setItem('klHigh',String(high))}}catch(e){}}
+function misSave(){try{localStorage.setItem('klMis',JSON.stringify({date:todayStr(),prog:misProg,done:misDone}))}catch(e){}}
+function recordWin(md){
+ totalWins++;winsByMode[md]=(winsByMode[md]||0)+1;
+ misProg.win++;
+ try{localStorage.setItem('klWins',String(totalWins));localStorage.setItem('klWinsByMode',JSON.stringify(winsByMode))}catch(e){}
+ misCheck();misSave();
+ gainXP(score);
+}
 
 // ===== DETAILING: static decor + cached background + craters + motes =====
 let craters=[],slashes=[],motes=[],cloudShadows=[];
@@ -356,7 +419,8 @@ const S={
   setTimeout(()=>S.goli(),120)},
  warHorn(){tone(140,0.4,'sawtooth',0.16,60);setTimeout(()=>tone(185,0.4,'sawtooth',0.16,40),120);setTimeout(()=>S.swing(),250)},
  thunder(){noise(0.7,0.4);tone(55,0.8,'sine',0.3,-20)},
- ult(){S.goliBurst(3);setTimeout(()=>S.boom(),200);S.clash(true);setTimeout(()=>S.clash(true),150)}
+ ult(){S.goliBurst(3);setTimeout(()=>S.boom(),200);S.clash(true);setTimeout(()=>S.clash(true),150)},
+ heart(){tone(62,0.12,'sine',0.25);setTimeout(()=>tone(52,0.16,'sine',0.25),170)}
 };
 setInterval(()=>{if(started&&!paused&&!gameOver&&!muted&&drumOn)S.drum()},500);
 function toggleSound(){muted=!muted;document.getElementById('soundBtn').textContent=muted?'🔇 Sound: OFF':'🔊 Sound: ON';if(!muted)S.click()}
@@ -388,7 +452,40 @@ function startDaily(){
  document.getElementById('menu').style.display='none';
  document.getElementById('modeT').textContent='Daily 📅';
  document.getElementById('diffT').textContent=difficulty;
+ applyBonus();
  flash('📅 AAJ KA CHALLENGE! 2 min khana race! Jeeto +200 bonus!');
+}
+// ===== SKINS: Raja ke naye roop =====
+const SKINS=[
+ {id:'raja',name:'👑 Kali Raja',needTxt:'shuru se',ok:()=>true},
+ {id:'gold',name:'✨ Sunehra Raja',needTxt:'3 jeet',ok:()=>totalWins>=3},
+ {id:'fire',name:'🔥 Aag Raja',needTxt:'Level 4',ok:()=>level>=4}
+];
+function skinCrown(){return SKIN==='fire'?'#ff4400':SKIN==='gold'?'#fff200':'#FFD700'}
+function skinGlow(kali){if(SKIN==='fire')return '#ff5500';if(SKIN==='gold')return '#fff200';return kali?'#FFD700':'#ff2222'}
+function selectSkin(id){const s=SKINS.find(x=>x.id===id);if(!s)return;if(!s.ok()){flash('🔒 '+s.name+': pehle '+s.needTxt+' chahiye!');S.click();return}SKIN=id;try{localStorage.setItem('klSkin',id)}catch(e){}S.power();refreshSkinBtns();flash(s.name+' taiyaar! 👑')}
+function refreshSkinBtns(){document.querySelectorAll('#skinBtns .opt').forEach(b=>{const s=SKINS.find(x=>x.id===b.dataset.s);if(!s)return;b.classList.toggle('sel',SKIN===b.dataset.s);b.textContent=(s.ok()?'✅ ':'🔒 ')+s.name})}
+// ===== VICTORY LOOT BOX =====
+let lootRewards=[];
+function showLoot(){
+ const r=[{t:'⭐ +150 Score',f:()=>addScoreSilent(150)},{t:'🍚 Agle khel +60 khana',f:()=>{pendingBonus.food+=60;saveBonus()}},{t:'🛡 Agle khel 15s kavach',f:()=>{pendingBonus.shield+=900;saveBonus()}}];
+ for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const tmp=r[i];r[i]=r[j];r[j]=tmp}
+ lootRewards=r;
+ document.getElementById('lootBoxes').innerHTML=r.map((x,i)=>'<button class="opt" style="font-size:20px;padding:14px 18px" onclick="pickLoot('+i+')">🎁</button>').join('');
+ document.getElementById('lootTxt').textContent='🎉 JEET KA KHAZANA! Ek dabba chuno!';
+ document.getElementById('loot').style.display='flex';
+ S.win();
+}
+function pickLoot(i){const r=lootRewards[i];if(!r)return;r.f();lootRewards=[];document.getElementById('lootTxt').textContent='💰 Mila: '+r.t+'!';document.getElementById('lootBoxes').innerHTML='<button class="btn-w" onclick="closeLoot()">✅ Le liya!</button>';S.power()}
+function closeLoot(){document.getElementById('loot').style.display='none'}
+function saveBonus(){try{localStorage.setItem('klBonus',JSON.stringify(pendingBonus))}catch(e){}}
+// ===== RANDOM MID-GAME EVENTS (versus me nahi) =====
+function triggerEvent(){
+ if(mode==='versus'||gameOver||!started||paused)return;
+ const ev=Math.floor(Math.random()*3);
+ if(ev===0){for(let i=0;i<5;i++)foods.push({x:rnd(340,560),y:rnd(90,410),r:9,golden:true,ph:rnd(0,6.28)});showBanner('🌟 SUNEHRI BARISH!');S.power()}
+ else if(ev===1){for(let i=0;i<3;i++)spawn('laal','runner',true);showBanner('⚠️ LAAL GHAT! Peeche dekho!');S.warHorn();shakeAll=6}
+ else{doubleT=900;showBanner('💢 DOUBLE FRENZY 15s!');S.power()}
 }
 // ===== DOWNLOAD + SHARE (mobile ke liye) =====
 function downloadGame(){
@@ -436,12 +533,32 @@ bindJoy('joyBase2','joyStick2',(x,y)=>{joy2DX=x;joy2DY=y});
 // ===== MENU =====
 document.querySelectorAll('#modeBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modeBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');mode=b.dataset.m;S.click()});
 document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
+function refreshMenu(){
+ try{
+  document.getElementById('menuBest').textContent='🏆 Best Score: '+high;
+  document.getElementById('bestT').textContent=high;
+  document.getElementById('menuLvl').textContent=level;
+  document.getElementById('menuXp').textContent=xp;
+  document.getElementById('menuWins').textContent=totalWins;
+  const modes={fort:'🏰',food:'🍚',endless:'♾',waves:'🌊',versus:'👥',daily:'📅'};
+  document.getElementById('shelf').innerHTML=Object.keys(modes).map(m=>modes[m]+' '+(winsByMode[m]||0)).join(' &nbsp; ');
+  document.getElementById('misList').innerHTML=MS.map(m=>{const v=misVal(m.id),done=misDone[m.id];return '<div>'+(done?'✅ ':'⬜ ')+m.txt+' ('+Math.min(v,m.need)+'/'+m.need+')</div>'}).join('');
+  refreshSkinBtns();
+ }catch(e){}
+}
 try{
- document.getElementById('menuBest').textContent='🏆 Best Score: '+high;
- document.getElementById('bestT').textContent=high;
+ refreshMenu();
  let dd=null;try{dd=localStorage.getItem('klDaily')}catch(e){}
  if(dd===todayStr())document.getElementById('dailyBtn').textContent='📅 AAJ KA CHALLENGE ✅ (ho gaya!)';
 }catch(e){}
+function applyBonus(){
+ // level food bonus + jeet ke khazane ka bonus
+ const lvBonus=Math.min(30,(level-1)*5);
+ if(lvBonus>0){G.kali.food+=lvBonus;float(G.kali.base.x,G.kali.base.y-90,'🎖 Lv'+level+' bonus +'+lvBonus+'🍚','#FFD700')}
+ if(pendingBonus.food>0){G.kali.food+=pendingBonus.food;float(450,150,'🎁 Khazana: +'+pendingBonus.food+'🍚!','#FFD700')}
+ if(pendingBonus.shield>0){shieldT+=pendingBonus.shield;float(G.kali.base.x,G.kali.base.y-110,'🎁 Khazana: 🛡 kavach!','#38bdf8')}
+ if(pendingBonus.food>0||pendingBonus.shield>0){pendingBonus={food:0,shield:0};saveBonus()}
+}
 function startGame(){ac();S.power();started=true;document.getElementById('menu').style.display='none';
  const names={fort:'Fort Todo',food:'Khana Race',endless:'Endless',waves:'Waves 🌊',versus:'Vs Dost 👥'};
  document.getElementById('modeT').textContent=names[mode]||mode;
@@ -454,6 +571,7 @@ function startGame(){ac();S.power();started=true;document.getElementById('menu')
   showBanner('👥 P1 ARROWS vs P2 WASD!');
  }
  flash(mode==='versus'?'👥 DOST vs DOST! P1 Arrow, P2 WASD!':'⚔ JUNGG SHURU! Kali Raja ko Arrow se chalao!');
+ applyBonus();
  try{if(matchMedia('(pointer:coarse)').matches&&screen.orientation&&innerHeight>innerWidth)setTimeout(()=>flash('📱 Phone TEDHA (landscape) karo — sabse bada mazaa!'),2500)}catch(e){}
 }
 function spawnFood(n,golden=false){for(let i=0;i<n;i++)foods.push({x:rnd(300,600),y:rnd(60,440),r:golden?9:6,golden:golden||Math.random()<0.08,mirchi:Math.random()<0.1,ph:rnd(0,6.28)})}
@@ -617,6 +735,11 @@ function onKill(how,v){
  let pts=10;
  if(v){if(v.type==='hero')pts=50;else if(v.type==='tank')pts=20;else if(v.type==='soldier'||v.type==='runner')pts=12;else if(v.type==='healer')pts=15}
  if(how==='ult')pts+=10;
+ // combo multiplier: lagatar kill par x5 tak!
+ const mult=Math.min(5,1+Math.floor(killStreak/4));
+ pts=Math.round(pts*mult);
+ if(mult>1)float(450,230,'🔥 x'+mult+' COMBO!','#ff0');
+ misProg.kill++;misSave();
  addScore(pts);vib(25);
  document.getElementById('killT').textContent=kills;
  if(killStreak===3){float(450,200,'🔥 TRIPLE KILL!','#ff0');showBanner('🔥 TRIPLE KILL! +'+(pts*3)+'⭐')}
@@ -642,6 +765,12 @@ function step(){
   if(frame%840===0)spawnPower();
   for(let p of powerups)p.life--;powerups=powerups.filter(p=>p.life>0);
   for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
+  // surprise events har ~45s + tension heartbeat jab fort tootne wala ho
+  if(frame>600&&frame%2700===0)triggerEvent();
+  if(frame%50===0&&!gameOver){
+   const tense=(G.kali.fort/G.kali.maxFort<0.2||G.laal.fort/G.laal.maxFort<0.2);
+   if(tense){S.heart();vib(20)}
+  }
   // wave mode spawner
   if(mode==='waves'){
    if(waveState==='break'){waveT--;if(waveT<=0){waveN++;waveLeft=Math.min(14,2+waveN*2);waveTick=0;waveState='attack';showBanner('🌊 WAVE '+waveN+'!');S.warHorn()}}
@@ -753,7 +882,7 @@ function spawnWaveAnt(){
  if(hero&&hero.hp<=0&&ants.includes(hero)===false){heroRespawn=600;float(G.kali.base.x,G.kali.base.y,'Raja gir gaya! 10s...','red')}
   if(G.kali.fort<=0||G.laal.fort<=0){
    gameOver=true;
-   if(G.kali.fort<=0){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose();showBanner('💔 HAAR! Score '+score+' ⭐')}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';addScore(150);S.win();slowmoT=100;showBanner('🎉 JEET! +150 ⭐');burst(G.laal.base.x,G.laal.base.y,'gold',50,6);puff(G.laal.base.x,G.laal.base.y,'rgba(0,0,0,0.7)',20)}
+   if(G.kali.fort<=0){document.getElementById('msg').textContent='💔 HAAR! Laal jeet gayi!';S.lose();showBanner('💔 HAAR! Score '+score+' ⭐');gainXP(score)}else{document.getElementById('msg').textContent='🎉 JEET! Kali ne Laal Fort uda diya! 💥';addScore(150);S.win();slowmoT=100;showBanner('🎉 JEET! +150 ⭐');burst(G.laal.base.x,G.laal.base.y,'gold',50,6);puff(G.laal.base.x,G.laal.base.y,'rgba(0,0,0,0.7)',20);recordWin(mode);showLoot()}
    try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
   }
  }
@@ -762,7 +891,7 @@ function spawnWaveAnt(){
 function endByFood(){gameOver=true;let k=Math.floor(G.kali.food),l=Math.floor(G.laal.food);let bonus=0;
  if(k>l){bonus=100;if(daily===todayStr()){bonus+=200;try{localStorage.setItem('klDaily',daily)}catch(e){}float(450,180,'📅 DAILY HO GAYA! +200','#0ff')}addScore(bonus)}
  document.getElementById('msg').textContent=k>l?`🎉 JEET! ${k} vs ${l} khana! +${bonus}⭐`:k<l?`💔 HAAR! ${l} vs ${k}`:'🤝 DRAW!';
- if(k>=l){S.win();showBanner(k>l?'🎉 JEET! +'+bonus+' ⭐':'🤝 DRAW!')}else S.lose();
+ if(k>=l){S.win();showBanner(k>l?'🎉 JEET! +'+bonus+' ⭐':'🤝 DRAW!');if(k>l){recordWin(daily?'daily':'food');showLoot()}}else{S.lose();gainXP(score)}
  try{document.getElementById('menuBest').textContent='🏆 Best Score: '+high}catch(e){}
 }
 
@@ -802,6 +931,7 @@ function draw(){
   if(shieldT>0)pill('🛡 '+(shieldT/60).toFixed(0)+'s','#38bdf8');
   if(doubleT>0)pill('💢 '+(doubleT/60).toFixed(0)+'s','#f472b6');
   if(freezeT>0)pill('❄ '+(freezeT/60).toFixed(0)+'s','#a5f3fc');
+  if(killStreak>=4)pill('🔥 x'+Math.min(5,1+Math.floor(killStreak/4)),'#ff0');
   if(mode==='waves')pill(waveState==='break'?'🌊 Wave '+(waveN+1)+' in '+(waveT/60).toFixed(0)+'s':'🌊 WAVE '+waveN+' ('+ants.filter(a=>a.team==='laal').length+' left)','#67e8f9');
   if(daily)pill('📅 DAILY','#FFD700');
   pill(nightF>0.5?'🌙 Raat':'☀ Din',nightF>0.5?'#818cf8':'#fde047');
@@ -847,6 +977,8 @@ function draw(){
  floats=floats.filter(f=>f.life>0);
  // raat ka andhera (mashaalon ki roshni me jung!)
  if(nightF>0.01){ctx.fillStyle=`rgba(8,8,35,${0.45*nightF})`;ctx.fillRect(0,0,W,H)}
+ // tension: fort tootne wala ho to laal dhak-dhak kinari
+ if(!gameOver&&started&&(G.kali.fort/G.kali.maxFort<0.2||G.laal.fort/G.laal.maxFort<0.2)){ctx.save();ctx.strokeStyle=`rgba(255,0,0,${0.35+0.25*Math.sin(frame/8)})`;ctx.lineWidth=16;ctx.strokeRect(6,6,W-12,H-12);ctx.restore()}
  // combo banner (bada center text — raat ke upar)
  if(bannerT>0){bannerT--;const bk=Math.min(1,bannerT/20,(160-bannerT)/15+0.3);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,bk));ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,0.85)';ctx.strokeText(bannerTxt,W/2,240);const bg2=ctx.createLinearGradient(0,200,0,250);bg2.addColorStop(0,'#fff7cc');bg2.addColorStop(1,'#ff9d00');ctx.fillStyle=bg2;ctx.fillText(bannerTxt,W/2,240);ctx.textAlign='left';ctx.restore()}
  // barish ki boondein
@@ -1026,12 +1158,14 @@ function drawAnt(a){
  // josh / boost aura
  if(joshT>0&&a.team==='kali'){ctx.strokeStyle='rgba(255,230,0,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.lineDashOffset=-frame;ctx.beginPath();ctx.arc(0,0,r+7,0,7);ctx.stroke();ctx.setLineDash([])}
  if(a.boost>0){ctx.shadowColor='red';ctx.shadowBlur=12}
- // hero aura ring
+ // hero aura ring (skin ke rang me)
  if(heroA){
-  ctx.save();ctx.shadowColor=kali?'#FFD700':'#ff2222';ctx.shadowBlur=16;
-  ctx.strokeStyle=kali?'rgba(255,215,0,0.85)':'rgba(255,50,50,0.85)';ctx.lineWidth=2.5;
+  const glowC=(a===hero)?skinGlow(kali):(kali?'#FFD700':'#ff2222');
+  ctx.save();ctx.shadowColor=glowC;ctx.shadowBlur=16;
+  ctx.strokeStyle=glowC;ctx.globalAlpha=0.9;ctx.lineWidth=2.5;
   ctx.setLineDash([8,6]);ctx.lineDashOffset=frame*1.5;
   ctx.beginPath();ctx.arc(0,0,r+9,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  if(SKIN==='fire'&&a===hero&&Math.random()<0.3)parts.push({x:a.x+rnd(-8,8),y:a.y+rnd(-4,4),vx:rnd(-0.3,0.3),vy:rnd(-1.2,-0.4),life:20,max:20,c:'#ff7b00',sz:3,grav:-0.02,glow:true});
  }
  // 🛡 kavach bubble (kali) / ❄ freeze tint (laal) / 😈 charge trail
  if(a.team==='kali'&&shieldT>0){ctx.save();ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2.5;ctx.shadowColor='#38bdf8';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(0,0,r+6,0,7);ctx.stroke();ctx.restore()}
@@ -1125,11 +1259,12 @@ function drawAnt(a){
   ctx.fillStyle=kaliH?'#FFD700':'#ffb4b4';ctx.textAlign='center';
   ctx.fillText(nm,a.x,ny+1);ctx.textAlign='left';
   ctx.restore();
-  // bada taj (3 nok + moti + nagine, pulse glow)
+  // bada taj (skin ke rang me, 3 nok + moti + nagine, pulse glow)
   const cy=a.y-r-32+bobY;
   ctx.save();ctx.translate(a.x,cy);
-  ctx.shadowColor=kaliH?'#FFD700':'#ff3333';ctx.shadowBlur=14+6*Math.sin(frame/10);
-  ctx.fillStyle=kaliH?'#FFD700':'#ff6666';
+  const crC=(a===hero&&kaliH)?skinCrown():(kaliH?'#FFD700':'#ff6666');
+  ctx.shadowColor=crC;ctx.shadowBlur=14+6*Math.sin(frame/10);
+  ctx.fillStyle=crC;
   ctx.beginPath();
   ctx.moveTo(-14,7);ctx.lineTo(-14,-5);ctx.lineTo(-7,1);ctx.lineTo(0,-9);ctx.lineTo(7,1);ctx.lineTo(14,-5);ctx.lineTo(14,7);ctx.closePath();ctx.fill();
   ctx.shadowBlur=0;
@@ -1176,6 +1311,7 @@ function updateHUD(){
  document.getElementById('heroT').textContent=hero?(hero.hp>0?Math.round(hero.hp)+' ❤':'Respawn...'):'-';
  document.getElementById('scoreT').textContent=score;
  document.getElementById('bestT').textContent=high;
+ document.getElementById('lvlT').textContent=level;
  const ub=document.getElementById('ultBtn');
  if(ub){if(ultCD>0){ub.innerHTML='🌀 '+Math.ceil(ultCD/60)+'s';ub.classList.remove('ready');ub.style.opacity=0.6}else{ub.innerHTML='🌀 Chakravat <kbd>U</kbd>';ub.classList.add('ready');ub.style.opacity=1}}
 }
