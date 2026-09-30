@@ -372,12 +372,12 @@ function trade(kind){
 let inPrep=false,prepT=0,prepLen=20;
 let freeRoster={worker:1,soldier:1,runner:1,tank:1,healer:1};
 function beginPrep(len){
- inPrep=true;prepLen=len||20;prepT=prepLen;
+ inPrep=true;const secs=len||20;prepLen=secs*60;prepT=prepLen;
  freeRoster={worker:1,soldier:1,runner:1,tank:1,healer:1};
  // dono taraf ka muft starting roster (fair)
  ['worker','soldier','runner','tank','healer'].forEach(t=>{if(freeRoster[t]>0)spawn('laal',t,true)});
  const pb=document.getElementById('prepBtn');if(pb)pb.style.display='inline-block';
- showBanner('⏱️ TRAINING TIME '+prepLen+'s — Army taiyaar karo!');
+ showBanner('⏱️ TRAINING TIME '+secs+'s — Army taiyaar karo!');
  flash('⏱️ Training: koi ladai nahi! Army banao (har type 1 MUFT, 2× income). Ready ho to ⚔ HAMLA SHURU dabao!');
 }
 function startBattleNow(){
