@@ -377,13 +377,13 @@ function beginPrep(len){
  // dono taraf ka muft starting roster (fair)
  ['worker','soldier','runner','tank','healer'].forEach(t=>{if(freeRoster[t]>0)spawn('laal',t,true)});
  const pb=document.getElementById('prepBtn');if(pb)pb.style.display='inline-block';
- showBanner('⏱️ TAIYAARI '+prepLen+'s — Army banao!');
- flash('⏱️ '+prepLen+' second! Apni army tayyar karo (har type 1 muft!)');
+ showBanner('⏱️ TRAINING TIME '+prepLen+'s — Army taiyaar karo!');
+ flash('⏱️ Training: koi ladai nahi! Army banao (har type 1 MUFT, 2× income). Ready ho to ⚔ HAMLA SHURU dabao!');
 }
 function startBattleNow(){
  if(!inPrep)return;
  prepT=0;inPrep=false;S.power();vib(40);shakeAll=6;
- showBanner('⚔ LADDY SHURU!');flash('⚔ ABHI LADO!');
+ showBanner('⚔ HAMLA SHURU!');flash('⚔ AB HAMLA! Army ready — lado!');
 }
 function armyPower(t){let p=0;for(const a of ants){if(a.team!==t||a.type==='villager')continue;p+=(a.type==='hero'?4:1)+a.maxHp/40+a.dmg/4}return Math.round(p)}
 let shieldT=0,freezeT=0,doubleT=0;
@@ -856,6 +856,7 @@ function spawn(team,type,free){
 }
 function repair(team){if(G[team].food>=30&&G[team].fort<G[team].maxFort){G[team].food-=30;G[team].fort=Math.min(G[team].maxFort,G[team].fort+90);S.heal();spark(G[team].base.x,G[team].base.y-70,'#7CFC00',12);float(G[team].base.x,G[team].base.y-70,'+REPAIR','#0f0')}else{flash('Repair=30 🍚');S.click()}}
 function dropBomb(){
+ if(inPrep){flash('⏱️ Training chal rahi! Pehle ⚔ LADAI SHURU karo!');S.click();return}
  if(G.kali.food<40){flash('Bomb ke liye 40 🍚!');return}
   G.kali.food-=40;S.goliBurst(5);setTimeout(()=>S.boom(),320);shakeAll=14;vib([60,40,60]);
  craters.push({x:rally.x,y:rally.y,life:900,max:900});
@@ -870,6 +871,7 @@ function josh(){if(G.kali.food<20){flash('Josh ke liye 20 🍚!');return}if(josh
 let ultCD=0;
 function rajaUlt(){
  if(!started||gameOver)return;
+ if(inPrep){flash('⏱️ Training chal rahi! Pehle ⚔ LADAI SHURU karo!');S.click();return}
  if(!hero||hero.hp<=0){flash('👑 Raja zinda nahi!');return}
  if(ultCD>0){flash('🌀 Ult taiyaar ho rahi: '+Math.ceil(ultCD/60)+'s');S.click();return}
  ultCD=1800;S.ult();shakeAll=12;vib([80,40,80]);
@@ -1058,7 +1060,7 @@ function step(){
   // ⏱️ taiyari countdown — khatam hone par junng shuru
   if(inPrep){
    prepT--;
-   if(prepT<=0){inPrep=false;S.warHorn();shakeAll=6;vib(60);showBanner('⚔ JUNGG SHURU!');flash('⚔ LADDY! Ab dushman bhi hilega!')}
+   if(prepT<=0){inPrep=false;S.warHorn();shakeAll=6;vib(60);showBanner('⚔ HAMLA SHURU! Ab ladai hogi!');flash('⚔ Training khatm! AB HAMLA SHURU — dushman bhi ladega!')}
   }
   // din-raat cycle (~100 sec)
   dayT=(dayT+1/6000)%1;nightF=(1-Math.cos(dayT*6.283))/2;
@@ -1081,7 +1083,7 @@ function step(){
   if(frame%300===0){for(let b of buildings){if(b.hp>0&&b.kind==='market'){G[b.team].gold+=3}}}
   // 🛕 Wonder timer: 90s tak bachao = jeet
   for(let t of ['kali','laal']){const w=buildings.find(b=>b.team===t&&b.kind==='wonder'&&b.hp>0);if(w){if(wonderT[t]>0){wonderT[t]--;if(wonderT[t]%600===0)float(w.x,w.y-50,'🛕 '+Math.ceil(wonderT[t]/60)+'s!','#FFD700');if(wonderT[t]<=0&&!gameOver){gameOver=true;const win=t==='kali';document.getElementById('msg').textContent=win?'🛕 WONDER JEET! Kali amar! 🎉':'🛕 Laal Wonder jeet gaya! 💔';if(win){addScore(300);S.win();recordWin(mode);showLoot()}else{S.lose()}showBanner(win?'🛕 WONDER JEET! +300⭐':'🛕 HAAR!')}}}}
-  for(let b of buildings){if(b.hp<=0||b.kind!=='tower')continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
+  for(let b of buildings){if(b.hp<=0||b.kind!=='tower'||inPrep)continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
 // surprise events har ~45s + tension heartbeat jab fort tootne wala ho
  if(frame>600&&frame%2700===0)triggerEvent();
   if(frame%50===0&&!gameOver){
@@ -1171,14 +1173,14 @@ function spawnWaveAnt(){
     if(a.carryKind==='wood'){let v=12*civ.woodRate;if(inPrep)v*=2;G[a.team].wood+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#365314':'#f66',4,2)}
     else if(a.carryKind==='gold'){let v=8;if(inPrep)v*=2;G[a.team].gold+=v;S.eat();spark(b.x,b.y,'#FFD700',6)}
     else{let v=a.carryGolden?30:10;v*=civ.foodRate;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}}
-   let en=nearestEnemy(a,42);if(en&&a.cool<=0){en.hp-=hitDmg(a,en);S.hit();slashes.push({x:en.x,y:en.y,r:4,life:10,max:10});a.cool=32;if(en.hp<=0){burst(en.x,en.y,'red',10,3);onKill('bite',en)}}
+   let en=nearestEnemy(a,42);if(!inPrep&&en&&a.cool<=0){en.hp-=hitDmg(a,en);S.hit();slashes.push({x:en.x,y:en.y,r:4,life:10,max:10});a.cool=32;if(en.hp<=0){burst(en.x,en.y,'red',10,3);onKill('bite',en)}}
    }else if(a.type==='healer'){
     // ⚕ healer: zakhmi sathi ko dhoondhkar heal karo
     let hurt=null,hd=130;
     for(let b of ants){if(b.team!==a.team||b===a||b.hp<=0||b.hp>=b.maxHp)continue;let dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd<hd){hd=dd;hurt=b}}
     if(hurt){a.px=a.x;a.py=a.y;moveTo(a,hurt.x,hurt.y);if(hd<44&&a.cool<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+14);a.cool=40;S.heal();spark(hurt.x,hurt.y-8,'#4ade80',5)}}
     else{const hb=G[a.team].base;if(Math.hypot(a.x-hb.x,a.y-hb.y)>70){a.px=a.x;a.py=a.y;moveTo(a,hb.x,hb.y)}}
-    let en2=nearestEnemy(a,30);if(en2&&a.cool<=0){en2.hp-=hitDmg(a,en2);a.cool=40;if(en2.hp<=0){burst(en2.x,en2.y,'red',8,2);onKill('bite',en2)}}
+    let en2=nearestEnemy(a,30);if(!inPrep&&en2&&a.cool<=0){en2.hp-=hitDmg(a,en2);a.cool=40;if(en2.hp<=0){burst(en2.x,en2.y,'red',8,2);onKill('bite',en2)}}
    }else if(a.type==='villager'){
     // 🏘 gaon-wala: khana jama karo, khatra dekhkar ghar ki taraf bhago!
     const hut=huts.length?huts.reduce((m,h)=>Math.hypot(a.x-h.x,a.y-h.y)<Math.hypot(a.x-m.x,a.y-m.y)?h:m,huts[0]):null;
@@ -1186,11 +1188,11 @@ function spawnWaveAnt(){
     if(flee&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y)}
     else if(a.carry&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y);if(Math.hypot(a.x-hut.x,a.y-hut.y)<28){a.carry=false;const gv=a.carryGolden?30:10;villageStore+=gv;S.eat();spark(hut.x,hut.y-26,'#c4b5fd',5);if(Math.random()<0.25)float(hut.x,hut.y-44,'🌾+'+gv,'#e9d5ff')}}
     else if(!a.carry){let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#d6bcfa',4)}}}
-    let en3=nearestEnemy(a,30);if(en3&&a.cool<=0){en3.hp-=4;a.cool=40;if(en3.hp<=0){burst(en3.x,en3.y,'#c4b5fd',8,2);onKill('bite',en3)}}
+    let en3=nearestEnemy(a,30);if(!inPrep&&en3&&a.cool<=0){en3.hp-=4;a.cool=40;if(en3.hp<=0){burst(en3.x,en3.y,'#c4b5fd',8,2);onKill('bite',en3)}}
    }else{
     // hero + soldier + runner + tank
     // 😈 LAAL RAJA charge attack (versus me nahi — wahan P2 khud chalata hai)
-    if(a===laalRaja&&mode!=='versus'){
+    if(a===laalRaja&&mode!=='versus'&&!inPrep){
      if(a.chargeCD===undefined){a.chargeCD=400;a.chargeT=0}
      if(a.chargeCD>0)a.chargeCD--;
      if(a.chargeT>0){
@@ -1215,9 +1217,9 @@ function spawnWaveAnt(){
     let best=null,bd=90;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
     if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<14){let v=best.golden?30:10;G[a.team].food+=v;S.eat();foods.splice(foods.indexOf(best),1);burst(a.x,a.y,'green',5,2)}continue}
    }
-    if(en&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
+    if(en&&!inPrep&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
      if(a.cool<=0){en.hp-=hitDmg(a,en);a.face=Math.atan2(en.y-a.y,en.x-a.x);a.cool=a.type==='hero'?14:26;S.swing();S.clash(a.type==='hero');slashes.push({x:en.x,y:en.y,r:5,life:12,max:12});burst(en.x,en.y,'#ff0',3,2);if(en.hp<=0){burst(en.x,en.y,'red',10,3);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0');puff(en.x,en.y,'rgba(120,0,0,0.5)',6);onKill('sword',en)}}
-    }else if(en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx||(autoAtk&&a.team==='kali'&&FIGHTERS.includes(a.type)))){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
+    }else if(!inPrep&&en&&Math.hypot(a.x-en.x,a.y-en.y)<130&&(a.team==='laal'||a.type==='hero'||!a.tx||(autoAtk&&a.team==='kali'&&FIGHTERS.includes(a.type)))){a.px=a.x;a.py=a.y;moveTo(a,en.x,en.y)}
      else{a.px=a.x;a.py=a.y;moveTo(a,tx,ty);if(!inPrep&&Math.hypot(a.x-ebase.x,a.y-ebase.y)<58){if(a.cool<=0){let fd=a.dmg*(a.type==='hero'?0.9:0.6);if(a.team==='kali'&&doubleT>0)fd*=2;G[eTeam].fort-=fd;a.cool=30;S.cannon();vib(40);burst(ebase.x+rnd(-20,20),ebase.y+rnd(-30,30),'orange',4,3);if(eTeam==='kali')shakeK=6;else shakeL=6}}}
     // 🏘 gaon ka ghar looto: paas ho to thoko, +3🍚 har vaar
     if(a.cool<=0&&huts.length){
@@ -1227,8 +1229,8 @@ function spawnWaveAnt(){
       if(Math.random()<0.3)float(hh.x,hh.y-52,'+3 🍚','#ffd27f');
       if(hh.hp<=0)destroyHut(hh,a.team)}
     }
-    // 🏯 dushman imarat todo
-    if(a.cool<=0){
+    // 🏯 dushman imarat todo (training me nahi)
+    if(!inPrep&&a.cool<=0){
      let bb=null,bd=48;for(let b of buildings){if(b.team===a.team||b.hp<=0)continue;let dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd<bd){bd=dd;bb=b}}
      if(bb){bb.hp-=a.dmg*0.8;a.cool=30;S.hit();spark(bb.x,bb.y,'orange',5);if(bb.hp<=0){burst(bb.x,bb.y,'#8b5a2b',14,4);float(bb.x,bb.y-24,'🏯 Toot gaya!','#ff0');addScore(30)}}
     }
@@ -1425,7 +1427,7 @@ function draw(){
   ctx.save();
   ctx.fillStyle='rgba(0,0,0,0.42)';ctx.fillRect(0,0,W,56);
   ctx.font='bold 15px sans-serif';ctx.fillStyle='#fde68a';ctx.textAlign='center';
-  ctx.fillText('⏱️ TAIYAARI — Army banao! (koi dushman nahi aayega)',W/2,22);
+  ctx.fillText('⏱️ TRAINING TIME — koi ladai nahi! Sirf army train karo',W/2,22);
   // ring
   ctx.beginPath();ctx.arc(W/2,86,22,-Math.PI/2,-Math.PI/2+Math.PI*2*frac);
   ctx.strokeStyle=secs<=5?'#ff4444':'#22c55e';ctx.lineWidth=7;ctx.lineCap='round';ctx.stroke();
@@ -1440,7 +1442,7 @@ function draw(){
   bar(24,'⬛ Kali',kP,'#e5e7eb');
   bar(W-214,'🟥 Laal',lP,'#e11d1d');
   ctx.textAlign='center';ctx.font='bold 13px sans-serif';ctx.fillStyle='#fde68a';
-  ctx.fillText('🎁 Har type ka 1st unit MUFT!  🍚 Khana 2×',W/2,170);
+  ctx.fillText('🎁 Har type 1 MUFT! 🍚 2× | Ready ho to ⚔ HAMLA SHURU dabao',W/2,170);
   ctx.restore();
  }
  if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillText('⏸ PAUSED',340,260);ctx.shadowBlur=0}
@@ -1904,7 +1906,7 @@ function updateHUD(){
  // ⏱️ prep button: sirf taiyari me
  const pb=document.getElementById('prepBtn');
  if(pb)pb.style.display=inPrep?'inline-block':'none';
- if(inPrep)pb.innerHTML='⚔ LADDI SHURU! ('+Math.max(0,Math.ceil(prepT/60))+'s)';
+ if(inPrep)pb.innerHTML='⚔ HAMLA SHURU — ARMY READY! ('+Math.max(0,Math.ceil(prepT/60))+'s)';
  const ub=document.getElementById('ultBtn');
  if(ub){if(ultCD>0){ub.innerHTML='🌀 '+Math.ceil(ultCD/60)+'s';ub.classList.remove('ready');ub.style.opacity=0.6}else{ub.innerHTML='🌀 Chakravat <kbd>U</kbd>';ub.classList.add('ready');ub.style.opacity=1}}
  // smart buttons: paise na hon to halke dikho (mobile par saaf pata chale)
