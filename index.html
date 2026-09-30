@@ -267,13 +267,13 @@ let rally={x:650,y:250},foods=[],ants=[],parts=[],floats=[];
 let gameOver=false,started=false,paused=false,speed=1,auto=true,muted=false;
 let mode='fort',difficulty='medium',timeLeft=180,elapsed=0,frame=0,kills=0,killStreak=0,streakT=0;
 let joshT=0, shakeAll=0;
-let G={kali:{food:50,wood:30,gold:20,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:50,wood:30,gold:20,fort:600,maxFort:600,base:{x:820,y:250}}};
+let G={kali:{food:80,wood:50,gold:30,fort:600,maxFort:600,base:{x:80,y:250}},laal:{food:80,wood:50,gold:30,fort:600,maxFort:600,base:{x:820,y:250}}};
 let DIFF={easy:{ai:0.012,dmg:0.8},medium:{ai:0.02,dmg:1.0},hard:{ai:0.034,dmg:1.3}};
 let hero=null, laalRaja=null, heroRespawn=0;
 let keys={};
 // ===== NAYE SYSTEMS: units, powerups, waves, score, weather, versus =====
 const UNITS={
- worker:{hp:45, dmg:6,  speed:1.5, cost:10},
+ worker:{hp:45, dmg:6,  speed:1.9, cost:10},
  runner:{hp:32, dmg:9,  speed:2.7, cost:12},
  soldier:{hp:110,dmg:20, speed:1.9, cost:20},
  tank:  {hp:260,dmg:26, speed:1.2, cost:35},
@@ -795,7 +795,7 @@ function refreshLevels(){
  });
 }
 function startGame(){ac();S.power();started=true;currentLevel=null;wavesToWin=0;laalStrat='balanced';document.getElementById('menu').style.display='none';
- G.kali.wood=30;G.kali.gold=20;G.laal.wood=30;G.laal.gold=20;
+ G.kali.wood=50;G.kali.gold=30;G.laal.wood=50;G.laal.gold=30;
  buildings=[];tech={kali:{sword:0,armor:0,speed:0},laal:{sword:0,armor:0,speed:0}};
  age={kali:0,laal:0};wonderT={kali:0,laal:0};
  laalCiv=['japan','cheen','bharat'][Math.floor(Math.random()*3)];
@@ -828,7 +828,7 @@ function makeHero(team){
 }
 hero=makeHero('kali');
 ants.push(hero);
-for(let i=0;i<3;i++){spawn('kali','worker',true);spawn('laal','worker',true)}
+for(let i=0;i<4;i++){spawn('kali','worker',true);spawn('laal','worker',true)}
 spawn('kali','soldier',true);spawn('laal','soldier',true);
 for(let i=0;i<4;i++){const h0=huts[i%huts.length];ants.push(mkVillager(h0))}
 if(difficulty==='hard'){/* laal raja start me banega */}
@@ -1082,9 +1082,9 @@ function step(){
   for(let p of powerups)p.life--;powerups=powerups.filter(p=>p.life>0);
   for(let a of ants){if(a.hp<=0||a.team!=='kali')continue;for(let p of powerups.slice()){if(Math.hypot(a.x-p.x,a.y-p.y)<20){collectPower(a,p);break}}}
   // 🏯 AOE economy: khet income + laal trickle + burj attack
-  if(frame%120===0){for(let b of buildings){if(b.hp<=0)continue;if(b.kind==='farm'){G[b.team].food+=4*civOf(b.team).foodRate;if(b.team==='kali'&&Math.random()<0.3)float(b.x,b.y-24,'+4 🍚','#4ade80')}}}
+  if(frame%120===0){for(let b of buildings){if(b.hp<=0)continue;if(b.kind==='farm'){G[b.team].food+=6*civOf(b.team).foodRate;if(b.team==='kali'&&Math.random()<0.3)float(b.x,b.y-24,'+6 🍚','#4ade80')}}}
   if(frame%300===0){G.laal.wood+=8;G.laal.gold+=5;if(frame%1200===0)laalAgeUp();if(frame%900===0&&mode!=='versus'&&G.laal.wood>=40&&buildings.filter(x=>x.team==='laal').length<4){const lb=G.laal.base;const pool=age.laal>=2?['barrack','tower','farm','market']:['barrack','farm','market'];buildings.push({team:'laal',kind:pool[Math.floor(Math.random()*pool.length)],x:lb.x+rnd(-40,30),y:lb.y-110,hp:220,maxHp:220,cool:0})}}
-  if(frame%300===0){for(let b of buildings){if(b.hp>0&&b.kind==='market'){G[b.team].gold+=3}}}
+  if(frame%300===0){for(let b of buildings){if(b.hp>0&&b.kind==='market'){G[b.team].gold+=5}}}
   // 🛕 Wonder timer: 90s tak bachao = jeet
   for(let t of ['kali','laal']){const w=buildings.find(b=>b.team===t&&b.kind==='wonder'&&b.hp>0);if(w){if(wonderT[t]>0){wonderT[t]--;if(wonderT[t]%600===0)float(w.x,w.y-50,'🛕 '+Math.ceil(wonderT[t]/60)+'s!','#FFD700');if(wonderT[t]<=0&&!gameOver){gameOver=true;const win=t==='kali';document.getElementById('msg').textContent=win?'🛕 WONDER JEET! Kali amar! 🎉':'🛕 Laal Wonder jeet gaya! 💔';if(win){addScore(300);S.win();recordWin(mode);showLoot()}else{S.lose()}showBanner(win?'🛕 WONDER JEET! +300⭐':'🛕 HAAR!')}}}}
   for(let b of buildings){if(b.hp<=0||b.kind!=='tower'||inPrep||!warStarted)continue;b.cool--;if(b.cool<=0){let en=null,bd=170;for(let e of ants){if(e.hp<=0)continue;if((b.team==='kali'&&e.team!=='laal')||(b.team==='laal'&&e.team!=='kali'))continue;let d=Math.hypot(e.x-b.x,e.y-b.y);if(d<bd){bd=d;en=e}}if(en){b.cool=55;en.hp-=14*techDmg(b.team);spark(en.x,en.y,'#fde047',4);if(Math.random()<0.3)S.goli();if(en.hp<=0)onKill('tower',en)}}}
@@ -1174,9 +1174,9 @@ function spawnWaveAnt(){
      if(best){moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryKind='food';a.carryGolden=best.golden;if(best.mirchi){a.boost=600;float(a.x,a.y,'🌶 SPEED!','red')}foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#aaffaa',5)}}
     }
    }else{const b=G[a.team].base;moveTo(a,b.x,b.y);if(Math.hypot(a.x-b.x,a.y-b.y)<32){a.carry=false;const civ=civOf(a.team);
-    if(a.carryKind==='wood'){let v=12*civ.woodRate;if(inPrep)v*=2;G[a.team].wood+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#365314':'#f66',4,2)}
-    else if(a.carryKind==='gold'){let v=8;if(inPrep)v*=2;G[a.team].gold+=v;S.eat();spark(b.x,b.y,'#FFD700',6)}
-    else{let v=a.carryGolden?30:10;v*=civ.foodRate;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}}
+    if(a.carryKind==='wood'){let v=20*civ.woodRate;if(inPrep)v*=2;G[a.team].wood+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#365314':'#f66',4,2)}
+    else if(a.carryKind==='gold'){let v=12;if(inPrep)v*=2;G[a.team].gold+=v;S.eat();spark(b.x,b.y,'#FFD700',6)}
+    else{let v=a.carryGolden?45:15;v*=civ.foodRate;if(inPrep)v*=2;G[a.team].food+=v;S.eat();burst(b.x,b.y,a.team==='kali'?'#333':'#f66',4,2);if(a.team==='kali'&&Math.random()<0.15)float(b.x,b.y-40,['Yummy!','Khana!','Wah!'][Math.floor(Math.random()*3)],'#0f0')}}}
    let en=nearestEnemy(a,42);if(!inPrep&&en&&a.cool<=0){en.hp-=hitDmg(a,en);S.hit();slashes.push({x:en.x,y:en.y,r:4,life:10,max:10});a.cool=32;if(en.hp<=0){burst(en.x,en.y,'red',10,3);onKill('bite',en)}}
    }else if(a.type==='healer'){
     // ⚕ healer: zakhmi sathi ko dhoondhkar heal karo
@@ -1190,7 +1190,7 @@ function spawnWaveAnt(){
     const hut=huts.length?huts.reduce((m,h)=>Math.hypot(a.x-h.x,a.y-h.y)<Math.hypot(a.x-m.x,a.y-m.y)?h:m,huts[0]):null;
     const flee=nearestEnemy(a,85);
     if(flee&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y)}
-    else if(a.carry&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y);if(Math.hypot(a.x-hut.x,a.y-hut.y)<28){a.carry=false;const gv=a.carryGolden?30:10;villageStore+=gv;S.eat();spark(hut.x,hut.y-26,'#c4b5fd',5);if(Math.random()<0.25)float(hut.x,hut.y-44,'🌾+'+gv,'#e9d5ff')}}
+    else if(a.carry&&hut){a.px=a.x;a.py=a.y;moveTo(a,hut.x,hut.y);if(Math.hypot(a.x-hut.x,a.y-hut.y)<28){a.carry=false;const gv=a.carryGolden?45:15;villageStore+=gv;S.eat();spark(hut.x,hut.y-26,'#c4b5fd',5);if(Math.random()<0.25)float(hut.x,hut.y-44,'🌾+'+gv,'#e9d5ff')}}
     else if(!a.carry){let best=null,bd=1e9;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<13){a.carry=true;a.carryGolden=best.golden;foods.splice(foods.indexOf(best),1);spark(a.x,a.y,'#d6bcfa',4)}}}
     let en3=nearestEnemy(a,30);if(!inPrep&&en3&&a.cool<=0){en3.hp-=4;a.cool=40;if(en3.hp<=0){burst(en3.x,en3.y,'#c4b5fd',8,2);onKill('bite',en3)}}
    }else{
@@ -1219,7 +1219,7 @@ function spawnWaveAnt(){
    if(a===hero&&a.tx==null&&en&&Math.hypot(a.x-en.x,a.y-en.y)<200){tx=en.x;ty=en.y}
    if((a.type==='hero')&&!en){
     let best=null,bd=90;for(let f of foods){let dd=Math.hypot(a.x-f.x,a.y-f.y);if(dd<bd){bd=dd;best=f}}
-    if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<14){let v=best.golden?30:10;G[a.team].food+=v;S.eat();foods.splice(foods.indexOf(best),1);burst(a.x,a.y,'green',5,2)}continue}
+    if(best){a.px=a.x;a.py=a.y;moveTo(a,best.x,best.y);if(bd<14){let v=best.golden?45:15;G[a.team].food+=v;S.eat();foods.splice(foods.indexOf(best),1);burst(a.x,a.y,'green',5,2)}continue}
    }
     if(en&&!inPrep&&Math.hypot(a.x-en.x,a.y-en.y)<(a.type==='hero'?34:28)){
      if(a.cool<=0){en.hp-=hitDmg(a,en);a.face=Math.atan2(en.y-a.y,en.x-a.x);a.cool=a.type==='hero'?14:26;S.swing();S.clash(a.type==='hero');slashes.push({x:en.x,y:en.y,r:5,life:12,max:12});burst(en.x,en.y,'#ff0',3,2);if(en.hp<=0){burst(en.x,en.y,'red',10,3);float(en.x,en.y-15,['Khatm!','Dhoom!','Uda diya!'][Math.floor(Math.random()*3)],'#ff0');puff(en.x,en.y,'rgba(120,0,0,0.5)',6);onKill('sword',en)}}
