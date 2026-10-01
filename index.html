@@ -919,11 +919,11 @@ function cycleQuality(){setQuality((qIdx+1)%4);msg('\u{1F3A8} Graphics: '+QNAMES
 function toggleAutoQ(){autoQ=!autoQ;const b=document.getElementById('bAuto');if(b)b.textContent='\u26A1 Auto: '+(autoQ?'ON':'OFF');S.click()}
 window.addEventListener('resize',()=>{if(started)fitCanvas()});
 
-// ---- wind ----
-let wind=0.45,windPh=0;
-function updateWind(){windPh+=(1+Math.sin(frame*0.004)*0.5)*0.008;wind=0.3+0.75*fbm(windPh*2.4,7.7,3)}
-function gustAt(ph){return Math.sin(frame*0.047+ph)*0.6+Math.sin(frame*0.019+ph*2.3)*0.4}
-function sway(ph,amp){return (Math.sin(frame*0.06+ph)*0.62+Math.sin(frame*0.031+ph*1.9)*0.38)*amp*wind}
+// ---- wind (hawa dheere + soft — tez nahi) ----
+let wind=0.22,windPh=0;
+function updateWind(){windPh+=(1+Math.sin(frame*0.0016)*0.5)*0.0022;wind=0.09+0.20*fbm(windPh*0.8,7.7,3)}
+function gustAt(ph){return Math.sin(frame*0.017+ph)*0.6+Math.sin(frame*0.008+ph*2.3)*0.4}
+function sway(ph,amp){return (Math.sin(frame*0.026+ph)*0.62+Math.sin(frame*0.013+ph*1.9)*0.38)*amp*wind}
 
 // ---- cloth (verlet) ----
 const cloths=[];
@@ -947,10 +947,10 @@ function simCloth(){
    const vx=(p.x-p.px)*0.94,vy=(p.y-p.py)*0.94;p.px=p.x;p.py=p.y;
    // travelling wave down the cloth + stronger pull toward tip (flag snaps)
    const t=i/c.segs;
-   const ripple=Math.sin(frame*0.19-i*0.85+c.ph)*0.10*wind*t;
+   const ripple=Math.sin(frame*0.08-i*0.85+c.ph)*0.10*wind*t;
    const wp=g0*(0.30+i*0.20)*wind*(0.5+t*0.9);
    p.x+=vx+wp*0.85+ripple;
-   p.y+=vy+0.15+Math.sin(frame*0.23+i*0.8)*0.07*wind+ripple*0.5;}
+   p.y+=vy+0.15+Math.sin(frame*0.09+i*0.8)*0.07*wind+ripple*0.5;}
   c.pts[0].x=c.ox;c.pts[0].y=c.oy;
   for(let it=0;it<5;it++)for(let i=0;i<c.segs;i++){
    const a=c.pts[i],d2=c.pts[i+1];let dx=d2.x-a.x,dy=d2.y-a.y,d=Math.hypot(dx,dy)||1,df=(d-seg)/d;
@@ -1109,8 +1109,9 @@ function stepWindParts(){
  for(const p of parts){
   if(p.t!=='leaf'&&p.t!=='dust'&&p.t!=='smoke'&&p.t!=='ember')continue;
   if(p.life>(p.max||25)*0.55)continue;      // only affects older particles
-  p.vx+=wind*0.016*(p.t==='leaf'?1.5:0.6);
-  p.vy+=Math.sin(frame*0.07+p.ph)*0.004;
+   p.vx+=wind*0.006*(p.t==='leaf'?1.2:0.5);
+   p.vy+=Math.sin(frame*0.04+p.ph)*0.0025;
+
  }
 }
 function beginLight(){
@@ -1818,7 +1819,7 @@ function shoji(x,y,w,h,glowR){
 }
 function noren(x,y,w,h,col){
  for(let i=0;i<4;i++){
-  const sw=Math.sin(frame*0.09+i*1.3+x*0.05)*1.4*wind;
+  const sw=Math.sin(frame*0.05+i*1.3+x*0.05)*1.4*wind;
   const sw2=w/4;
   ctx.fillStyle=col;
   ctx.beginPath();ctx.moveTo(x-w/2+i*sw2,y);ctx.lineTo(x-w/2+(i+1)*sw2,y);
@@ -2277,26 +2278,87 @@ function collideBuildings(){
 }
 const SKIN='#f0c396',SKIN_D='#c08f60';
 function eyeBlink(u,ph){return (Math.sin(frame/7+u.id*1.7)>0.985)?0.12:1}
+// ============ VILLAGER ANIMATION ============
+// har villager ka apna phase (id se offset) — sab ek jaisa nahi chalte
+// 3-phase tool swing: wind-up -> strike -> recover
+function villSwingPose(f){
+ let a,tw,tl;
+ if(f<0.32){const k=easeOut(f/0.32);a=-0.85-1.45*k;tw=-0.10*k;tl=-1.80+0.80*k}
+ else if(f<0.47){const k=Math.pow((f-0.32)/0.15,2.2);a=-2.30+3.00*k;tw=-0.10+0.30*k;tl=-1.00+2.45*k}
+ else{const k=easeOut((f-0.47)/0.53);a=0.70-1.55*k;tw=0.20*(1-k);tl=1.45-2.45*k}
+ return{a:a,tw:tw,tl:tl};
+}
+function villAnim(u,sc){
+ const off=u.id*37,mv=u.mv?1:0;
+ const A={off:off,sc:sc,wph:frame*0.40+off,working:false,swing:null,hit:false,sw:0,
+          carry:u.carry>0,armB:0,armF:-0.35,lunge:0,headDX:0,headDY:0,headTilt:0,crouch:0,tool:-0.9};
+ // --- chalna (walk cycle) ---
+ const wph=A.wph;
+ A.strideAmp=mv?1:0.20;
+ A.crouch=mv?0:0.35+Math.sin(frame*0.05+off)*0.22;
+ A.bobY=mv?-Math.abs(Math.sin(wph*2))*1.45:Math.sin(frame*0.062+off)*0.42;
+ A.torsoLean=mv?0.17+Math.sin(wph*2)*0.035:0.03+Math.sin(frame*0.05+off)*0.02;
+ A.armSwing=mv?Math.sin(wph)*0.72:Math.sin(frame*0.06+off)*0.09;
+ // --- sar: thoda upar-neeche + kabhi kabhi idhar-udhar dekhta hai
+ const glance=Math.sin(frame*0.0125+off*1.7);
+ A.headDX=mv?Math.sin(wph*2+Math.PI)*0.55*sc:(glance>0.94?-1.3*sc:0);
+ A.headDY=mv?-Math.abs(Math.sin(wph*2))*0.4*sc:Math.sin(frame*0.062+off)*0.32*sc;
+ A.headTilt=mv?Math.sin(wph*2+1)*0.05:0;
+ // --- kaam (ped kaatna / building banana) ---
+ if(u.state==='gather'||u.state==='build'){
+  A.working=true;
+  const per=u.state==='build'?15:22;
+  const raw=frame+u.id*29;
+  const sw=Math.floor(raw/per);
+  const f=(raw%per)/per;
+  const P=villSwingPose(f);
+  A.swing=P;A.sw=sw;
+  A.hit=(u.vsw!==sw);            // nayi swing shuru = pichhli swing ka zor
+  A.tool=P.tl;
+  A.armF=P.a;
+  A.torsoLean=0.16+P.tw;
+  A.crouch=1.5+Math.abs(Math.sin(f*Math.PI))*0.55;
+  A.headDX=-1.15*sc;A.headDY=1.6*sc;A.headTilt=0.16;
+  if(f>=0.30&&f<0.50)A.lunge=Math.sin((f-0.30)/0.20*Math.PI)*2.0;
+  // back-hath saath-saath ulta (dhakka)
+  A.armB=-P.a*0.5-0.2;
+ }else{
+  // --- bojh uthaye chalna/farna ---
+  if(A.carry)A.armB=-2.50+(mv?Math.sin(wph)*0.14:Math.sin(frame*0.06+off)*0.06);
+  else A.armB=-0.15+(mv?Math.sin(wph)*0.62:Math.sin(frame*0.06+off)*0.07);
+  A.armF=A.carry?-0.62:-0.35-A.armSwing;
+  A.headTilt=A.carry?0.07:0;
+ }
+ return A;
+}
 
 // ---- legs ----
-function drawLegs(u,ph,col,dark,sk,sc,y0){
+function drawLegs(u,ph,col,dark,sk,sc,y0,VA){
+ const amp=VA&&VA.strideAmp!=null?VA.strideAmp:1;
+ const cr=VA&&VA.crouch?VA.crouch:0;
+ const hipY=y0+cr*sc*0.45;
+ const walking=u.mv&&amp>0.5;
  for(const side of [-1,1]){
   const p=ph+(side>0?0:Math.PI);
   const k=Math.sin(p);
-  const thigh=0.34*k*sc;
-  const knee=-0.30-Math.max(0,Math.cos(p))*0.62;
+  const thigh=0.36*k*amp*sc;
+  const knee=-0.32-Math.max(0,Math.cos(p))*0.66*amp;
   const colr=side>0?col:dark;
-  const hip=[side*2.4*sc,y0];
+  const hip=[side*2.4*sc,hipY];
   const th=6.6*sc,sh=6.6*sc;
   const kx=hip[0]+Math.sin(thigh)*th,ky=hip[1]+Math.cos(thigh)*th;
   const fa=thigh+knee;
   const fx=kx+Math.sin(fa)*sh,fy=ky+Math.cos(fa)*sh;
   ctx.strokeStyle=colr;ctx.lineWidth=3.5*sc;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
-  // waraji
+  // waraji — pair chalti hai to toe angle badlo + heel up
+  ctx.save();ctx.translate(fx+1*sc,fy+0.6);ctx.rotate(-k*0.32*amp);
   ctx.fillStyle=side>0?'#3a2f22':'#2a2118';
-  ctx.beginPath();ctx.ellipse(fx+1*sc,fy+0.6,2.9*sc,1.5*sc,0,0,7);ctx.fill();
-  if(side>0&&u.mv&&Math.abs(k)>0.85)addFootDust(u,fx,fy);
+  ctx.beginPath();ctx.ellipse(0,0,2.9*sc,1.5*sc,0,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.10)';
+  ctx.beginPath();ctx.ellipse(-0.4*sc,-0.5*sc,1.6*sc,0.7*sc,0,0,7);ctx.fill();
+  ctx.restore();
+  if(walking&&Math.abs(k)>0.85)addFootDust(u,fx,fy);
  }
 }
 let footT=0;
@@ -2512,7 +2574,7 @@ function drawSickle(hx,hy,ang){
 // ---- back gear (sashimono / quiver / cape) ----
 function drawBackGear(u,TC,sc,ySh,wind2){
  if(u.type==='sword'||u.type==='spear'||u.type==='archer'){
-  const fl=Math.sin(frame*0.13+u.id)*2.2*wind;
+  const fl=Math.sin(frame*0.065+u.id)*2.2*wind;
   ctx.save();
   ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(-3.4*sc,ySh-2);ctx.lineTo(-4.4*sc+fl*0.3,ySh-15*sc);ctx.stroke();
@@ -2538,7 +2600,7 @@ function drawBackGear(u,TC,sc,ySh,wind2){
   ctx.restore();
  }
  if(u.type==='sword'||u.type==='knight'){
-  const hw2=Math.sin(frame*0.1+u.id)*3*wind+wind*1.4;
+  const hw2=Math.sin(frame*0.055+u.id)*3*wind+wind*1.4;
   ctx.save();ctx.translate(-3.4*sc,ySh-2);
   ctx.fillStyle=u.team==='P1'?'rgba(38,80,180,0.72)':'rgba(190,40,34,0.72)';
   ctx.beginPath();
@@ -2582,7 +2644,7 @@ function drawUnit(u){
  }
  ctx.rotate(u.face);
  if(u.flinch>0)ctx.rotate(Math.sin(u.flinch*2.4)*0.09*u.flinch/6);
- const bobY=moving?-Math.abs(Math.sin(ph*2))*1.1:Math.sin(frame*0.07+u.id)*0.35;
+ const bobY=(t==='villager')?0:(moving?-Math.abs(Math.sin(ph*2))*1.1:Math.sin(frame*0.07+u.id)*0.35);
  ctx.translate(lunge-recoil,bobY);
  // tint (hit flash / selection)
  const flash=u.hurt>0?0.55:0;
@@ -2613,23 +2675,47 @@ function drawUnit(u){
  const armored=t!=='villager';
  const gk=u.node?u.node.kind:(u.carryKind==='w'?'wood':u.carryKind==='g'?'gold':'food');
  const working=u.state==='gather'||u.state==='return'||u.state==='build';
- // --- back leg ---
- drawLegs(u,ph,TC.p,TC.d,SKIN,sc,yHip);
+ // 👷 villager ka apna animation system (chalna / katna / banana / bojh)
+ const VA=(t==='villager')?villAnim(u,sc):null;
+ if(VA)ctx.translate(VA.lunge,VA.bobY);
+ // 👷 swing ka impact (nayi swing = pichhla zor pada)
+ if(VA&&VA.working&&VA.hit&&u.vsw!=null){
+  u.vsw=VA.sw;
+  if(isVis(u.x,u.y)){
+   if(u.state==='build'){
+    const bb=blds.find(x=>x.id===u.bld);
+    if(bb){const px=bb.x+rnd(-bb.w/3,bb.w/3),py=bb.y+rnd(-4,bb.h/3);
+     chips(px,py,1);spark(px,py,1,'#ffe9a8');dustP(px,py+2,1,'rgba(200,184,142,0.4)')}
+    if(u.team==='P1'&&Math.random()<0.35)S.build();
+   }else if(u.node){
+    const n=u.node;
+    if(n.kind==='wood'){chips(n.x+rnd(-7,7),n.y-14,2);if(Math.random()<0.45)leaves(n.x+rnd(-8,8),n.y-30,1);n.shake=Math.max(n.shake||0,6)}
+    else if(n.kind==='gold'){spark(n.x+rnd(-7,7),n.y-4,2,'#ffe08a');if(Math.random()<0.4)emit('spark',n.x+rnd(-7,7),n.y-4,rnd(-1,1),rnd(-2,-.6),qn(12),{r:1.6,c:'#FFD700',g:0.12,add:true})}
+    else{spark(n.x+rnd(-7,7),n.y-6,1,'#ff7a9a');if(Math.random()<0.35)leaves(n.x+rnd(-8,8),n.y-8,1)}
+    if(u.team==='P1'&&Math.random()<0.22)S.chop();
+   }
+   addTrauma(0.018);
+  }
+ }
+ // --- legs ---
+ drawLegs(u,VA?VA.wph:ph,TC.p,TC.d,SKIN,sc,yHip,VA);
  // --- back arm ---
  const swing=moving?Math.sin(ph)*0.55:Math.sin(frame*0.06+u.id)*0.1;
  const bSh=[-1.2*sc,ySh+0.6*sc];
- const bA=swing*0.9+0.35;
- const bE=joint(bSh[0],bSh[1],-0.5+bA,4.6*sc,1.0-bA*0.4,4.4*sc,2.3*sc,SKIN_D);
+ const bA=VA?VA.armB:(swing*0.9+0.35);
+ const bE=joint(bSh[0],bSh[1],VA?VA.armB:(-0.5+bA),4.6*sc,1.0-(VA?VA.armB:bA)*0.4,4.4*sc,2.3*sc,SKIN_D);
  // --- back gear ---
  drawBackGear(u,TC,sc,ySh,wind);
  // --- torso ---
- drawTorso(u,TC,sc,yHip,ySh,armored,ap<=1?(t==='archer'?-0.03:0.05):moving?0.06:0);
+ drawTorso(u,TC,sc,yHip,ySh,armored,VA?VA.torsoLean:(ap<=1?(t==='archer'?-0.03:0.05):moving?0.06:0));
  // --- shoulder pads (team color + gold trim) ---
  if(armored){for(const sx of [-3.6*sc,3.6*sc]){ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(sx,ySh+0.6*sc,2.7*sc,0,7);ctx.fill();ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='rgba(255,255,255,0.35)';ctx.beginPath();ctx.arc(sx-0.8*sc,ySh-0.2*sc,0.9*sc,0,7);ctx.fill()}}
  // --- weapon / tool (front) ---
  const fSh=[1.4*sc,ySh+0.6*sc];
  let fa,fe,wex=0,wTool=t;
- if(working){
+ if(VA){
+  fa=VA.armF;wex=0;
+ }else if(working){
   const chop=Math.abs(Math.sin(frame/6.5+u.id));
   fa=-0.9-chop*0.95;
   wex=0;
@@ -2643,19 +2729,30 @@ function drawUnit(u){
  fe=joint(fSh[0],fSh[1],fa,4.8*sc,1.05,4.6*sc,2.5*sc,SKIN);
  // tool
  if(u.type==='villager'){
-  if(u.state==='gather'&&gk==='gold')drawPick(fe.fx,fe.fy,fa-0.5);
-  else if(u.state==='gather'&&(gk==='food'||gk==='hunt'))drawSickle(fe.fx,fe.fy,fa-0.35);
-  else if(u.state==='build')drawHammer(fe.fx,fe.fy,fa-0.3);
-  else drawAxe(fe.fx,fe.fy,fa-0.55);
+  // 👷 tool ka angle swing ke saath — pehchanhe pe upar, zor pe neeche
+  const ta=VA?VA.tool:(fa-0.55);
+  if(u.state==='gather'&&gk==='gold')drawPick(fe.fx,fe.fy,VA?ta:fa-0.5);
+  else if(u.state==='gather'&&(gk==='food'||gk==='hunt'))drawSickle(fe.fx,fe.fy,VA?ta:fa-0.35);
+  else if(u.state==='build')drawHammer(fe.fx,fe.fy,VA?ta:fa-0.3);
+  else drawAxe(fe.fx,fe.fy,ta);
  }else if(t==='sword')drawKatana(fe.fx,fe.fy,fa-0.55,TC);
  else if(t==='hero')drawKatana(fe.fx,fe.fy,fa-0.55,TC);
  else if(t==='spear')drawSpear(fe.fx,fe.fy,fa-1.5,TC,t==='spear'&&ap<=1?Math.sin(Math.min(1,ap)*Math.PI)*7:0);
  else if(t==='archer')drawBow(fe.fx,fe.fy,-0.15,ap<=1?Math.min(6,ap*9):2.5);
  // --- head ---
- const hx=(working?0.2:1.5)*sc+Math.sin(ph*2)*0.4*sc;
- const hy=ySh-4.6*sc+(working?-0.6:0);
+ const hx=VA?VA.headDX:((working?0.2:1.5)*sc+Math.sin(ph*2)*0.4*sc);
+ const hy=(VA?(ySh-4.6*sc+VA.headDY):(ySh-4.6*sc+(working?-0.6:0)));
  const helmet=u.type==='villager'?0:u.type==='archer'?2:u.type==='spear'?3:1;
+ if(VA&&VA.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(VA.headTilt);ctx.translate(-hx,-hy)}
  drawHead(u,TC,sc,hx,hy,helmet,blink);
+ if(VA&&VA.headTilt)ctx.restore();
+ // 👷 kandhe pe bojh ka dhaaga
+ if(VA&&VA.carry){
+  ctx.strokeStyle='#6b4a1f';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-6*sc,ySh-6*sc);ctx.lineTo(4.5*sc,ySh-7*sc);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=0.6;
+  ctx.beginPath();ctx.moveTo(-6*sc,ySh-6.6*sc);ctx.lineTo(4.5*sc,ySh-7.6*sc);ctx.stroke();
+ }
  if(u.type==='archer'&&ap>0.6&&ap<0.95){
   ctx.strokeStyle='#f5f0e0';ctx.lineWidth=1;ctx.beginPath();
   ctx.moveTo(hx+2*sc,hy-1*sc);ctx.lineTo(15*sc,hy-1.6*sc);ctx.stroke();
@@ -2669,7 +2766,7 @@ function drawUnit(u){
  // 🤴 hero crown + level
  if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('🤴',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.fillStyle='#000'}ctx.textAlign='left'}
  // carried load (world space, above shoulder)
- if(u.carry>0)drawLoad(u,TC);
+ if(u.carry>0)drawLoad(u,TC,VA);
  if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);
 }
 function drawUnitBar(u,isSel){
@@ -2682,9 +2779,13 @@ function drawUnitBar(u,isSel){
  ctx.fillRect(u.x-w/2,top,w*hp,3.4);
  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fillRect(u.x-w/2,top,w*hp,1);
 }
-function drawLoad(u,TC){
+function drawLoad(u,TC,VA){
+ // 👷 bojh kandhe par — chalte hue hilta hai
+ const bob=VA?VA.bobY*0.85:0;
+ const tilt=VA?Math.sin(VA.wph*2)*0.06:0;
  ctx.save();ctx.translate(u.x,u.y);
- ctx.save();ctx.rotate(u.face);
+ ctx.save();ctx.rotate(u.face+tilt);
+ ctx.translate(0,bob);
  if(u.carryKind==='w'){
   ctx.fillStyle='#6b4a1f';ctx.beginPath();ctx.arc(-7,-24,4.4,0,7);ctx.arc(-2.4,-25.4,4.4,0,7);ctx.arc(-4.6,-19.6,4.4,0,7);ctx.fill();
   ctx.strokeStyle='#3a2a10';ctx.lineWidth=1;ctx.stroke();
@@ -2770,7 +2871,7 @@ function drawHorse(u,TC,ph,ap,blink){
  ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.stroke();
  ctx.fillStyle=TC.d;ctx.fillRect(-7*sc,yBody-8*sc,2*sc,4*sc);ctx.fillRect(3*sc,yBody-8*sc,2*sc,4*sc);
  // tail
- const tl=Math.sin(frame*0.09+u.id)*2.4*wind;
+ const tl=Math.sin(frame*0.05+u.id)*2.4*wind;
  ctx.strokeStyle='#2a1a0a';ctx.lineWidth=3.4*sc;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(-12*sc,yBody-1*sc);
  ctx.quadraticCurveTo(-18*sc-tl,yBody+3*sc,-16*sc-tl*1.4,yBody+10*sc);ctx.stroke();
@@ -2896,11 +2997,11 @@ function drawElephant(u,TC,ph,ap){
  ctx.strokeStyle=TC.rim;ctx.lineWidth=0.7;ctx.strokeRect(-10.4*sc,yB-12*sc+bob,10*sc,3.4*sc);
  // tail
  ctx.strokeStyle='#5f646d';ctx.lineWidth=2;ctx.lineCap='round';
- const tl=Math.sin(frame*0.11+u.id)*1.6*wind;
+ const tl=Math.sin(frame*0.06+u.id)*1.6*wind;
  ctx.beginPath();ctx.moveTo(-16*sc,yB-2*sc+bob);ctx.quadraticCurveTo(-21*sc,yB+2*sc,-19*sc-tl,yB+8*sc);ctx.stroke();
  ctx.fillStyle='#3a3f46';ctx.beginPath();ctx.ellipse(-19*sc-tl,yB+9*sc,1.4*sc,2*sc,0,0,7);ctx.fill();
  // ears
- const earF=Math.sin(frame*0.08+u.id)*0.14*wind;
+ const earF=Math.sin(frame*0.045+u.id)*0.14*wind;
  for(const s2 of [-1,1]){
   ctx.save();ctx.translate(6*sc,yB-7*sc+bob);ctx.rotate(s2*0.4+earF*s2);
   const earG=ctx.createLinearGradient(0,-6*sc,0,6*sc);
@@ -2941,7 +3042,7 @@ function drawElephant(u,TC,ph,ap){
  drawHead(u,TC,0.9,0.6*sc,mhY+1*sc,3,1);
  // spear + team banner on the howdah
  ctx.strokeStyle='#6b4a22';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(3*sc,mhY+7*sc);ctx.lineTo(9*sc,mhY-8*sc);ctx.stroke();
- const bf=Math.sin(frame*0.14+u.id)*1.6*wind;
+ const bf=Math.sin(frame*0.075+u.id)*1.6*wind;
  ctx.fillStyle=TC.p;ctx.beginPath();
   ctx.moveTo(9*sc,mhY-8*sc);ctx.quadraticCurveTo(15*sc+bf,mhY-7*sc,9*sc+16*sc+bf,mhY-7*sc);
   ctx.lineTo(9*sc+16*sc+bf,mhY-4*sc);ctx.quadraticCurveTo(12*sc+bf,mhY-5.6*sc,9*sc,mhY-4.6*sc);ctx.closePath();ctx.fill();
@@ -3448,7 +3549,7 @@ function draw(){
   const _b=blds.find(x=>x.id===sel.bld);
   if(_b){
    ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(_b.rx,_b.ry);ctx.lineTo(_b.rx,_b.ry-22);ctx.stroke();
-   const fw=Math.sin(frame*0.12)*2.4*wind;
+   const fw=Math.sin(frame*0.06)*2.4*wind;
    ctx.fillStyle='#22c55e';ctx.beginPath();
    ctx.moveTo(_b.rx,_b.ry-22);ctx.quadraticCurveTo(_b.rx+8+fw,_b.ry-20,_b.rx+15+fw,_b.ry-17);
    ctx.lineTo(_b.rx+15+fw,_b.ry-8);ctx.quadraticCurveTo(_b.rx+8+fw,_b.ry-12,_b.rx,_b.ry-11);ctx.closePath();ctx.fill();
@@ -3706,12 +3807,12 @@ function step(){
    for(const c of crates){if(c.taken)continue;for(const u of units){if(u.hp>0&&u.team==='P1'&&Math.hypot(u.x-c.x,u.y-c.y)<30){c.taken=true;try{crateReward(c)}catch(_){}break}}}
    crates=crates.filter(c=>!c.taken);
    units=units.filter(u=>u.hp>0||u.deadT>0);
-  for(const cl of clouds){cl.x+=cl.vx*wind*0.7+0.05;if(cl.x-cl.rx>W)cl.x=-cl.rx}
+  for(const cl of clouds){cl.x+=cl.vx*(0.22+wind*0.55)+0.03;if(cl.x-cl.rx>W)cl.x=-cl.rx}
   if(treaty<=0&&frame%36===0)S.drum(frame%72===0);
   // 🍂 hawa ke saath udte patte (throttled so combat FX never starve)
-  if(frame%26===0&&wind>0.55&&qn(2)>0){
+  if(frame%40===0&&wind>0.30&&qn(2)>0){
    const lx=rnd(-40,W+40),ly=rnd(60,H-40);
-   if(isSeen(lx,ly))emit('leaf',lx,ly,1.2+wind*2.6,rnd(-.3,.3),qn(150+rnd(0,70)),{r:rnd(2.2,4.2),c:['#3f9e2f','#6b8f2a','#c9a227','#8a5a2b'][(Math.random()*4)|0],g:0.006,rot:rnd(0,6.28),vr:rnd(-.22,.22),drag:0.994});
+   if(isSeen(lx,ly))emit('leaf',lx,ly,0.4+wind*1.5,rnd(-.22,.22),qn(190+rnd(0,90)),{r:rnd(2.2,4.2),c:['#3f9e2f','#6b8f2a','#c9a227','#8a5a2b'][(Math.random()*4)|0],g:0.004,rot:rnd(0,6.28),vr:rnd(-.12,.12),drag:0.997});
   }
   for(const bd of birds){
    // birds fly in a loose V and bob on thermals (flocking-ish, cheap)
