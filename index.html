@@ -93,6 +93,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
 🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
 🕊 Shuru me <b>Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b><br>
+⬆️ <b>Yug (Age) system zaroori hai:</b> <b>🏟 Barracks / 🛒 Market / 🗼 Burj</b> banane ke liye pehle <b>Colonial Yug</b> chahiye. Barracks ka button 🔒 dikha raha hai? → <b>Town Center chuno → ⬆️ Yug button dabao</b> (sirf 🍖 khana chahiye), phir Barracks unlock ho jayega! <b>🏠 Ghar</b> aur <b>🌾 Khet</b> starting Yug me hi ban jaate hain.
 🗺 <b>Bada naksha (2200×1400):</b> dono gaon door-door — beech me 6 sone ki khaan, 9 ped-jhund, shikaar aur khazane! Scout karke jagah pakdo!
 🌫️ <b>Fog of War:</b> naksha kaala hai — khoji jagah hi dikhegi! 💎 <b>Khazane:</b> chamakte khandar chhoo = +150🪙! 📦 <b>Bonus crates:</b> har ~50s me gift box girega — unit bhejkar uthao! 🎯 <b>Campaign:</b> menu se 10 mission khelo! 🔊 button se sound band/kholo.
 <br>⚡ <b>Powers:</b> <b>⚡ Bijli</b> = dushman par tap karke hamla, <b>💚 Heal</b> = sena full HP, <b>🎁 Gift</b> = +resource! 🤴 <b>Maharaja Hero:</b> free me milta hai, kill par XP + level-up, khud heal hota hai! 💀 kills + 🏆 score + 🔥 combo se high-score banao!
@@ -177,7 +178,7 @@ const BLD={
  barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:20*60,minAge:1,icon:'🏟️'},
  market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'},
  tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:18*60,minAge:1,icon:'🗼'},
- farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:12*60,minAge:1,icon:'🌾'}
+ farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:12*60,minAge:0,icon:'🌾'}
 };
 const GATHER_T=48,CARRY=15;
 // ============ STATE ============
@@ -3444,11 +3445,24 @@ function drawMM(){
 }
 // ============ HUD + PANEL ============
 function costStr(c){const m=civOf('P1').cost;const p=[];if(c.f)p.push(Math.ceil(c.f*m)+'🍖');if(c.w)p.push(Math.ceil(c.w*m)+'🪵');if(c.g)p.push(Math.ceil(c.g*m)+'🪙');return p.join(' ')}
+// ---- age gate helper: building/unit locked hai ya nahi ----
+function ageLocked(minAge){return age.P1<(minAge||0)}
+function lockTag(minAge){return ageLocked(minAge)?'<br>🔒 '+AGES[minAge].icon+' '+AGES[minAge].name+' chahiye':''}
+// locked building pe click -> TC auto-select karo taaki ⬆️ button saamne dikhe
+function explainLocked(kind){
+ const B=BLD[kind],need=B.minAge||0;
+ const nx=AGES[age.P1+1];
+ msg('⬆️ '+B.name+' ke liye '+AGES[need].icon+' '+AGES[need].name+' Yug chahiye! → Town Center chuna gaya, ⬆️ button dabao ('+nx.icon+' '+nx.name+', '+costStr(nx.cost||{})+')');
+ const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0);
+ if(tc){sel={units:[],bld:tc.id};placing=null;placingPower=null;refreshPanel();addTrauma(0.12)}
+ else msg('⚠️ Town Center nahi mila — pehle wapas banao!');
+ S.click();
+}
 function startPlace(kind){
  const B=BLD[kind];
- if(age.P1<(B.minAge||0)){msg('⬆️ Pehle '+AGES[B.minAge].name+' Yug!');return}
- if(!canAfford('P1',B.cost||{})){msg('💰 Resource kam! '+costStr(B.cost||{}));return}
- if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){msg('👷 Pehle VILLAGER chuno!');return}
+ if(ageLocked(B.minAge)){explainLocked(kind);return}
+ if(!canAfford('P1',B.cost||{})){msg('💰 Resource kam! Chahiye: '+costStr(B.cost||{}));return}
+ if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){msg('👷 Pehle VILLAGER chuno (👷 Villager ya ⚔️ Fauj button)!');return}
  placing=kind;msg('📍 '+B.name+' lagane ke liye jagah tap karo (Esc = cancel)');refreshPanel();
 }
 function orderAttack(){
@@ -3462,7 +3476,7 @@ function orderAttack(){
 function refreshPanel(){
  const info=document.getElementById('panelInfo'),btns=document.getElementById('panelBtns');
  btns.innerHTML='';
- const btn=(t,fn,dis)=>{const b=document.createElement('button');b.innerHTML=t;if(dis)b.disabled=true;b.onclick=fn;btns.appendChild(b);return b};
+  const btn=(t,fn,dis,hl)=>{const b=document.createElement('button');b.innerHTML=t;if(dis)b.disabled=true;if(hl){b.style.background='linear-gradient(180deg,#fde047,#b45309)';b.style.color='#000';b.style.boxShadow='0 0 0 3px #22c55e,0 0 18px #fde047';b.style.animation='none'}b.onclick=fn;btns.appendChild(b);return b};
  if(placingPower==='bolt'){info.innerHTML='⚡ <b>Bijli Hamla</b> — dushman par tap karo! <b>Esc</b> = cancel';return}
  if(placing){info.innerHTML='📍 <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') — jagah tap karo. <b>Esc</b> = cancel';return}
  const b=sel.bld!=null?blds.find(x=>x.id===sel.bld):null;
@@ -3470,7 +3484,7 @@ function refreshPanel(){
   const qn=b.queue.length?(' ⏳'+b.queue.length):'';
   info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ ban raha '+Math.floor(b.prog/b.need*100)+'% (villager bhejo!)')+qn;
   if(b.kind==='tc'&&b.done){btn('👷 Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
-   btn(age.P1>=4?'👑 MAX Yug':'⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()});
+   btn(age.P1>=4?'👑 MAX Yug':'⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()},false,age.P1<4);
    if(!heroAlive())btn('🤴 Maharaja<br>'+costStr(UNITS.hero.cost),()=>{trainUnit('P1',b.id,'hero');refreshPanel()},age.P1<1);}
   if(b.kind==='barracks'&&b.done){for(const t of ['sword','spear','archer','knight','elephant','cannon','hero']){const U=UNITS[t];
    btn(U.icon+' '+t+((U.pop||1)>1?' (2👥)':'')+'<br>'+costStr(trueCost('P1',t))+(age.P1<(U.minAge||0)?'<br>🔒 Yug '+(U.minAge+1):''),()=>{trainUnit('P1',b.id,t);refreshPanel()},age.P1<(U.minAge||0))}
@@ -3485,7 +3499,14 @@ function refreshPanel(){
  const c={};for(const u of alive)c[u.type]=(c[u.type]||0)+1;
  info.innerHTML=Object.keys(c).map(t=>UNITS[t].icon+' '+t+' ×'+c[t]).join(' &nbsp; ');
  const _h=alive.find(u=>u.type==='hero');if(_h)info.innerHTML+=' &nbsp; ⭐ Lv'+(_h.lvl||1)+' ('+Math.round(_h.hp)+'/'+_h.maxHp+')';
- if(alive.some(u=>u.type==='villager')){btn('🏠 Ghar<br>'+costStr(BLD.house.cost),()=>startPlace('house'));btn('🏟️ Barracks<br>'+costStr(BLD.barracks.cost),()=>startPlace('barracks'));btn('🛒 Market<br>'+costStr(BLD.market.cost),()=>startPlace('market'));btn('🗼 Burj<br>'+costStr(BLD.tower.cost),()=>startPlace('tower'));btn('🌾 Khet<br>'+costStr(BLD.farm.cost),()=>startPlace('farm'))}
+ if(alive.some(u=>u.type==='villager')){
+  const nx=AGES[age.P1+1];
+  if(age.P1<4)info.innerHTML+='<br>⬆️ <b>Next Yug: '+nx.icon+' '+nx.name+'</b> — Town Center chuno → ⬆️ button dabao ('+costStr(nx.cost||{})+')';
+  for(const k of ['house','barracks','market','tower','farm']){
+   const B=BLD[k],lk=ageLocked(B.minAge);
+   btn(B.icon+' '+B.name+lockTag(B.minAge)+'<br>'+costStr(B.cost),()=>startPlace(k));
+  }
+ }
  if(alive.some(u=>u.type!=='villager'))btn('⚔ HAMLA!',orderAttack);
 }
 function updateHUD(){
