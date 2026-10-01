@@ -68,6 +68,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <button id="bSpeed" class="tbtn" onclick="toggleSpeed()">🚀 1x</button>
 <button class="tbtn" onclick="zoomBy(1.25)">🔍+</button><button class="tbtn" onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
 <button id="bFol" class="tbtn" onclick="toggleFollow()">📷 Follow: OFF</button>
+<button class="tbtn" onclick="goHome()" title="Camera wapas apne gaon par">⌂ Ghar</button>
 <button class="tbtn" onclick="cycleQuality()">🎨 <b id="gfxLbl">ULTRA</b></button>
 <button id="bAuto" class="tbtn" onclick="toggleAutoQ()">⚡ Auto: ON</button>
 <button id="bFull" class="tbtn" onclick="toggleFull()">⛶ Full</button>
@@ -278,7 +279,7 @@ let trauma=0,hitStop=0,camKickX=0,camKickY=0,camZoomPunch=0,letterbox=0,cbT=0,ca
 let panVX=0,panVY=0;   // pan inertia (chhodne ke baad slide)
 let camTX=null,camTY=null,camTZ=null;   // camera target (smoothed)
 function addTrauma(a){trauma=Math.min(1,trauma+a)}
-function hitStopT(frames){hitStop=Math.max(hitStop,frames)}
+function hitStopT(frames){hitStop=Math.min(14,Math.max(hitStop,frames))}
 function zoomPunch(f){camZoomPunch=Math.max(camZoomPunch,f)}
 function cinematicBars(frames){cbT=Math.max(cbT,frames)}
 // focus a point on screen for a beat (used by powers / hero level / big kills)
@@ -317,9 +318,15 @@ function stepCamera(){
  }else{camKickX*=0.8;camKickY*=0.8}
  // zoom punch decays (impact punch-in)
  if(camZoomPunch>0.0005)camZoomPunch*=0.86;else camZoomPunch=0;
- // letterbox (cinematic bars) for key moments
- if(cbT>0)cbT--;letterbox+=(cbT>0?1:0-letterbox)*0.08;
-}
+// letterbox (cinematic bars) for key moments
+  // 🛡️ pehle likha tha (cbT>0?1:0-letterbox) — jab cbT>0 hota to seedha
+  //    `letterbox += 0.08` ho jata tha (koi pull nahi tha), isliye 50 frames me
+  //    letterbox ~4 tak chala jata tha aur bars (VH*0.11*letterbox) screen ka
+  //    88% dhak dete the. Ab 0..1 ke beech ease-in/ease-out karta hai.
+  if(cbT>0)cbT--;
+  letterbox+=((cbT>0?1:0)-letterbox)*0.08;
+  letterbox=letterbox<0?0:letterbox>1?1:letterbox;
+ }
 function farFromBases(x,y){return Math.hypot(x-P1BX,y-P1BY)>300&&Math.hypot(x-AIBX,y-AIBY)>300}
 function genMap(){
  nodes=[];decor=[];tufts=[];flowers=[];
@@ -427,6 +434,10 @@ let pinchPts=new Map(),pinchD=0,pinchAnchor=null,pinchMx=0,pinchMy=0;
 let mouseSX=0,mouseSY=0,mouseIn=false,isTouch=false,mPan=null,followOn=false,panMode=false;
 function togglePanMode(){panMode=!panMode;const b=document.getElementById('bPan');if(b){b.textContent=panMode?'🖐️ Pan: ON':'🖐️ Pan: OFF';b.classList.toggle('sel',panMode)}if(panMode){mPan=null;pDown=null;pDrag=null;panVX=panVY=0;deselect();cv.style.cursor='grab'}else cv.style.cursor='default';S.click();msg(panMode?'🖐️ Pan mode ON — left-click hold karke map ghisao! (box-select off)':'⬛ Box-select mode — left drag se units chuno')}
 function toggleFollow(){followOn=!followOn;const b=document.getElementById('bFol');if(b)b.textContent=followOn?'📷 Follow: ON':'📷 Follow: OFF';S.click()}
+// ⌂ camera wapas apne Town Center par (andhere me bhatakne par kaam aata hai)
+function goHome(){if(!started)return;cancelCam();const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0);const hx=tc?tc.x:P1BX,hy=tc?tc.y:P1BY;view.x=hx;view.y=hy;clampView();if(followOn)toggleFollow();S.click();msg('⌂ Ghar wapas!')
+ // thoda ujala pulse taaki pata chale camera aaya
+ for(let i=0;i<qn(8);i++)spark(hx+rnd(-40,40),hy+rnd(-30,30),1,'#ffe9a8')}
 function worldHit(wx,wy){
  let bu=null,bd=1e9;
  for(const u of units){if(u.hp<=0)continue;const d=Math.hypot(u.x-wx,u.y-wy);if(d<27&&d<bd){bd=d;bu=u}}
@@ -449,13 +460,15 @@ function heroAlive(){return units.find(u=>u.team==='P1'&&u.type==='hero'&&u.hp>0
 function addScore(base){if(comboT>0)combo=Math.min(20,combo+1);else combo=1;comboT=5*60;const mult=1+Math.min(10,combo)*0.2;score+=Math.round(base*mult);if(score>highScore){highScore=score;try{localStorage.setItem('syHigh',String(highScore))}catch(e){}}}
 function heroGainXp(n){const h=heroAlive();if(!h)return;h.xp=(h.xp||0)+n;const need=(h.lvl||1)*100;if(h.xp>=need){h.xp-=need;h.lvl=(h.lvl||1)+1;h.maxHp+=150;h.hp=h.maxHp;h.dmg=Math.round(h.dmg*1.15);float(h.x,h.y-44,'⬆️ HERO Lv'+h.lvl+'! 🤴','#FFD700');spark(h.x,h.y-10,14,'#FFD700');
  // cinematic level-up
- for(let i=0;i<qn(3);i++)rings.push({x:h.x,y:h.y+4,r:10+i*8,life:44+i*10,c:'rgba(255,215,0,0.6)',flat:1});
+  for(let i=0;i<qn(3);i++)rings.push({x:h.x,y:h.y+4,r:10+i*8,life:44+i*10,max:44+i*10,c:'rgba(255,215,0,0.6)',flat:1});
+
  for(let i=0;i<qn(20);i++)emit('ember',h.x+rnd(-16,16),h.y+rnd(-10,6),rnd(-.9,.9),rnd(-2.4,-.8),qn(46+rnd(0,30)),{r:rnd(1.2,2.6),c:'#ffd76a',g:0.01,add:true});
  addTrauma(0.35);zoomPunch(0.7);cinematicBars(34);focusOn(h.x,h.y,null,40);
  S.age();msg('🤴 Maharaja Level '+h.lvl+'! +HP +hamla!')}}
 function onEnemyKilled(v){if(gameOver||!started)return;kills++;const base=!v.type?150:v.type==='elephant'?80:v.type==='cannon'?60:v.type==='knight'?40:v.type==='hero'?200:25;addScore(base);heroGainXp(!v.type?100:20)}
 function castBolt(){if(!started||paused||gameOver)return;if(powers.bolt.cd>0){msg('⚡ Bijli '+Math.ceil(powers.bolt.cd)+'s me taiyaar!');return}if(treaty>0){msg('🕊 Sandhi me Bijli nahi!');return}placingPower='bolt';placing=null;msg('⚡ Bijli: dushman par tap karo! (Esc = cancel)');S.click();refreshPanel()}
-function strikeBolt(wx,wy){let hits=0;for(const e of units){if(e.team!=='AI'||e.hp<=0)continue;if(Math.hypot(e.x-wx,e.y-wy)<150){dealDmg('P1',e,350);hits++}}for(const b of blds){if(b.team!=='AI'||b.hp<=0)continue;if(Math.hypot(b.x-wx,b.y-wy)<150){dealDmg('P1',b,500);hits++}}for(let i=0;i<16;i++)spark(wx+rnd(-60,60),wy+rnd(-40,20),8,'#fef08a');for(let i=0;i<8;i++)flame(wx+rnd(-50,50),wy+rnd(-30,10),rnd(3,6));rings.push({x:wx,y:wy,r:14,life:45,flat:1,c:'rgba(190,220,255,0.75)'});rings.push({x:wx,y:wy,r:8,life:70,flat:1,c:'rgba(120,180,255,0.45)'});for(let i=0;i<qn(10);i++)smoke(wx+rnd(-40,40),wy+rnd(-20,10),rnd(10,20),0,'rgba(90,100,120,0.5)');shake=Math.max(shake,14);addTrauma(1);zoomPunch(1.4);hitStopT(9);cinematicBars(50);focusOn(wx,wy,null,55);S.boom();float(wx,wy-40,'⚡ BIJLI! ('+hits+' hits)','#fef08a');powers.bolt.cd=powers.bolt.max;placingPower=null;msg(hits?'⚡ Bijli giri! '+hits+' nishane!':'⚡ Bijli khaali gayi!');refreshPanel()}
+function strikeBolt(wx,wy){let hits=0;for(const e of units){if(e.team!=='AI'||e.hp<=0)continue;if(Math.hypot(e.x-wx,e.y-wy)<150){dealDmg('P1',e,350);hits++}}for(const b of blds){if(b.team!=='AI'||b.hp<=0)continue;if(Math.hypot(b.x-wx,b.y-wy)<150){dealDmg('P1',b,500);hits++}}for(let i=0;i<16;i++)spark(wx+rnd(-60,60),wy+rnd(-40,20),8,'#fef08a');for(let i=0;i<8;i++)flame(wx+rnd(-50,50),wy+rnd(-30,10),rnd(3,6));rings.push({x:wx,y:wy,r:14,life:45,max:45,flat:1,c:'rgba(190,220,255,0.75)'});rings.push({x:wx,y:wy,r:8,life:70,max:70,flat:1,c:'rgba(120,180,255,0.45)'});
+for(let i=0;i<qn(10);i++)smoke(wx+rnd(-40,40),wy+rnd(-20,10),rnd(10,20),0,'rgba(90,100,120,0.5)');shake=Math.max(shake,14);addTrauma(1);zoomPunch(1.4);hitStopT(9);cinematicBars(50);focusOn(wx,wy,null,55);S.boom();float(wx,wy-40,'⚡ BIJLI! ('+hits+' hits)','#fef08a');powers.bolt.cd=powers.bolt.max;placingPower=null;msg(hits?'⚡ Bijli giri! '+hits+' nishane!':'⚡ Bijli khaali gayi!');refreshPanel()}
 function castHeal(){if(!started||paused||gameOver)return;if(powers.heal.cd>0){msg('💚 Heal '+Math.ceil(powers.heal.cd)+'s me taiyaar!');return}let n=0;for(const u of units){if(u.team==='P1'&&u.hp>0&&u.hp<u.maxHp){u.hp=Math.min(u.maxHp,u.hp+300);n++;float(u.x,u.y-30,'+💚','#4ade80')}}S.age();powers.heal.cd=powers.heal.max;msg(n?n+' units heal! 💚':'💚 Sab full HP hain!')}
 function castGift(){if(!started||paused||gameOver)return;if(powers.gift.cd>0){msg('🎁 Gift '+Math.ceil(powers.gift.cd)+'s me taiyaar!');return}const a=addRes('P1','f',500),b2=addRes('P1','w',400),c2=addRes('P1','g',300);S.coin();float(P1BX,P1BY-80,'🎁 +500🍖 +400🪵 +300🪙','#FFD700');powers.gift.cd=powers.gift.max;const lost=(500-a)+(400-b2)+(300-c2);msg(lost>0?('🎁 +'+(a)+'🍖 +'+(b2)+'🪵 +'+(c2)+'🪙'+(lost>0?' (kuch storage full thi!)':'')):'🎁 Tohfa mila! +500🍖 +400🪵 +300🪙');updateHUD()}
 function spawnCrate(){for(let t=0;t<20;t++){const x=rnd(400,1800),y=rnd(250,1150);if(!farFromBases(x,y))continue;const r=Math.random();const kind=r<0.45?'res':r<0.7?'gold':r<0.85?'heal':'army';crates.push({x,y,kind,ph:rnd(0,6.28)});float(x,y-30,'📦 Bonus!','#fde047');msg('📦 Bonus crate aaya! Unit bhejkar uthao!');return}}
@@ -626,7 +639,9 @@ function updateFog(){fogVis.fill(0);
  const mark=(x,y,r)=>{const r2=r*r,x0=Math.max(0,Math.floor((x-r)/40)),x1=Math.min(FOGC-1,Math.floor((x+r)/40)),y0=Math.max(0,Math.floor((y-r)/40)),y1=Math.min(FOGR-1,Math.floor((y+r)/40));
   for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++){const px=cx*40+20,py=cy*40+20;if((px-x)*(px-x)+(py-y)*(py-y)<r2){fogVis[cy*FOGC+cx]=1;fogSeen[cy*FOGC+cx]=1}}};
  for(const u of units)if(u.team==='P1'&&u.hp>0)mark(u.x,u.y,sightOf(u));
- for(const b of blds)if(b.team==='P1'&&b.hp>0)mark(b.x,b.y,sightOf(b));}
+ for(const b of blds)if(b.team==='P1'&&b.hp>0)mark(b.x,b.y,sightOf(b));
+ // camera hamesha andhera na ho: viewport ke around scout-vision reveal
+ mark(view.x,view.y,Math.hypot(W,H)/2+90);}
 function updateUnit(u){
  if(u.hp<=0){if(u.deadT>0)u.deadT--;return}
  if(u.hurt>0)u.hurt--;
@@ -3583,24 +3598,31 @@ function draw(){
  }
  // ---- units carrying: glow already added in drawLoad ----
  // ---- age-up + impact shockwave rings ----
- for(const rg of rings){
-  const lt=Math.max(0,rg.life/(rg.max||55)),t=1-lt;
-  if(rg.flat){
-   // ground shockwave: flat ellipse expanding on the floor
-   const rr2=rg.r*(1+t*4.2);
+  // 🛡️ life kabhi max se zyada na ho (warna lt>1 → negative radius → canvas crash)
+  for(const rg of rings){
+   const mx=rg.max||55;
+   if(rg.life>mx)rg.life=mx;
+   const lt=Math.max(0,Math.min(1.2,rg.life/mx)),t=1-lt;
+   if(rg.flat){
+    // ground shockwave: flat ellipse expanding on the floor
+    const rr2=Math.max(0.1,rg.r*(1+t*4.2));
+
    ctx.globalAlpha=lt*0.85;
    ctx.strokeStyle=rg.c||'rgba(255,235,200,0.7)';ctx.lineWidth=2.6*lt+0.6;
    ctx.beginPath();ctx.ellipse(rg.x,rg.y,rr2,rr2*0.42,0,0,7);ctx.stroke();
    ctx.globalAlpha=lt*0.35;ctx.lineWidth=6*lt+1;
    ctx.beginPath();ctx.ellipse(rg.x,rg.y,rr2*0.72,rr2*0.3,0,0,7);ctx.stroke();
-  }else{
-   ctx.globalAlpha=lt*0.9;
-   ctx.strokeStyle='#FFD700';ctx.lineWidth=4;
-   ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r,0,7);ctx.stroke();
-   ctx.globalAlpha=lt*0.5;ctx.lineWidth=8;
-   ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r*0.8,0,7);ctx.stroke();
-   addGlow(rg.x,rg.y,rg.r,'rgba(255,210,80,0.25)');
-  }
+   }else{
+    // 🛡️ negative radius guard (arc negative r par throw karta hai)
+    if(!(rg.r>0))continue;
+    ctx.globalAlpha=lt*0.9;
+    ctx.strokeStyle='#FFD700';ctx.lineWidth=4;
+    ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r,0,7);ctx.stroke();
+    ctx.globalAlpha=lt*0.5;ctx.lineWidth=8;
+    ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r*0.8,0,7);ctx.stroke();
+    addGlow(rg.x,rg.y,rg.r,'rgba(255,210,80,0.25)');
+   }
+
   ctx.globalAlpha=1;
  }
  // ---- rally point flag ----
@@ -3703,9 +3725,25 @@ function draw(){
  ctx.font='11px monospace';ctx.textAlign='right';
  ctx.fillStyle='rgba(255,255,255,0.35)';
  const hh=Math.floor(todT*24),mm2=Math.floor((todT*24-hh)*60);
- ctx.fillText(Math.round(fpsAvg)+' fps \u00B7 '+QNAMES[qIdx]+' \u00B7 '+DPR.toFixed(1)+'x \u00B7 '+
-  (hh<10?'0':'')+hh+':'+(mm2<10?'0':'')+mm2,VW-8,14);
- ctx.restore();
+  ctx.fillText(Math.round(fpsAvg)+' fps \u00B7 '+QNAMES[qIdx]+' \u00B7 '+DPR.toFixed(1)+'x \u00B7 '+
+   (hh<10?'0':'')+hh+':'+(mm2<10?'0':'')+mm2,VW-8,14);
+  // 🌑 camera ghane andhere me hai to hint dikhao (naye players isi se "black screen" samajhte hain)
+  // view ke center + 4 kone check karo — kahin bhi ujala hai to hint mat dikhao
+  if(started&&!gameOver){
+   const _hw=VW/2/view.z,_hh=VH/2/view.z;
+   const _anyVis=isSeen(view.x,view.y)||isSeen(view.x-_hw*0.8,view.y-_hh*0.7)||isSeen(view.x+_hw*0.8,view.y-_hh*0.7)||isSeen(view.x-_hw*0.8,view.y+_hh*0.7)||isSeen(view.x+_hw*0.8,view.y+_hh*0.7);
+   if(!_anyVis){
+    ctx.font='bold 20px sans-serif';ctx.textAlign='center';
+    ctx.fillStyle='rgba(0,0,0,0.55)';
+    const _ht='🌑 Yahan andhera hai — ⌂ Ghar dabao ya minimap par tap karo';
+    const _w=ctx.measureText(_ht).width;
+    ctx.fillRect(VW/2-_w/2-10,86,_w+20,32);
+    ctx.fillStyle='#fde68a';ctx.fillText(_ht,VW/2,109);
+    ctx.textAlign='left';
+   }
+  }
+  ctx.restore();
+
  drawMM();
 }
 function drawMM(){
@@ -3979,7 +4017,13 @@ function toggleMenu(){const t=document.getElementById('topbar');t.classList.togg
 function toggleFull(){try{if(document.fullscreenElement){document.exitFullscreen()}else{const w=document.getElementById('wrap');if(w&&w.requestFullscreen)w.requestFullscreen();else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen()}}catch(e){msg('⛶ Fullscreen nahi khula')}}
 document.addEventListener('fullscreenchange',()=>{const b=document.getElementById('bFull');if(b)b.textContent=document.fullscreenElement?'🗗 Exit':'⛶ Full';if(started)fitCanvas()});
 let lastDt=16,lastFrameT=0;
-function loop(){const t0=performance.now();if(hitStop>0){hitStop--;stepCamera()}else{step();stepCamera()}if(started)draw();const exec=performance.now()-t0;if(lastFrameT>0){const realDt=t0-lastFrameT;fpsAvg=fpsAvg*0.92+(1000/Math.max(1,realDt))*0.08}lastFrameT=t0;lastDt=exec;requestAnimationFrame(loop)}
+function loop(){const t0=performance.now();
+// 🛡️ rAF sabse PEHLE queue karo — taaki draw/step me kabhi exception aaye to bhi game freeze na ho (pehle black/freeze hota tha)
+requestAnimationFrame(loop);
+try{
+if(hitStop>0){hitStop--;stepCamera()}else{step();stepCamera()}if(started)draw();
+}catch(err){if(!window.__loopErr||frame-(window.__loopErrF||0)>600){window.__loopErr=err;window.__loopErrF=frame;try{console.error('[loop]',err)}catch(_){}}}
+const exec=performance.now()-t0;if(lastFrameT>0){const realDt=t0-lastFrameT;fpsAvg=fpsAvg*0.92+(1000/Math.max(1,realDt))*0.08}lastFrameT=t0;lastDt=exec}
 // ============ MENU + START ============
 document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');myCiv=b.dataset.c;S.click()});
 document.querySelectorAll('#diffBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diffBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');difficulty=b.dataset.d;S.click()});
