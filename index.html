@@ -148,7 +148,7 @@ const BLD={
 const GATHER_T=48,CARRY=15;
 // ============ STATE ============
 let units=[],blds=[],nodes=[],parts=[],floats=[];
-let res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
+let res={P1:{f:5000,w:5000,g:5000},AI:{f:300,w:200,g:100}};
 let age={P1:0,AI:0},pop={P1:0,AI:0};
 let tech={P1:{atk:0,def:0},AI:{atk:0,def:0}};
 let myCiv='japan',aiCiv='china',difficulty='normal';
@@ -3028,7 +3028,7 @@ refreshLevels();
 function startGame(){
  ac();S.click();
  units=[];blds=[];parts=[];floats=[];corpses=[];slashes=[];rubble=[];rings=[];shake=0;uid=1;bid=1;frame=0;elapsed=0;gameOver=false;paused=false;speed=1;
- res={P1:{f:300,w:200,g:100},AI:{f:300,w:200,g:100}};
+ res={P1:{f:5000,w:5000,g:5000},AI:{f:300,w:200,g:100}};
  age={P1:0,AI:0};treaty=40*60;sel={units:[],bld:null};placing=null;aiPlan={t:0,attackSent:0};relicsGot=0;
  cloths.length=0;
  fogSeen.fill(0);fogVis.fill(0);
