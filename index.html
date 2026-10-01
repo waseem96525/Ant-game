@@ -622,7 +622,7 @@ function vnz(x,y){
  const xi=Math.floor(x)&255,yi=Math.floor(y)&255,xf=x-Math.floor(x),yf=y-Math.floor(y);
  const u=SMR(xf),v=SMR(yf);
  const aa=nTab[nTab[xi]+yi],ab=nTab[nTab[xi]+yi+1],ba=nTab[nTab[xi+1]+yi],bb=nTab[nTab[xi+1]+yi+1];
- const x1=aa+(ba-aa)*u,x2=ab+(bb-ab)*u;return x1+(x2-x1)*v;
+ const x1=aa+(ba-aa)*u,x2=ab+(bb-ab)*u;return (x1+(x2-x1)*v)/255;
 }
 function fbm(x,y,oc,g){oc=oc||4;g=g||0.5;let a=0.5,f=1,s=0,nn=0;for(let i=0;i<oc;i++){s+=a*vnz(x*f,y*f);nn+=a;a*=g;f*=2.03}return s/nn}
 
@@ -897,7 +897,7 @@ function paintBG(){
   const x=rnd(0,W),y=rnd(0,H);
   const n=vnz(x/95+40,y/95+40),dry=smoothstep(0.50,0.74,fbm(x/300,y/300,4)*0.62+n*0.38);
   const rr2=roadAt(x,y);if(rr2<20)continue;
-  const L=rnd(3.5,8.5)*(1-rr2*0.012),ang=rnd(-0.5,0.5);
+  const L=Math.max(1.5,rnd(3.5,8.5)*(1-rr2*0.012)),ang=rnd(-0.5,0.5);
   const base=mixc([64,112,36],mixc([104,146,54],[150,140,86],dry),0.35+vnz(x/13,y/13)*0.5);
   const tip=mixc([120,186,74],[198,204,120],dry);
   b.strokeStyle='rgba('+base[0]+','+base[1]+','+base[2]+',0.85)';
@@ -2614,7 +2614,7 @@ function draw(){
  drawClouds();
  // wind-driven grass
  for(const t of tufts){
-  const sw=sway(t.ph,3.2*t.s);
+  const sw=sway(t.ph,2.4*t.s);
   ctx.strokeStyle='#4d7d25';ctx.lineWidth=2;ctx.beginPath();
   ctx.moveTo(t.x,t.y);ctx.quadraticCurveTo(t.x+sw*0.5,t.y-8*t.s,t.x+sw,t.y-13*t.s);
   ctx.moveTo(t.x+4,t.y);ctx.quadraticCurveTo(t.x+4+sw*0.5,t.y-6*t.s,t.x+4+sw*0.9,t.y-10*t.s);ctx.stroke();
