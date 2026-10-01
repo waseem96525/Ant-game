@@ -51,6 +51,9 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <button id="bFol" onclick="toggleFollow()">📷 Follow: OFF</button>
 <button onclick="cycleQuality()">🎨 <b id="gfxLbl">ULTRA</b></button>
 <button id="bAuto" onclick="toggleAutoQ()">⚡ Auto: ON</button>
+<button onclick="selectAllArmy()">⚔️ Fauj</button>
+<button onclick="selectAllVillagers()">👷 Villager</button>
+<button onclick="selectAllUnits()">👥 Sab</button>
 <button onclick="deselect()">✖</button>
 </div>
 <div id="msg"></div>
@@ -58,8 +61,8 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
 <div class="guide">
 <b>🎮 Kaise khelein (Age of Empires style):</b><br>
-🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare), Right-click = bhejo / katwao / hamla. Mouse <b>kinare</b> le jao = camera ghumao, <b>beech-button</b> dabakar ghisao = camera pakdo, wheel = zoom. <kbd>WASD</kbd> = camera, 📷 Follow = chuni foj ke saath camera.<br>
-📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Minimap (neeche-right) tap = camera bhejo.<br>
+🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare, max 60), Right-click = bhejo / katwao / hamla. <b>Shift+click</b> = jodo/hatao, <b>Shift+drag</b> = box me jodo, <b>Double-click</b> = same type sab (screen par). <kbd>Q</kbd>=Fauj, <kbd>E</kbd>=Villager, <kbd>R</kbd>=Sab. Mouse <b>kinare</b> le jao = camera ghumao, <b>beech-button</b> dabakar ghisao = camera pakdo, wheel = zoom. <kbd>WASD</kbd> = camera, 📷 Follow = chuni foj ke saath camera.<br>
+📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Topbar ke <b>⚔️ Fauj / 👷 Villager / 👥 Sab</b> button se multi-select karo! Minimap (neeche-right) tap = camera bhejo.<br>
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
 🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
 🕊 Shuru me <b>Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b><br>
@@ -287,6 +290,11 @@ function worldHit(wx,wy){
  return {u:bu,b:bb,n:nd};
 }
 function deselect(){sel={units:[],bld:null};placing=null;if(followOn)toggleFollow();refreshPanel()}
+function selectUnits(list,label){sel={units:list.filter(u=>u.hp>0).slice(0,60),bld:null};placing=null;S.click();refreshPanel();if(label)msg(label)}
+function selectAllArmy(){selectUnits(units.filter(u=>u.team==='P1'&&u.type!=='villager'),'⚔️ Saari fauj chuni! ('+sel.units.length+')')}
+function selectAllVillagers(){selectUnits(units.filter(u=>u.team==='P1'&&u.type==='villager'),'👷 Saare villager chune! ('+sel.units.length+')')}
+function selectAllUnits(){selectUnits(units.filter(u=>u.team==='P1'),'👥 Sab units chune! ('+sel.units.length+')')}
+function selectSameTypeOnScreen(type){const hw=VW/2/view.z,hh=VH/2/view.z;const x0=view.x-hw,x1=view.x+hw,y0=view.y-hh,y1=view.y+hh;selectUnits(units.filter(u=>u.team==='P1'&&u.type===type&&u.x>x0&&u.x<x1&&u.y>y0&&u.y<y1),'Double-click: '+type+' ×'+sel.units.length)}
 function refreshPanel(){/* part3 me */}
 function issueOrder(wx,wy,hit){
  const myU=sel.units.filter(u=>u.hp>0);
@@ -331,9 +339,12 @@ cv.addEventListener('pointermove',e=>{mouseSX=e.clientX;mouseSY=e.clientY;mouseI
   else if(pDown.btn===0){pDrag={x0:pDown.x,y0:pDown.y,x1:e.clientX,y1:e.clientY}}
  }});
 cv.addEventListener('pointerup',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;mPan=null;if(!pDown)return;const wasTouch=e.pointerType==='touch';
- if(pDrag&&!wasTouch){ // box select
-  const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
-  sel={units:units.filter(u=>u.team==='P1'&&u.hp>0&&u.x>a.x&&u.x<b.x&&u.y>a.y&&u.y<b.y).slice(0,30),bld:null};placing=null;S.click();refreshPanel();
+ if(pDrag&&!wasTouch){ // box select (Shift dabao = purani selection me jodo)
+   const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
+   const boxed=units.filter(u=>u.team==='P1'&&u.hp>0&&u.x>a.x&&u.x<b.x&&u.y>a.y&&u.y<b.y);
+   if(e.shiftKey){const ids=new Set(sel.units.map(u=>u.id));for(const u of boxed)if(!ids.has(u.id)){sel.units.push(u);ids.add(u.id)}sel.units=sel.units.filter(u=>u.hp>0).slice(0,60);sel.bld=null;msg('➕ Box + Shift: '+sel.units.length+' units!')}
+   else{sel={units:boxed.slice(0,60),bld:null};msg('⬛ Box select: '+sel.units.length+' units!')}
+   placing=null;S.click();refreshPanel();
   }else if(!pMoved){const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
    if(placing){ // building lagao
     const k=placing;
@@ -342,18 +353,25 @@ cv.addEventListener('pointerup',e=>{pinchPts.delete(e.pointerId);if(pinchPts.siz
     refreshPanel();return;
    }
   if(e.button===2){issueOrder(p.x,p.y,hit);return}
-  // select
-  if(hit.u&&hit.u.team==='P1'){sel={units:[hit.u],bld:null};S.click()}
+  // select (Shift+click = jodo/hatao, Double-click = same type sab)
+   if(hit.u&&hit.u.team==='P1'){
+    if(e.shiftKey){const i=sel.units.indexOf(hit.u);if(i>=0){sel.units.splice(i,1);msg('➖ 1 hataya ('+sel.units.length+')')}else{if(sel.units.length<60){sel.units.push(hit.u);sel.bld=null;msg('➕ 1 joda ('+sel.units.length+')')}else msg('⚠️ Max 60 units!')}S.click()}
+    else{sel={units:[hit.u],bld:null};S.click()}
+   }
   else if(hit.b&&hit.b.team==='P1'){sel={units:[],bld:hit.b.id};S.click()}
   else if(sel.units.length||sel.bld){issueOrder(p.x,p.y,hit)}
   refreshPanel();
  }
  pDown=null;pDrag=null});
 cv.addEventListener('pointercancel',e=>{pinchPts.delete(e.pointerId);if(pinchPts.size<2)pinchD=0;pDown=null;pDrag=null;mPan=null});
+cv.addEventListener('dblclick',e=>{if(!started||paused||gameOver)return;const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);if(hit.u&&hit.u.team==='P1')selectSameTypeOnScreen(hit.u.type)});
 cv.addEventListener('pointerleave',()=>{mouseIn=false});
 document.addEventListener('keydown',e=>{
  if(e.code==='Escape'){if(placing){placing=null;refreshPanel()}else deselect();return}
  if(!started||gameOver)return;
+ if(e.code==='KeyQ'){selectAllArmy();return}
+ if(e.code==='KeyE'){selectAllVillagers();return}
+ if(e.code==='KeyR'){selectAllUnits();return}
  const sp=26/view.z;let kp=false;
  if(e.code==='KeyA'||e.code==='ArrowLeft'){view.x-=sp;kp=true}if(e.code==='KeyD'||e.code==='ArrowRight'){view.x+=sp;kp=true};
  if(e.code==='KeyW'||e.code==='ArrowUp'){view.y-=sp;kp=true}if(e.code==='KeyS'||e.code==='ArrowDown'){view.y+=sp;kp=true};
