@@ -91,9 +91,12 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Topbar ke <b>☰</b> burger se menu kholo, <b>⛶ Full</b> se fullscreen khelo, <b>⚔️ Fauj / 👷 Villager / 👥 Sab</b> se multi-select karo! Minimap (neeche-right) tap = camera bhejo.<br>
 🎥 <b>Cinematic:</b> badi marmaat aur TC girne par <b>slow-motion + camera zoom-punch + letterbox bars</b> lagte hain! God rays, ghisne patte, dhundh jhund patte, raat me jugnu, jalte mashaal ki roshni aur talab ki lahrein — ULTRA graphics me poora cinematic feel!
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
-🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
+🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 📦 <b>Khalon/Godown/Kotla = storage capacity (Lv1→3 upgrade)</b> | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
 🕊 Shuru me <b>Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b><br>
-⬆️ <b>Yug (Age) system zaroori hai:</b> <b>🏟 Barracks / 🛒 Market / 🗼 Burj</b> banane ke liye pehle <b>Colonial Yug</b> chahiye. Barracks ka button 🔒 dikha raha hai? → <b>Town Center chuno → ⬆️ Yug button dabao</b> (sirf 🍖 khana chahiye), phir Barracks unlock ho jayega! <b>🏠 Ghar</b> aur <b>🌾 Khet</b> starting Yug me hi ban jaate hain.
+⬆️ <b>Yug (Age) system zaroori hai:</b> <b>🏟 Barracks / 🛒 Market / 🗼 Burj</b> banane ke liye pehle <b>Colonial Yug</b> chahiye. Barracks ka button 🔒 dikha raha hai? → <b>Town Center chuno → ⬆️ Yug button dabao</b> (sirf 🍖 khana chahiye), phir Barracks unlock ho jayega! <b>🏠 Ghar</b>, <b>🌾 Khet</b> aur <b>🌾 Khalon</b> starting Yug me hi ban jaate hain.<br>
+📦 <b>Storage & Capacity:</b> Har resource ka ek limit hai (topbar me <b>🍖 1200/5000</b> jaisa dikhta hai). Storage bana kar capacity badhao:<br>
+&nbsp;&nbsp;• <b>🌾 Khalon</b> = 🍖 khana ki jagah &nbsp;• <b>🪵 Godown</b> = 🪵 lakdi ki jagah &nbsp;• <b>🪙 Kotla</b> = 🪙 sona ki jagah<br>
+&nbsp;&nbsp;Har storage building <b>Level 1 → 2 → 3</b> upgrade hoti hai. Storage chuno → <b>⭐ Upgrade</b> button dabao. Jitna level, utni capacity (L1 < L2 < L3)! Storage bhar jaane par villagers doosra resource katwane lag jaate hain.
 🗺 <b>Bada naksha (2200×1400):</b> dono gaon door-door — beech me 6 sone ki khaan, 9 ped-jhund, shikaar aur khazane! Scout karke jagah pakdo!
 🌫️ <b>Fog of War:</b> naksha kaala hai — khoji jagah hi dikhegi! 💎 <b>Khazane:</b> chamakte khandar chhoo = +150🪙! 📦 <b>Bonus crates:</b> har ~50s me gift box girega — unit bhejkar uthao! 🎯 <b>Campaign:</b> menu se 10 mission khelo! 🔊 button se sound band/kholo.
 <br>⚡ <b>Powers:</b> <b>⚡ Bijli</b> = dushman par tap karke hamla, <b>💚 Heal</b> = sena full HP, <b>🎁 Gift</b> = +resource! 🤴 <b>Maharaja Hero:</b> free me milta hai, kill par XP + level-up, khud heal hota hai! 💀 kills + 🏆 score + 🔥 combo se high-score banao!
@@ -178,8 +181,61 @@ const BLD={
  barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:20*60,minAge:1,icon:'🏟️'},
  market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'},
  tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:18*60,minAge:1,icon:'🗼'},
- farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:12*60,minAge:0,icon:'🌾'}
+ farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:12*60,minAge:0,icon:'🌾'},
+ khalon:{name:'Khalon',w:86,h:66,hp:600,cost:{w:80},time:14*60,minAge:0,icon:'🌾',store:'f'},
+ godown:{name:'Godown',w:94,h:70,hp:700,cost:{w:100},time:16*60,minAge:1,icon:'🪵',store:'w'},
+ kotla:{name:'Kotla',w:88,h:68,hp:650,cost:{w:90,g:40},time:15*60,minAge:1,icon:'🪙',store:'g'}
 };
+// ============ STORAGE / CAPACITY SYSTEM ============
+// har storage building 3 level tak upgrade ho sakti hai
+const STOR_LV=4,STOR_MAX=3;
+const STOR_CAP=[0,2000,4500,8000];                 // level -> extra capacity
+const STOR_UP=[{},{f:120,w:60,g:30},{f:300,w:160,g:90},{f:0,w:0,g:0}]; // L1->2, L2->3 cost
+function isStore(b){return !!(b&&BLD[b.kind]&&BLD[b.kind].store)}
+function storeKind(b){return isStore(b)?BLD[b.kind].store:null}
+function baseCap(){return{f:5000,w:5000,g:5000}}
+function resCap(t,kind){
+ let c=baseCap()[kind];
+ for(const b of blds)if(b.team===t&&b.hp>0&&b.done&&isStore(b)&&storeKind(b)===kind)c+=STOR_CAP[Math.min(STOR_MAX,b.lvl||1)];
+ return c;
+}
+function allCaps(t){return{f:resCap(t,'f'),w:resCap(t,'w'),g:resCap(t,'g')}}
+function isFull(t,kind){return res[t][kind]>=resCap(t,kind)-0.5}
+function anyFull(t){return isFull(t,'f')||isFull(t,'w')||isFull(t,'g')}
+function fullName(t){
+ const m={f:'🌾 Khalon',w:'🪵 Godown',g:'🪙 Kotla'};
+ if(isFull(t,'f'))return m.f;if(isFull(t,'w'))return m.w;if(isFull(t,'g'))return m.g;return'';
+}
+// add resources but clamp to capacity. returns amount actually added
+function addRes(t,kind,amt){
+ const cap=resCap(t,kind),before=res[t][kind];
+ res[t][kind]=Math.min(cap,before+amt);
+ return res[t][kind]-before;
+}
+function storUpCost(b){
+ const lv=Math.min(STOR_MAX,b.lvl||1);
+ if(lv>=STOR_MAX)return null;
+ return STOR_UP[lv]||null;
+}
+function upgradeStore(b){
+ const c=storUpCost(b);
+ if(!c){msg('⭐ Max level (3)!');return}
+ if(!canAfford('P1',c)){msg('💰 Upgrade ke liye resource kam! '+costStr(c));return}
+ pay('P1',c);
+ b.lvl=Math.min(STOR_MAX,(b.lvl||1)+1);
+ b.maxHp+=250;b.hp=b.maxHp;
+ float(b.x,b.y-b.h/2-46,'⭐ '+BLD[b.kind].name+' → Lv'+b.lvl+'! +'+STOR_CAP[b.lvl]+' '+capIcon(storeKind(b)),'#FFD700');
+ for(let i=0;i<qn(14);i++)spark(b.x+rnd(-18,18),b.y-rnd(0,20),6,'#fde047');
+ rings.push({x:b.x,y:b.y+6,r:10,life:40,c:'rgba(253,224,71,0.6)',flat:1});
+ addTrauma(0.2);zoomPunch(0.4);S.coin();
+ // paas ka villager bhejo (upgrade ke liye kaam chahiye)
+ let best=null,bd=1e9;
+ for(const u of units)if(u.team==='P1'&&u.type==='villager'&&u.hp>0){const d=dist(u,b);if(d<bd){bd=d;best=u}}
+ if(best){best.state='build';best.bld=b.id;best.tx=b.x+rnd(-40,40);best.ty=b.y+50}
+ msg('⭐ '+BLD[b.kind].name+' Level '+b.lvl+'! Ab capacity '+resCap('P1',storeKind(b))+'!');
+ refreshPanel();
+}
+function capIcon(k){return k==='f'?'🍖':k==='w'?'🪵':'🪙'}
 const GATHER_T=48,CARRY=15;
 // ============ STATE ============
 let units=[],blds=[],nodes=[],parts=[],floats=[];
@@ -290,7 +346,7 @@ function mkUnit(team,type,x,y){
  let hp=U.hp*am*(1+0.15*tech[team].def);if(cv2.hp)hp*=cv2.hp;
  let dmg=U.dmg*am*(1+0.15*tech[team].atk);if(type==='sword')dmg*=cv2.swordDmg;
  if(team==='AI'){const m=difficulty==='easy'?0.85:difficulty==='hard'?1.15:1;hp*=m;dmg*=m}
-  const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0,hurt:0,deadT:0,deadMax:36};
+  const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0,hurt:0,deadT:0,deadMax:36,warnedT:0};
   if(type==='hero'){u.lvl=1;u.xp=0}
   units.push(u);return u;
 }
@@ -326,8 +382,10 @@ function tryAge(team){
  msg(civOf(team).name+' → '+AGES[age[team]].icon+' '+AGES[age[team]].name+'!');
 }
 function validSpot(x,y,kind){
-  const B=BLD[kind];
-  if(x<B.w/2+20||x>W-B.w/2-20||y<B.h/2+20||y>H-B.h/2-20)return false;
+ const B=BLD[kind];
+ // non-finite coords reject karo (warna NaN building ban jaati hai jo render tod deti hai)
+ if(!isFinite(x)||!isFinite(y))return false;
+ if(x<B.w/2+20||x>W-B.w/2-20||y<B.h/2+20||y>H-B.h/2-20)return false;
   for(const b of blds)if(b.hp>0&&Math.abs(b.x-x)<(b.w+B.w)/2+14&&Math.abs(b.y-y)<(b.h+B.h)/2+14)return false;
   for(const n of nodes)if(n.amt>0&&Math.hypot(n.x-x,n.y-y)<50)return false;
   if(Math.hypot((x-POND.x)/1.5,y-POND.y)<105)return false;
@@ -341,6 +399,7 @@ function placeBld(team,kind,x,y){
   if(!validSpot(x,y,kind))return null;
   pay(team,B.cost||{});
   const b={id:bid++,team,kind,x,y,w:B.w,h:B.h,hp:1,maxHp:B.hp,prog:0,need:B.time,done:kind==='tc',queue:[],rx:x+60,ry:y,cool:0,cloth:null,dying:false,dieT:0};
+  if(B.store)b.lvl=1;          // storage buildings level 1 se shuru
   if(b.done)b.hp=b.maxHp;
   blds.push(b);
   addBldCloth(b);
@@ -353,9 +412,11 @@ function placeBld(team,kind,x,y){
 function orderVillagerBuild(u,b){u.state='build';u.bld=b.id;u.tx=b.x+rnd(-40,40);u.ty=b.y+50}
 function trade(t,what){
  const r=res[t];
- if(what==='wf'&&r.w>=50){r.w-=50;r.f+=35;msg('50🪵 → +35🍖')}
- else if(what==='fw'&&r.f>=60){r.f-=60;r.w+=35;msg('60🍖 → +35🪵')}
- else if(what==='fg'&&r.f>=100&&r.w>=60){r.f-=100;r.w-=60;r.g+=45;msg('+45🪙 Sona!')}
+ // destination storage full hai to trade mat karo
+ if(what==='wf'&&r.w>=50&&!isFull(t,'f')){r.w-=50;addRes(t,'f',35);msg('50🪵 → +35🍖')}
+ else if(what==='fw'&&r.f>=60&&!isFull(t,'w')){r.f-=60;addRes(t,'w',35);msg('60🍖 → +35🪵')}
+ else if(what==='fg'&&r.f>=100&&r.w>=60&&!isFull(t,'g')){r.f-=100;r.w-=60;addRes(t,'g',45);msg('+45🪙 Sona!')}
+ else if((what==='wf'&&isFull(t,'f'))||(what==='fw'&&isFull(t,'w'))||(what==='fg'&&isFull(t,'g')))msg('📦 '+fullName(t)+' bhar gaya!');
  else msg('🛒 Resource kam!');
 }
 // ============ INPUT: select + order ============
@@ -394,9 +455,9 @@ function onEnemyKilled(v){if(gameOver||!started)return;kills++;const base=!v.typ
 function castBolt(){if(!started||paused||gameOver)return;if(powers.bolt.cd>0){msg('⚡ Bijli '+Math.ceil(powers.bolt.cd)+'s me taiyaar!');return}if(treaty>0){msg('🕊 Sandhi me Bijli nahi!');return}placingPower='bolt';placing=null;msg('⚡ Bijli: dushman par tap karo! (Esc = cancel)');S.click();refreshPanel()}
 function strikeBolt(wx,wy){let hits=0;for(const e of units){if(e.team!=='AI'||e.hp<=0)continue;if(Math.hypot(e.x-wx,e.y-wy)<150){dealDmg('P1',e,350);hits++}}for(const b of blds){if(b.team!=='AI'||b.hp<=0)continue;if(Math.hypot(b.x-wx,b.y-wy)<150){dealDmg('P1',b,500);hits++}}for(let i=0;i<16;i++)spark(wx+rnd(-60,60),wy+rnd(-40,20),8,'#fef08a');for(let i=0;i<8;i++)flame(wx+rnd(-50,50),wy+rnd(-30,10),rnd(3,6));rings.push({x:wx,y:wy,r:14,life:45,flat:1,c:'rgba(190,220,255,0.75)'});rings.push({x:wx,y:wy,r:8,life:70,flat:1,c:'rgba(120,180,255,0.45)'});for(let i=0;i<qn(10);i++)smoke(wx+rnd(-40,40),wy+rnd(-20,10),rnd(10,20),0,'rgba(90,100,120,0.5)');shake=Math.max(shake,14);addTrauma(1);zoomPunch(1.4);hitStopT(9);cinematicBars(50);focusOn(wx,wy,null,55);S.boom();float(wx,wy-40,'⚡ BIJLI! ('+hits+' hits)','#fef08a');powers.bolt.cd=powers.bolt.max;placingPower=null;msg(hits?'⚡ Bijli giri! '+hits+' nishane!':'⚡ Bijli khaali gayi!');refreshPanel()}
 function castHeal(){if(!started||paused||gameOver)return;if(powers.heal.cd>0){msg('💚 Heal '+Math.ceil(powers.heal.cd)+'s me taiyaar!');return}let n=0;for(const u of units){if(u.team==='P1'&&u.hp>0&&u.hp<u.maxHp){u.hp=Math.min(u.maxHp,u.hp+300);n++;float(u.x,u.y-30,'+💚','#4ade80')}}S.age();powers.heal.cd=powers.heal.max;msg(n?n+' units heal! 💚':'💚 Sab full HP hain!')}
-function castGift(){if(!started||paused||gameOver)return;if(powers.gift.cd>0){msg('🎁 Gift '+Math.ceil(powers.gift.cd)+'s me taiyaar!');return}res.P1.f+=500;res.P1.w+=400;res.P1.g+=300;S.coin();float(P1BX,P1BY-80,'🎁 +500🍖 +400🪵 +300🪙','#FFD700');powers.gift.cd=powers.gift.max;msg('🎁 Tohfa mila! +500🍖 +400🪵 +300🪙');updateHUD()}
+function castGift(){if(!started||paused||gameOver)return;if(powers.gift.cd>0){msg('🎁 Gift '+Math.ceil(powers.gift.cd)+'s me taiyaar!');return}const a=addRes('P1','f',500),b2=addRes('P1','w',400),c2=addRes('P1','g',300);S.coin();float(P1BX,P1BY-80,'🎁 +500🍖 +400🪵 +300🪙','#FFD700');powers.gift.cd=powers.gift.max;const lost=(500-a)+(400-b2)+(300-c2);msg(lost>0?('🎁 +'+(a)+'🍖 +'+(b2)+'🪵 +'+(c2)+'🪙'+(lost>0?' (kuch storage full thi!)':'')):'🎁 Tohfa mila! +500🍖 +400🪵 +300🪙');updateHUD()}
 function spawnCrate(){for(let t=0;t<20;t++){const x=rnd(400,1800),y=rnd(250,1150);if(!farFromBases(x,y))continue;const r=Math.random();const kind=r<0.45?'res':r<0.7?'gold':r<0.85?'heal':'army';crates.push({x,y,kind,ph:rnd(0,6.28)});float(x,y-30,'📦 Bonus!','#fde047');msg('📦 Bonus crate aaya! Unit bhejkar uthao!');return}}
-function crateReward(c){const done=()=>{spark(c.x,c.y-6,14,'#fde047');S.coin()};if(c.kind==='res'){res.P1.f+=300;res.P1.w+=200;res.P1.g+=100;float(c.x,c.y-30,'📦 +300🍖 +200🪵 +100🪙','#fde047');msg('📦 Crate: resource bonus!')}else if(c.kind==='gold'){res.P1.g+=300;float(c.x,c.y-30,'📦 +300🪙 SONA!','#FFD700');msg('📦 Crate: +300 sona!')}else if(c.kind==='heal'){for(const u of units)if(u.team==='P1'&&u.hp>0){u.hp=Math.min(u.maxHp,u.hp+250);float(u.x,u.y-30,'+💚','#4ade80')}msg('📦 Crate: poori sena heal! 💚')}else{const opts=['sword','spear','archer'];const tp=opts[Math.floor(Math.random()*opts.length)];if(popUsed('P1')+1<=popCap('P1')){const u=mkUnit('P1',tp,c.x+rnd(-20,20),c.y+rnd(-20,20));u.state='idle';float(c.x,c.y-30,'📦 Muft '+UNITS[tp].icon+' '+tp+'!','#4ade80');msg('📦 Crate: muft '+tp+' mila!')}else{res.P1.f+=200;res.P1.g+=100;float(c.x,c.y-30,'📦 +resource (pop full)','#fde047');msg('📦 Crate: abaadi full, resource mila!')}}done();updateHUD()}
+function crateReward(c){const done=()=>{spark(c.x,c.y-6,14,'#fde047');S.coin()};if(c.kind==='res'){addRes('P1','f',300);addRes('P1','w',200);addRes('P1','g',100);float(c.x,c.y-30,'📦 +300🍖 +200🪵 +100🪙','#fde047');msg('📦 Crate: resource bonus!')}else if(c.kind==='gold'){addRes('P1','g',300);float(c.x,c.y-30,'📦 +300🪙 SONA!','#FFD700');msg('📦 Crate: +300 sona!')}else if(c.kind==='heal'){for(const u of units)if(u.team==='P1'&&u.hp>0){u.hp=Math.min(u.maxHp,u.hp+250);float(u.x,u.y-30,'+💚','#4ade80')}msg('📦 Crate: poori sena heal! 💚')}else{const opts=['sword','spear','archer'];const tp=opts[Math.floor(Math.random()*opts.length)];if(popUsed('P1')+1<=popCap('P1')){const u=mkUnit('P1',tp,c.x+rnd(-20,20),c.y+rnd(-20,20));u.state='idle';float(c.x,c.y-30,'📦 Muft '+UNITS[tp].icon+' '+tp+'!','#4ade80');msg('📦 Crate: muft '+tp+' mila!')}else{addRes('P1','f',200);addRes('P1','g',100);float(c.x,c.y-30,'📦 +resource (pop full)','#fde047');msg('📦 Crate: abaadi full, resource mila!')}}done();updateHUD()}
 function refreshPanel(){/* part3 me */}
 function issueOrder(wx,wy,hit){
  const myU=sel.units.filter(u=>u.hp>0);
@@ -551,7 +612,7 @@ function dealDmg(t,v,dmg){
  }
 function burst2(x,y,c){for(let i=0;i<8;i++)parts.push({x,y,vx:rnd(-2,2),vy:rnd(-2,1),life:25,c})}
 function nodeKind(n){return n.kind==='wood'?'w':n.kind==='gold'?'g':'f'}
-function sightOf(o){if(o.type)return {villager:170,sword:220,spear:220,archer:230,knight:250,elephant:230,cannon:200,hero:280}[o.type]||180;return {tc:300,house:180,barracks:220,market:220,tower:340,farm:180}[o.kind]||200}
+function sightOf(o){if(o.type)return {villager:170,sword:220,spear:220,archer:230,knight:250,elephant:230,cannon:200,hero:280}[o.type]||180;return {tc:300,house:180,barracks:220,market:220,tower:340,farm:180,khalon:200,godown:200,kotla:200}[o.kind]||200}
 const FOGC=Math.ceil(W/40),FOGR=Math.ceil(H/40);
 let fogSeen=new Uint8Array(FOGC*FOGR),fogVis=new Uint8Array(FOGC*FOGR);
 function fogCell(x,y){return Math.max(0,Math.min(FOGR-1,Math.floor(y/40)))*FOGC+Math.max(0,Math.min(FOGC-1,Math.floor(x/40)))}
@@ -566,10 +627,19 @@ function updateUnit(u){
  if(u.hp<=0){if(u.deadT>0)u.deadT--;return}
  if(u.hurt>0)u.hurt--;
  if(u.cool>0)u.cool--;
- if(u.type==='villager'){
-  if(u.state==='gather'){
-   let n=u.node;
-   if(!n||n.amt<=0){n=nearestNode(u.x,u.y,null,250);u.node=n;if(!n){u.state='idle';return}}
+ if(u.warnedT>0)u.warnedT--;
+  if(u.type==='villager'){
+   if(u.state==='gather'){
+    let n=u.node;
+    // storage bhar gaya? phir dusre resource ka node dhoondo
+    if(n&&u.team==='P1'&&isFull('P1',nodeKind(n))){
+     let alt=null,bd=1e9;
+     for(const c2 of nodes){if(c2.amt<=0||nodeKind(c2)===nodeKind(n))continue;
+      const d=Math.hypot(c2.x-u.x,c2.y-u.y);if(d<bd){bd=d;alt=c2}}
+     if(alt&&bd<520){n=alt;u.node=alt;u.carry=0;u.gatherT=0;
+      if(u.warnedT<=0){u.warnedT=200;msg('📦 '+fullName('P1')+' full — doosra resource katwa raha hai')}}
+    }
+    if(!n||n.amt<=0){n=nearestNode(u.x,u.y,null,250);u.node=n;if(!n){u.state='idle';return}}
     if(Math.hypot(u.x-n.x,u.y-n.y)>26){moveTo(u,n.x,n.y)}
     else{u.gatherT++;if(u.gatherT>=GATHER_T){u.gatherT=0;if(n.amt>0){
       n.amt--;u.carry++;u.carryKind=nodeKind(n);n.shake=10;
@@ -589,7 +659,10 @@ function updateUnit(u){
    let tc=null,bd=1e9;for(const b of blds)if(b.team===u.team&&b.kind==='tc'&&b.done){const d=dist(u,b);if(d<bd){bd=d;tc=b}}
    if(!tc)return;
    if(dist(u,tc)>70){moveTo(u,tc.x,tc.y)}
-   else{const m=civOf(u.team).gather;const kinds={};kinds[u.carryKind||'f']=Math.round(u.carry*m);for(const k in kinds)res[u.team][k]+=kinds[k];u.carry=0;u.state='gather';if(!u.node||u.node.amt<=0)u.node=nearestNode(u.x,u.y,null,250)}
+    else{const m=civOf(u.team).gather;const kinds={};kinds[u.carryKind||'f']=Math.round(u.carry*m);
+     let got=0;for(const k in kinds)got+=addRes(u.team,k,kinds[k]);
+     if(got<kinds[u.carryKind||'f']&&u.team==='P1'&&u.warnedT<=0){u.warnedT=200;msg('📦 '+fullName('P1')+' bhar gaya! '+BLD[fullName('P1').indexOf('Khalon')>=0?'khalon':(fullName('P1').indexOf('Godown')>=0?'godown':'kotla')].name+' banao ya upgrade karo');S.click()}
+     u.carry=0;u.state='gather';if(!u.node||u.node.amt<=0)u.node=nearestNode(u.x,u.y,null,250)}
    return;
   }
   if(u.state==='build'){
@@ -717,7 +790,19 @@ function aiTick(){
  if(age.AI<4){const nx=AGES[age.AI+1].cost;const wait=difficulty==='easy'?3600:difficulty==='hard'?600:1800;
   if(frame>(age.AI+1)*wait&&canAfford(A,nx))tryAge(A)}
  if(popUsed(A)>=popCap(A)-2){const s=aiSpotNear(tc.x,tc.y,'house');if(s)placeBld(A,'house',s.x,s.y)}
- if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='barracks')){const s=aiSpotNear(tc.x,tc.y,'barracks');if(s)placeBld(A,'barracks',s.x,s.y)}
+  if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='barracks')){const s=aiSpotNear(tc.x,tc.y,'barracks');if(s)placeBld(A,'barracks',s.x,s.y)}
+  // 📦 storage: jab stock 85% cap ke paas pohanche to storage banao + upgrade karo
+  for(const sk of ['f','w','g']){
+   const cap=resCap(A,sk);
+   if(res[A][sk]>=cap*0.85){
+    const kind=sk==='f'?'khalon':sk==='w'?'godown':'kotla';
+    const mine=blds.filter(b=>b.team===A&&b.kind===kind&&b.hp>0&&b.done);
+    if(!mine.length){const s=aiSpotNear(tc.x,tc.y,kind);if(s)placeBld(A,kind,s.x,s.y)}
+    else{const u1=mine[0];
+     if((u1.lvl||1)<STOR_MAX&&canAfford(A,STOR_UP[Math.min(STOR_MAX,u1.lvl||1)])){pay(A,STOR_UP[Math.min(STOR_MAX,u1.lvl||1)]);u1.lvl=(u1.lvl||1)+1}
+    }
+   }
+  }
  if(age.AI>=1&&!blds.some(b=>b.team===A&&b.kind==='market'&&b.hp>0)){const s=aiSpotNear(tc.x,tc.y,'market');if(s)placeBld(A,'market',s.x,s.y)}
  const towerCap=difficulty==='hard'?5:4;
  if(age.AI>=1&&blds.filter(b=>b.team===A&&b.kind==='tower').length<towerCap&&res.AI.w>150){const s=aiSpotNear(tc.x,tc.y,'tower');if(s)placeBld(A,'tower',s.x,s.y)}
@@ -844,6 +929,7 @@ function sway(ph,amp){return (Math.sin(frame*0.06+ph)*0.62+Math.sin(frame*0.031+
 const cloths=[];
 function addCloth(ox,oy,ax,ay,len,w,team,kind,segs){
  if(!G.cloth)return null;
+ if(!isFinite(ox)||!isFinite(oy)||!isFinite(len)||!isFinite(w))return null;
   const c={ox,oy,ax,ay,len,w,team,kind:kind||'flag',segs:segs||7,ph:Math.random()*6.28,pts:[]};
  for(let i=0;i<=c.segs;i++){const x=ox+ax*i*(len/c.segs),y=oy+ay*i*(len/c.segs);c.pts.push({x,y,px:x,py:y})}
  cloths.push(c);return c;
@@ -1967,6 +2053,40 @@ function drawBldBody(b,TC,dmg,broken){
  // raised floor + stilts (looks grounded)
  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillRect(-halfW-3,halfH-2,w+6,4);
  // ---- per-kind props ----
+ if(BLD[k].store){
+  const sk=BLD[k].store,col=sk==='f'?'#e8c34a':sk==='w'?'#c98f4e':'#ffd700';
+  // side annex (thatched store shed)
+  ctx.fillStyle=sk==='f'?'#7a5a2a':'#6b4a22';
+  ctx.fillRect(halfW-4,halfH-30,20,30);
+  ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1.2;ctx.strokeRect(halfW-4,halfH-30,20,30);
+  ctx.fillStyle=col;ctx.beginPath();
+  ctx.moveTo(halfW-6,halfH-30);ctx.lineTo(halfW+6,halfH-42);ctx.lineTo(halfW+18,halfH-30);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=0.8;ctx.stroke();
+  // stacked crates/sacks
+  for(let i=0;i<3;i++){
+   const bx2=-halfW+10+i*11,by2=halfH-8-(i%2)*5;
+   ctx.fillStyle=i%2?'#a8813f':'#8a6a30';rr(bx2-5,by2-8,10,8,1.5);ctx.fill();
+   ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.7;ctx.stroke();
+   ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(bx2-5,by2-8,10,1.6);
+  }
+  // resource symbol on wall
+  ctx.font='bold 15px sans-serif';ctx.textAlign='center';
+  ctx.fillText(sk==='f'?'🌾':sk==='w'?'🪵':'🪙',0,-halfH*0.16+4);ctx.textAlign='left';
+  // ⭐ level stars above roof
+  const lv=Math.min(STOR_MAX,b.lvl||1);
+  for(let i=0;i<STOR_MAX;i++){
+   ctx.font=(i<lv?'bold 13px':'11px')+' sans-serif';
+   ctx.fillStyle=i<lv?'#FFD700':'rgba(0,0,0,0.45)';
+   ctx.fillText(i<lv?'★':'☆',(i-(STOR_MAX-1)/2)*15,eaveY-tall-9);
+  }
+  ctx.font='bold 10px sans-serif';ctx.fillStyle='#FFD700';ctx.textAlign='center';
+  ctx.fillText('L'+lv,0,eaveY-tall-22);ctx.textAlign='left';
+  // capacity glow when nearly full
+  if(b.team==='P1'){
+   const cap=resCap('P1',sk),cur=res.P1[sk],pc=cap>0?cur/cap:0;
+   if(pc>=0.9){ctx.fillStyle='rgba(255,80,80,'+(0.25+0.2*Math.sin(frame*0.14))+')';ctx.fillRect(-halfW,-halfH,w,h)}
+  }
+ }
  if(k==='barracks'){
   // weapon rack
   ctx.strokeStyle='#5b3a10';ctx.lineWidth=2.2;
@@ -3491,6 +3611,15 @@ function refreshPanel(){
    btn('⚔ Hathiyar Lv'+tech.P1.atk+'<br>'+costStr({f:100*(tech.P1.atk+1),g:75*(tech.P1.atk+1)}),()=>{resTech('P1','atk');refreshPanel()},tech.P1.atk>=4);
    btn('🛡️ Zirah Lv'+tech.P1.def+'<br>'+costStr({f:75*(tech.P1.def+1),w:100*(tech.P1.def+1)}),()=>{resTech('P1','def');refreshPanel()},tech.P1.def>=4)}
   if(b.kind==='market'&&b.done){btn('50🪵→35🍖',()=>{trade('P1','wf');refreshPanel()});btn('60🍖→35🪵',()=>{trade('P1','fw');refreshPanel()});btn('100🍖+60🪵→45🪙',()=>{trade('P1','fg');refreshPanel()})}
+  if(isStore(b)&&b.done){
+   const sk=storeKind(b),lv=Math.min(STOR_MAX,b.lvl||1),nx=resCap('P1',sk);
+   info.innerHTML+='<br>📦 Capacity: <b>'+nx+'</b> '+capIcon(sk)+' &nbsp; ⭐ Level <b>'+lv+'/'+STOR_MAX+'</b>'+(lv>=1?' <span style="color:#ffd700">'+(lv>=1?'★':'')+(lv>=2?'★':'')+(lv>=3?'★':'')+'</span>':'');
+   if(lv>=STOR_MAX)btn('⭐ MAX Level',null,true);
+   else{
+    const c=storUpCost(b);
+    btn('⭐ Upgrade → Lv'+(lv+1)+' (+'+STOR_CAP[lv+1]+' '+capIcon(sk)+')<br>'+costStr(c),()=>{upgradeStore(b);refreshPanel()},!canAfford('P1',c));
+   }
+  }
   if(b.kind==='house')info.innerHTML+=' — +5 abaadi 🏠';
   return;
  }
@@ -3502,7 +3631,7 @@ function refreshPanel(){
  if(alive.some(u=>u.type==='villager')){
   const nx=AGES[age.P1+1];
   if(age.P1<4)info.innerHTML+='<br>⬆️ <b>Next Yug: '+nx.icon+' '+nx.name+'</b> — Town Center chuno → ⬆️ button dabao ('+costStr(nx.cost||{})+')';
-  for(const k of ['house','barracks','market','tower','farm']){
+  for(const k of ['house','khalon','barracks','market','tower','farm','godown','kotla']){
    const B=BLD[k],lk=ageLocked(B.minAge);
    btn(B.icon+' '+B.name+lockTag(B.minAge)+'<br>'+costStr(B.cost),()=>startPlace(k));
   }
@@ -3510,9 +3639,11 @@ function refreshPanel(){
  if(alive.some(u=>u.type!=='villager'))btn('⚔ HAMLA!',orderAttack);
 }
 function updateHUD(){
- document.getElementById('resF').textContent=Math.floor(res.P1.f);
- document.getElementById('resW').textContent=Math.floor(res.P1.w);
- document.getElementById('resG').textContent=Math.floor(res.P1.g);
+ const cf=resCap('P1','f'),cw=resCap('P1','w'),cg=resCap('P1','g');
+ const rf=document.getElementById('resF'),rw=document.getElementById('resW'),rg=document.getElementById('resG');
+ rf.textContent=Math.floor(res.P1.f)+'/'+cf;rf.style.color=isFull('P1','f')?'#ff6b6b':'';
+ rw.textContent=Math.floor(res.P1.w)+'/'+cw;rw.style.color=isFull('P1','w')?'#ff6b6b':'';
+ rg.textContent=Math.floor(res.P1.g)+'/'+cg;rg.style.color=isFull('P1','g')?'#ff6b6b':'';
  document.getElementById('popT').textContent=popUsed('P1')+'/'+popCap('P1');
  document.getElementById('ageT').textContent=AGES[age.P1].icon+' '+AGES[age.P1].name;
  const tt=Math.floor(elapsed);
@@ -3642,7 +3773,7 @@ function step(){
   if(LEVEL&&LEVEL.obj==='relic'&&relicsGot>=3){endGame(true,'relic');break}
  }
  // 💎 khazana collection — only P1 villagers can claim (AI cannot steal campaign win)
- for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&u.team==='P1'&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;res.P1.g+=150;float(rl.x,rl.y-30,'💎 +150🪙 KHAZANA!','#FFD700');spark(rl.x,rl.y-6,16,'#FFD700');S.coin();relicsGot++;msg('💎 Khazana mila! +150 sona! ('+relicsGot+'/3)');break}}}
+ for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&u.team==='P1'&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;addRes('P1','g',150);float(rl.x,rl.y-30,'💎 +150🪙 KHAZANA!','#FFD700');spark(rl.x,rl.y-6,16,'#FFD700');S.coin();relicsGot++;msg('💎 Khazana mila! +150 sona! ('+relicsGot+'/3)');break}}}
  if(frame%25===0)for(const rl of relics)if(!rl.taken)emit('ember',rl.x+rnd(-12,12),rl.y+rnd(-8,8),rnd(-.3,.3),rnd(-.9,-.4),qn(26),{r:1.4,c:'#FFD700',g:0.004,add:true});
  // 📷 camera: kinare-scroll + follow
  if(mouseIn&&!isTouch){const cr=cv.getBoundingClientRect(),mg=26,sp=14/view.z;let moved=false;
@@ -3727,6 +3858,8 @@ function startGame(){
   if(LEVEL.diff)difficulty=LEVEL.diff;
   if(LEVEL.aiCiv)aiCiv=LEVEL.aiCiv;
   if(LEVEL.pRes)res.P1={f:LEVEL.pRes.f||0,w:LEVEL.pRes.w||0,g:LEVEL.pRes.g||0};
+  // campaign par bhi capacity se clip karo
+  res.P1.f=Math.min(res.P1.f,resCap('P1','f'));res.P1.w=Math.min(res.P1.w,resCap('P1','w'));res.P1.g=Math.min(res.P1.g,resCap('P1','g'));
   if(LEVEL.pAge)age.P1=LEVEL.pAge;
   if(LEVEL.aiAge)age.AI=LEVEL.aiAge;
   if(LEVEL.treaty)treaty=LEVEL.treaty*60;
@@ -3737,10 +3870,10 @@ function startGame(){
  blds.push({id:bid++,team:'AI',kind:'tc',x:AIBX,y:AIBY,w:124,h:92,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:AIBX,ry:AIBY+100,cool:0,cloth:null,dying:false,dieT:0});
  for(const b of blds)addBldCloth(b);
  const nv=civOf('P1').extraVill?4:3;
- // villagers TC ke AAGE khade (building ke andar nahi)
- for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',P1BX+rnd(-70,70),P1BY+70+rnd(-14,26));u.state='idle'}
- for(let i=0;i<3;i++){const u=mkUnit('AI','villager',AIBX+rnd(-70,70),AIBY+70+rnd(-14,26));u.state='idle'}
- {const h=mkUnit('P1','hero',P1BX+rnd(-52,52),P1BY+80+rnd(-6,14));h.state='idle';float(h.x,h.y-40,'🤴 Maharaja aaya!','#FFD700')}
+ // villagers TC ke AAGE khade (collision box se BAHAR — box bottom = TC.y+62)
+ for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',P1BX+rnd(-70,70),P1BY+74+rnd(0,30));u.state='idle'}
+ for(let i=0;i<3;i++){const u=mkUnit('AI','villager',AIBX+rnd(-70,70),AIBY+74+rnd(0,30));u.state='idle'}
+ {const h=mkUnit('P1','hero',P1BX+rnd(-52,52),P1BY+86+rnd(0,16));h.state='idle';float(h.x,h.y-40,'🤴 Maharaja aaya!','#FFD700')}
  view={x:P1BX+50,y:P1BY-50,z:0.7};
  updateFog();
  started=true;
