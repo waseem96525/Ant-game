@@ -2434,7 +2434,7 @@ function drawTorso(u,TC,sc,yHip,ySh,armored,lean){
  ctx.restore();
 }
 // ---- head ----
-function drawHead(u,TC,sc,x,y,helmet,blink){
+function drawHead(u,TC,sc,x,y,helmet,blink,bk){
  const civH=u.team==='P1'?myCiv:aiCiv;
  // neck
  ctx.strokeStyle=SKIN_D;ctx.lineWidth=2.6*sc;ctx.beginPath();ctx.moveTo(x-1.2*sc,y+3*sc);ctx.lineTo(x-0.6*sc,y+0.6*sc);ctx.stroke();
@@ -2448,18 +2448,27 @@ function drawHead(u,TC,sc,x,y,helmet,blink){
  ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x+0.5*sc,y,3.1*sc,3.5*sc,0,0,7);ctx.fill();
  // ear
  ctx.fillStyle=SKIN_D;ctx.beginPath();ctx.ellipse(x-0.4*sc,y+0.6*sc,0.9*sc,1.3*sc,0,0,7);ctx.fill();
- // eye
- if(blink>0.3){ctx.fillStyle='#1a1410';ctx.beginPath();ctx.ellipse(x+1.9*sc,y-0.4*sc,0.75*sc,1.0*sc*blink,0,0,7);ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x+2.15*sc,y-0.75*sc,0.3*sc,0,7);ctx.fill()}
- // brow
- ctx.strokeStyle='#2a1d12';ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+0.9*sc,y-1.5*sc);ctx.lineTo(x+2.9*sc,y-1.2*sc);ctx.stroke();
- // mouth
- ctx.strokeStyle='rgba(90,50,30,0.8)';ctx.lineWidth=0.55*sc;ctx.beginPath();
- ctx.moveTo(x+1.5*sc,y+2*sc);ctx.quadraticCurveTo(x+2.3*sc,y+2.35*sc,x+3*sc,y+1.9*sc);ctx.stroke();
- // beard
- if(civH!=='india'&&u.type!=='villager'&&u.type!=='archer'){
-  ctx.fillStyle='#2e2018';ctx.beginPath();ctx.moveTo(x+1*sc,y+1.6*sc);
-  ctx.quadraticCurveTo(x+3.4*sc,y+3.4*sc,x+4.4*sc,y+1.2*sc);ctx.quadraticCurveTo(x+3*sc,y+1.4*sc,x+1*sc,y+1.6*sc);ctx.fill()}
+ // 🧍 peeche dikha raha hai to chehra mat dikhao
+ if(bk){
+  const bk2=ctx.createLinearGradient(x-3.4*sc,y-3.6*sc,x+3.4*sc,y+3*sc);
+  bk2.addColorStop(0,'#2a2018');bk2.addColorStop(1,civH==='india'?'#3a2a1c':'#1c1512');
+  ctx.fillStyle=bk2;ctx.beginPath();ctx.ellipse(x-0.2*sc,y-0.5*sc,3.5*sc,3.9*sc,0,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.10)';
+  ctx.beginPath();ctx.ellipse(x-1.3*sc,y-2.0*sc,1.7*sc,0.9*sc,-0.4,0,7);ctx.fill();
+ }else{
+  // eye
+  if(blink>0.3){ctx.fillStyle='#1a1410';ctx.beginPath();ctx.ellipse(x+1.9*sc,y-0.4*sc,0.75*sc,1.0*sc*blink,0,0,7);ctx.fill();
+   ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x+2.15*sc,y-0.75*sc,0.3*sc,0,7);ctx.fill()}
+  // brow
+  ctx.strokeStyle='#2a1d12';ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+0.9*sc,y-1.5*sc);ctx.lineTo(x+2.9*sc,y-1.2*sc);ctx.stroke();
+  // mouth
+  ctx.strokeStyle='rgba(90,50,30,0.8)';ctx.lineWidth=0.55*sc;ctx.beginPath();
+  ctx.moveTo(x+1.5*sc,y+2*sc);ctx.quadraticCurveTo(x+2.3*sc,y+2.35*sc,x+3*sc,y+1.9*sc);ctx.stroke();
+  // beard
+  if(civH!=='india'&&u.type!=='villager'&&u.type!=='archer'){
+   ctx.fillStyle='#2e2018';ctx.beginPath();ctx.moveTo(x+1*sc,y+1.6*sc);
+   ctx.quadraticCurveTo(x+3.4*sc,y+3.4*sc,x+4.4*sc,y+1.2*sc);ctx.quadraticCurveTo(x+3*sc,y+1.4*sc,x+1*sc,y+1.6*sc);ctx.fill()}
+ }
  // helmet / topi
  if(helmet===1){ // kabuto
   ctx.fillStyle=civH==='china'?'#5a6a7a':civH==='india'?'#7d7468':'#2b2e36';
@@ -2656,7 +2665,12 @@ function drawUnit(u){
   else if(t==='archer')lunge=-ap*1.2;
   else lunge=Math.sin(Math.min(1,ap*1.35)*Math.PI)*3.4-ap*0.6;
  }
- ctx.rotate(u.face);
+ // 🧍 UPRIGHT FACING: poora ctx.rotate(u.face) hataya — north face karte hi unit lat jaata tha.
+ // ab: halka lean (upar/neeche) + left/right mirror + peeche-wala (back) view
+ const fSin=Math.max(-1,Math.min(1,Math.sin(u.face)));
+ const isBack=fSin<-0.45;                 // upar (door) face = humein peeth dikh rahi hai
+ ctx.rotate(fSin*0.13);
+ if(Math.cos(u.face)<0)ctx.scale(-1,1);   // left face = mirror
  if(u.flinch>0)ctx.rotate(Math.sin(u.flinch*2.4)*0.09*u.flinch/6);
  const bobY=(t==='villager')?0:(moving?-Math.abs(Math.sin(ph*2))*1.1:Math.sin(frame*0.07+u.id)*0.35);
  ctx.translate(lunge-recoil,bobY);
@@ -2759,7 +2773,7 @@ function drawUnit(u){
  const hy=(VA?(ySh-4.6*sc+VA.headDY):(ySh-4.6*sc+(working?-0.6:0)));
  const helmet=u.type==='villager'?0:u.type==='archer'?2:u.type==='spear'?3:1;
  if(VA&&VA.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(VA.headTilt);ctx.translate(-hx,-hy)}
- drawHead(u,TC,sc,hx,hy,helmet,blink);
+ drawHead(u,TC,sc,hx,hy,helmet,blink,isBack);
  if(VA&&VA.headTilt)ctx.restore();
  // 👷 kandhe pe bojh ka dhaaga
  if(VA&&VA.carry){
@@ -2799,7 +2813,10 @@ function drawLoad(u,TC,VA){
  const bob=VA?VA.bobY*0.85:0;
  const tilt=VA?Math.sin(VA.wph*2)*0.06:0;
  ctx.save();ctx.translate(u.x,u.y);
- ctx.save();ctx.rotate(u.face+tilt);
+ // 🧍 upright (same as body — full rotation se bojh bhi lat jaata tha)
+ const fs2=Math.max(-1,Math.min(1,Math.sin(u.face)));
+ ctx.rotate(fs2*0.13+tilt);
+ if(Math.cos(u.face)<0)ctx.scale(-1,1);
  ctx.translate(0,bob);
  if(u.carryKind==='w'){
   ctx.fillStyle='#6b4a1f';ctx.beginPath();ctx.arc(-7,-24,4.4,0,7);ctx.arc(-2.4,-25.4,4.4,0,7);ctx.arc(-4.6,-19.6,4.4,0,7);ctx.fill();
@@ -2820,8 +2837,10 @@ function drawLoad(u,TC,VA){
   ctx.fillStyle='#e11d48';
   for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-8+i*2.6,-25.4-(i%2)*1.6,1.7,0,7);ctx.fill()}
  }
+ // 🪵 count — mirror ke andar text ulta padh raha tha, wapas theek karo
  ctx.fillStyle='#fff';ctx.font='bold 8px sans-serif';ctx.textAlign='center';
- ctx.fillText(u.carry,-4,-18);ctx.textAlign='left';
+ ctx.save();if(Math.cos(u.face)<0)ctx.scale(-1,1);
+ ctx.fillText(u.carry,-4,-18);ctx.restore();ctx.textAlign='left';
  ctx.restore();ctx.restore();
 }
 // ---- corpse ----
