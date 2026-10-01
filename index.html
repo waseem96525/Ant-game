@@ -35,34 +35,48 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 #startBtn{width:100%;font-size:19px;background:linear-gradient(180deg,#fde047,#f59e0b);margin-top:12px;padding:14px;color:#000}
 #endScreen{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:20;align-items:center;justify-content:center}
 #endCard{background:#241b0e;border:2px solid #FFD700;border-radius:14px;padding:26px;text-align:center;max-width:400px}
+#bBurger{display:none;font-size:18px;padding:10px 14px}
+#wrap:fullscreen{max-width:none;width:100%;height:100%;overflow:auto;background:#141007;padding:8px}
+#wrap:fullscreen canvas#cv{max-height:62vh}
+@media (max-width:700px){
+ #bBurger{display:inline-block}
+ #topbar:not(.open) button.tbtn{display:none}
+ #topbar.open button.tbtn{display:inline-block}
+ canvas#mm{width:110px;height:69px}
+ h1{font-size:17px}
+ #wrap{width:100%;padding:0 6px 20px}
+ button{min-height:44px;font-size:14px}
+}
 </style>
 </head>
 <body>
 <div id="wrap">
 <h1>🏯 Samrat Yuddh — Asian Dynasty</h1>
 <div id="topbar">
+<button id="bBurger" onclick="toggleMenu()">☰</button>
 <span>🍖 <b id="resF">0</b></span><span>🪵 <b id="resW">0</b></span><span>🪙 <b id="resG">0</b></span>
 <span>👥 <b id="popT">0/0</b></span><span>🏰 <b id="ageT">-</b></span><span>⏱ <b id="timeT">0:00</b></span>
 <span id="treatyT">🕊 -</span>
-<button id="bPause" onclick="togglePause()">⏸</button>
-<button id="bSnd" onclick="toggleSnd()">🔊</button>
-<button id="bSpeed" onclick="toggleSpeed()">🚀 1x</button>
-<button onclick="zoomBy(1.25)">🔍+</button><button onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
-<button id="bFol" onclick="toggleFollow()">📷 Follow: OFF</button>
-<button onclick="cycleQuality()">🎨 <b id="gfxLbl">ULTRA</b></button>
-<button id="bAuto" onclick="toggleAutoQ()">⚡ Auto: ON</button>
-<button onclick="selectAllArmy()">⚔️ Fauj</button>
-<button onclick="selectAllVillagers()">👷 Villager</button>
-<button onclick="selectAllUnits()">👥 Sab</button>
-<button onclick="deselect()">✖</button>
+<button id="bPause" class="tbtn" onclick="togglePause()">⏸</button>
+<button id="bSnd" class="tbtn" onclick="toggleSnd()">🔊</button>
+<button id="bSpeed" class="tbtn" onclick="toggleSpeed()">🚀 1x</button>
+<button class="tbtn" onclick="zoomBy(1.25)">🔍+</button><button class="tbtn" onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
+<button id="bFol" class="tbtn" onclick="toggleFollow()">📷 Follow: OFF</button>
+<button class="tbtn" onclick="cycleQuality()">🎨 <b id="gfxLbl">ULTRA</b></button>
+<button id="bAuto" class="tbtn" onclick="toggleAutoQ()">⚡ Auto: ON</button>
+<button id="bFull" class="tbtn" onclick="toggleFull()">⛶ Full</button>
+<button class="tbtn" onclick="selectAllArmy()">⚔️ Fauj</button>
+<button class="tbtn" onclick="selectAllVillagers()">👷 Villager</button>
+<button class="tbtn" onclick="selectAllUnits()">👥 Sab</button>
+<button class="tbtn" onclick="deselect()">✖</button>
 </div>
 <div id="msg"></div>
 <div id="cvwrap"><canvas id="cv" width="900" height="500"></canvas><canvas id="mm" width="150" height="94"></canvas></div>
 <div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
 <div class="guide">
 <b>🎮 Kaise khelein (Age of Empires style):</b><br>
-🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare, max 60), Right-click = bhejo / katwao / hamla. <b>Shift+click</b> = jodo/hatao, <b>Shift+drag</b> = box me jodo, <b>Double-click</b> = same type sab (screen par). <kbd>Q</kbd>=Fauj, <kbd>E</kbd>=Villager, <kbd>R</kbd>=Sab. Mouse <b>kinare</b> le jao = camera ghumao, <b>beech-button</b> dabakar ghisao = camera pakdo, wheel = zoom. <kbd>WASD</kbd> = camera, 📷 Follow = chuni foj ke saath camera.<br>
-📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Topbar ke <b>⚔️ Fauj / 👷 Villager / 👥 Sab</b> button se multi-select karo! Minimap (neeche-right) tap = camera bhejo.<br>
+🖱️ <b>PC:</b> Left-click = chuno (drag = bahut saare, max 60), Right-click = bhejo / katwao / hamla. <b>Shift+click</b> = jodo/hatao, <b>Shift+drag</b> = box me jodo, <b>Double-click</b> = same type sab (screen par). <kbd>Q</kbd>=Fauj, <kbd>E</kbd>=Villager, <kbd>R</kbd>=Sab, <kbd>F</kbd>=Fullscreen. Mouse <b>kinare</b> le jao = camera ghumao, <b>beech-button</b> dabakar ghisao = camera pakdo, wheel = zoom. <kbd>WASD</kbd> = camera, 📷 Follow = chuni foj ke saath camera.<br>
+📱 <b>Mobile:</b> Tap = chuno, dobara tap = bhejo / hamla. Ungli ghisao (drag) = camera ghumao. Topbar ke <b>☰</b> burger se menu kholo, <b>⛶ Full</b> se fullscreen khelo, <b>⚔️ Fauj / 👷 Villager / 👥 Sab</b> se multi-select karo! Minimap (neeche-right) tap = camera bhejo.<br>
 👷 Villager se 🌳 ped / 🪙 sona / 🫐 jungle-meva katwao — woh khud Town Center me jama karega. Villager se building banao + repair karo.<br>
 🏠 Ghar = +5 abaadi | 🏟 Barracks (Yug 2) = foj: 🗡️ 🔱 🏹 🐎 + Yug 3 me 🐘 Hathi, Yug 4 me 💣 Top! | 🗼 Burj = teer se raksha | 🌾 Khet = kabhi na khatm hone wala khana | 🛒 Market = trade | 🏟 me ⚔ Hathiyar + 🛡️ Zirah upgrade | ⬆️ Town Center se <b>Yug badhao</b>!<br>
 🕊 Shuru me <b>Sandhi</b> — koi ladai nahi. Uske baad dushman hamla karega. Dushman ka <b>Town Center todo = JEET!</b><br>
@@ -372,6 +386,7 @@ document.addEventListener('keydown',e=>{
  if(e.code==='KeyQ'){selectAllArmy();return}
  if(e.code==='KeyE'){selectAllVillagers();return}
  if(e.code==='KeyR'){selectAllUnits();return}
+ if(e.code==='KeyF'){toggleFull();return}
  const sp=26/view.z;let kp=false;
  if(e.code==='KeyA'||e.code==='ArrowLeft'){view.x-=sp;kp=true}if(e.code==='KeyD'||e.code==='ArrowRight'){view.x+=sp;kp=true};
  if(e.code==='KeyW'||e.code==='ArrowUp'){view.y-=sp;kp=true}if(e.code==='KeyS'||e.code==='ArrowDown'){view.y+=sp;kp=true};
@@ -3023,6 +3038,9 @@ function nextLevel(){
 }
 function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('bPause').textContent=paused?'▶':'⏸'}
 function toggleSpeed(){speed=speed===1?2:1;document.getElementById('bSpeed').textContent='🚀 '+speed+'x'}
+function toggleMenu(){const t=document.getElementById('topbar');t.classList.toggle('open');const b=document.getElementById('bBurger');if(b)b.textContent=t.classList.contains('open')?'✖':'☰';S.click()}
+function toggleFull(){try{if(document.fullscreenElement){document.exitFullscreen()}else{const w=document.getElementById('wrap');if(w&&w.requestFullscreen)w.requestFullscreen();else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen()}}catch(e){msg('⛶ Fullscreen nahi khula')}}
+document.addEventListener('fullscreenchange',()=>{const b=document.getElementById('bFull');if(b)b.textContent=document.fullscreenElement?'🗗 Exit':'⛶ Full';if(started)fitCanvas()});
 let lastDt=16,lastFrameT=0;
 function loop(){const t0=performance.now();step();if(started)draw();const exec=performance.now()-t0;if(lastFrameT>0){const realDt=t0-lastFrameT;fpsAvg=fpsAvg*0.92+(1000/Math.max(1,realDt))*0.08}lastFrameT=t0;lastDt=exec;requestAnimationFrame(loop)}
 // ============ MENU + START ============
