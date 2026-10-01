@@ -848,7 +848,9 @@ function addCloth(ox,oy,ax,ay,len,w,team,kind,segs){
  cloths.push(c);return c;
 }
 function addBldCloth(b){
- if(!b.cloth&&G.cloth)b.cloth=addCloth(b.x+5,b.y-b.h/2-33,1,0.1,b.w*0.40,b.h*0.28,b.team,b.kind==='tc'?'nobori':'flag',10);
+ // TC ke paas apne nobori flags hain (drawTownHall), isliye cloth skip
+ if(b.kind==='tc')return;
+ if(!b.cloth&&G.cloth)b.cloth=addCloth(b.x+5,b.y-b.h/2-33,1,0.1,b.w*0.40,b.h*0.28,b.team,b.kind==='barracks'?'nobori':'flag',10);
 }
 function simCloth(){
  if(!G.cloth)return;
@@ -1448,6 +1450,266 @@ function roofBand(cx,y0,y1,halfW,layers,pal,broke,seed){
    ctx.beginPath();ctx.ellipse(hx2,hy2,4.4,3,0.3,0,7);ctx.fill()}
  }
 }
+// ====================== GRAND TOWN HALL (3-tier pagoda) ======================
+// curved hip roof with upturned corners (sori) + pantile rows
+function pagodaRoof(cx,y0,y1,halfW,pal,broke,seed,soriMul,tileRows){
+ const sori=(soriMul==null?1:soriMul)*(halfW*0.13+3);
+ const rows=tileRows||5;
+ // ---- silhouette ----
+ ctx.beginPath();
+ ctx.moveTo(cx-halfW,y0-sori);
+ ctx.quadraticCurveTo(cx,y0+3.6,cx+halfW,y0-sori);   // eave sags in middle, tips flick UP
+ ctx.lineTo(cx+halfW*0.30,y1);                        // right slope
+ ctx.lineTo(cx-halfW*0.30,y1);                        // ridge
+ ctx.closePath();
+ const g=ctx.createLinearGradient(cx-halfW,y0,cx+halfW,y1);
+ g.addColorStop(0,pal[0]);g.addColorStop(0.34,pal[1]);g.addColorStop(0.62,pal[2]);g.addColorStop(0.84,pal[3]);g.addColorStop(1,pal[1]);
+ ctx.fillStyle=g;ctx.fill();
+ // ---- pantile rows (follow the curve) ----
+ for(let r=1;r<=rows;r++){
+  const t=r/(rows+1);
+  const yA=y0+(y1-y0)*t;
+  const wA=halfW*(1-t*0.70), sA=sori*(1-t);
+  ctx.strokeStyle='rgba(0,0,0,0.30)';ctx.lineWidth=0.9;
+  ctx.beginPath();ctx.moveTo(cx-wA,yA-sA);ctx.quadraticCurveTo(cx,yA+2.4*sA+1.4,cx+wA,yA-sA);ctx.stroke();
+  const n=Math.max(5,Math.round(wA/5.5));
+  ctx.strokeStyle='rgba(0,0,0,0.24)';ctx.lineWidth=0.6;
+  for(let i=0;i<=n;i++){
+   if(broke&&((i*7+r*5+((seed||0)|0))%13===0))continue;
+   const k=i/n, xa=cx-wA+2*wA*k, xb=cx-wA*0.7+2*wA*0.7*k;
+   ctx.beginPath();ctx.moveTo(xa,yA-sA);ctx.lineTo(xb,yB_(y0,y1,(t+1/(rows+1))*0.7));ctx.stroke();
+  }
+  // sun highlight along each row
+  ctx.strokeStyle='rgba(255,226,196,0.22)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-wA*0.98,yA-sA-0.7);ctx.quadraticCurveTo(cx-wA*0.2,yA+1.2,cx-wA*0.05,yA+0.2);ctx.stroke();
+ }
+ // ---- fascia board along the eave ----
+ ctx.strokeStyle=pal[3];ctx.lineWidth=2.2;
+ ctx.beginPath();ctx.moveTo(cx-halfW,y0-sori);ctx.quadraticCurveTo(cx,y0+3.6,cx+halfW,y0-sori);ctx.stroke();
+ ctx.strokeStyle='rgba(255,240,215,0.35)';ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(cx-halfW,y0-sori-1.6);ctx.quadraticCurveTo(cx,y0+2.1,cx+halfW,y0-sori-1.6);ctx.stroke();
+ // ---- ridge cap (munagawara) ----
+ ctx.fillStyle=pal[3];
+ ctx.beginPath();ctx.moveTo(cx-halfW*0.34,y1-2.6);ctx.lineTo(cx+halfW*0.34,y1-2.6);
+ ctx.lineTo(cx+halfW*0.30,y1+1.2);ctx.lineTo(cx-halfW*0.30,y1+1.2);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.7;ctx.stroke();
+ // ---- onigawara: small curl ornaments at the 4 eave tips ----
+ ctx.fillStyle=pal[2];
+ for(const sx of [-1,1]){
+  const ex=cx+sx*halfW, ey=y0-sori;
+  ctx.beginPath();ctx.moveTo(ex-sx*1.2,ey+3.2);
+  ctx.quadraticCurveTo(ex-sx*6,ey+1.4,ex-sx*5,ey-4.6);
+  ctx.quadraticCurveTo(ex-sx*2.6,ey-2.2,ex-sx*1.2,ey-1.4);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=0.6;ctx.stroke();
+ }
+ if(broke){
+  ctx.fillStyle='rgba(18,12,8,0.8)';
+  const sd=(seed||0)*0.7;
+  for(let i=0;i<4;i++){const hx2=cx+Math.sin(i*2.7+sd)*halfW*0.55,hy2=y0+(y1-y0)*(0.25+0.16*i);
+   ctx.beginPath();ctx.ellipse(hx2,hy2,4.6,3,0.3,0,7);ctx.fill()}
+ }
+}
+function yB_(y0,y1,t){return y0+(y1-y0)*t}
+// stone platform + front steps
+function tcSteps(cw,topY,botY){
+ ctx.fillStyle='#8a857a';
+ ctx.beginPath();ctx.moveTo(-cw-6,topY);ctx.lineTo(cw+6,topY);ctx.lineTo(cw+2,botY);ctx.lineTo(-cw-2,botY);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.32)';ctx.lineWidth=1;ctx.stroke();
+ const steps=4;
+ for(let i=0;i<steps;i++){
+  const t0=i/steps,t1=(i+1)/steps;
+  const yA=topY+(botY-topY)*t0,yB2=topY+(botY-topY)*t1;
+  const wA=cw+6-(cw+6-(cw+2))*t0, wB=cw+6-(cw+6-(cw+2))*t1;
+  ctx.fillStyle=i%2?'#7d786e':'#948f84';
+  ctx.beginPath();ctx.moveTo(-wA,yA);ctx.lineTo(wA,yA);ctx.lineTo(wB,yB2);ctx.lineTo(-wB,yB2);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.14)';ctx.fillRect(-wA,yA,2*wA,1.2);
+  ctx.fillStyle='rgba(0,0,0,0.20)';ctx.fillRect(-wB,yB2-1.2,2*wB,1.2);
+ }
+ // moss between stones
+ ctx.fillStyle='rgba(74,120,52,0.4)';
+ for(let i=0;i<6;i++){const mx=-cw+rnd(0,cw*2);ctx.beginPath();ctx.ellipse(mx,topY+rnd(0,botY-topY),rnd(1.6,3.4),rnd(.8,1.4),0,0,7);ctx.fill()}
+}
+// hanging paper lantern
+function tcLantern(x,y,s,col){
+ const sw=Math.sin(frame/22+x*0.05)*1.1*wind;
+ ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+3+s);ctx.stroke();
+ const cy=y+3+s+5;
+ ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(x+sw*0.4,cy,4.6*s,6*s,0,0,7);ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=0.6;
+ for(let i=-2;i<=2;i++){const yy=cy+i*2.1*s;ctx.beginPath();ctx.ellipse(x+sw*0.4,yy,4.6*s*Math.sqrt(Math.max(0.05,1-(i/3.2)**2)),0.5,0,0,7);ctx.stroke()}
+ ctx.fillStyle='#c9a227';ctx.fillRect(x+sw*0.4-2.4*s,cy-6.4*s,4.8*s,1.8);
+ ctx.fillRect(x+sw*0.4-2.4*s,cy+4.8*s,4.8*s,1.8);
+ ctx.fillStyle='rgba(255,255,255,0.28)';ctx.beginPath();ctx.ellipse(x+sw*0.4-1.5*s,cy-1,1.2*s,3*s,0,0,7);ctx.fill();
+ addGlow(x+sw*0.4,cy,12*s,'rgba(255,150,70,0.24)');
+}
+// golden shachihoko (koi) on the roof ridge
+function tcKoi(x,y,s,flip){
+ ctx.save();ctx.translate(x,y);ctx.scale(flip||1,1);
+ ctx.fillStyle='#c9a227';
+ ctx.beginPath();ctx.moveTo(0,0);
+ ctx.quadraticCurveTo(-2.6*s,-2.4*s,-1.5*s,-6.4*s);   // tail up
+ ctx.quadraticCurveTo(-0.6*s,-8.4*s,0.6*s,-6.6*s);
+ ctx.quadraticCurveTo(1.9*s,-5.4*s,2.4*s,-2.6*s);
+ ctx.quadraticCurveTo(3.4*s,-4.2*s,4.2*s,-5.4*s);     // snout
+ ctx.quadraticCurveTo(3.4*s,-1.2*s,1.2*s,0.4*s);
+ ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(120,88,10,0.7)';ctx.lineWidth=0.7;ctx.stroke();
+ ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.ellipse(-0.9*s,-4.2*s,0.7*s,1.7*s,0.2,0,7);ctx.fill();
+ ctx.fillStyle='#8a6a10';ctx.beginPath();ctx.arc(1.5*s,-4.6*s,0.55*s,0,7);ctx.fill();
+ ctx.restore();
+}
+function drawTownHall(b,TC,dmg,broken){
+ const w=b.w,h=b.h,halfW=w/2,halfH=h/2;
+ const palA=['#7a1f1f','#a83232','#6d1f1f','#c44440'];   // main roof
+ const palB=['#6a1c1c','#932a2a','#5a1818','#b03a34'];   // mid roof
+ const palC=['#5e1a1a','#7d2626','#4a1414','#8f3030'];   // top roof
+ const wallA=b.team==='P1'?'#efe0b8':'#e2b6ab',wallB=b.team==='P1'?'#c0a570':'#ad837a';
+ const lit=broken?0.25:0.55+dmg*0.45;
+ // ---------- stone terrace ----------
+ ctx.fillStyle='#7e7a70';rr(-halfW-9,halfH-16,w+18,20,3);ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.34)';ctx.lineWidth=1.2;rr(-halfW-9,halfH-16,w+18,20,3);ctx.stroke();
+ for(let bx=-halfW-9;bx<halfW+9;bx+=13){
+  ctx.fillStyle=(((bx/13)|0)%2)?'rgba(0,0,0,0.15)':'rgba(255,255,255,0.10)';
+  ctx.fillRect(bx,halfH-15,12.2,18);
+  ctx.fillStyle='rgba(0,0,0,0.22)';ctx.fillRect(bx,halfH-15,1.1,18)}
+ tcSteps(halfW-16,halfH+4,halfH+16);
+ // ---------- GROUND FLOOR ----------
+ const gTop=-2,gBot=halfH-16,gH=gBot-gTop;
+ const gwg=ctx.createLinearGradient(0,gTop,0,gBot);
+ gwg.addColorStop(0,wallA);gwg.addColorStop(0.55,wallB);gwg.addColorStop(1,b.team==='P1'?'#9d8757':'#916a60');
+ ctx.fillStyle=gwg;rr(-halfW+4,gTop,w-8,gH,3);ctx.fill();
+ // timber frame on ground floor
+ ctx.strokeStyle='rgba(74,51,17,0.9)';ctx.lineWidth=3.4;
+ ctx.beginPath();ctx.moveTo(-halfW+16,gTop);ctx.lineTo(-halfW+16,gBot);
+ ctx.moveTo(halfW-16,gTop);ctx.lineTo(halfW-16,gBot);
+ ctx.moveTo(-halfW+4,gTop+8);ctx.lineTo(halfW-4,gTop+8);ctx.stroke();
+ ctx.strokeStyle='rgba(120,85,40,0.5)';ctx.lineWidth=0.9;
+ ctx.beginPath();ctx.moveTo(-halfW+17.4,gTop+2);ctx.lineTo(-halfW+17.4,gBot-2);
+ ctx.moveTo(halfW-14.6,gTop+2);ctx.lineTo(halfW-14.6,gBot-2);ctx.stroke();
+ // plaster weathering
+ ctx.fillStyle='rgba(120,90,40,0.12)';
+ ctx.beginPath();ctx.ellipse(-w*0.26,gBot-6,w*0.14,gH*0.3,0,0,7);ctx.fill();
+ ctx.beginPath();ctx.ellipse(w*0.30,gTop+16,w*0.1,gH*0.28,0.3,0,7);ctx.fill();
+ // grand gate
+ const gw=34,gh=32;
+ ctx.fillStyle='#241408';rr(-gw/2,gBot-gh,gw,gh,12);ctx.fill();
+ // gate inner glow (lit hall inside)
+ const ig=ctx.createLinearGradient(0,gBot-gh,0,gBot);
+ ig.addColorStop(0,'rgba(255,214,130,'+(0.42*lit)+')');
+ ig.addColorStop(0.6,'rgba(255,170,70,'+(0.22*lit)+')');
+ ig.addColorStop(1,'rgba(120,60,20,'+(0.10*lit)+')');
+ ctx.fillStyle=ig;rr(-gw/2+2.4,gBot-gh+2.4,gw-4.8,gh-2.4,10);ctx.fill();
+ addGlow(b.x,b.y+gBot-gh*0.55,24,'rgba(255,180,80,'+(0.20*lit)+')');
+ // door leaves
+ ctx.fillStyle='#3a2410';
+ ctx.fillRect(-gw/2+2.4,gBot-gh+2.4,gw/2-3,gh-2.4);ctx.fillRect(1.6,gBot-gh+2.4,gw/2-3,gh-2.4);
+ ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.8;
+ for(let i=0;i<3;i++){const yy=gBot-gh+5+i*(gh-6)/3;
+  ctx.beginPath();ctx.moveTo(-gw/2+3,yy);ctx.lineTo(-1.4,yy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(1.4,yy);ctx.lineTo(gw/2-3,yy);ctx.stroke()}
+ ctx.fillStyle='#c9a227';
+ ctx.beginPath();ctx.arc(-2.6,gBot-gh*0.52,2,0,7);ctx.arc(2.6,gBot-gh*0.52,2,0,7);ctx.fill();
+ // gate lintel + plaque
+ ctx.fillStyle='#4a3311';ctx.fillRect(-gw/2-5,gBot-gh-5,gw+10,6);
+ ctx.fillStyle='rgba(255,255,255,0.14)';ctx.fillRect(-gw/2-5,gBot-gh-5,gw+10,1.4);
+ ctx.fillStyle='#c9a227';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
+ ctx.fillText(b.team==='P1'?'城':'都',0,gBot-gh-1);ctx.textAlign='left';
+ // side shoji windows (soft glow so bloom na phoole)
+ shoji(-halfW+34,gTop+24,18,16,7);shoji(halfW-34,gTop+24,18,16,7);
+ // team trim
+ ctx.strokeStyle=TC.p;ctx.lineWidth=2.8;rr(-halfW+4,gTop,w-8,gH,3);ctx.stroke();
+ // ---------- 1st (main) ROOF ----------
+ const r1b=gTop, r1t=-46;
+ for(let i=0;i<5;i++)bracket(-halfW+2+i*(w-8)/5,r1b+1,1.2,'#5b3a1a');
+ pagodaRoof(0,r1b,r1t,halfW+19,palA,broken,b.x,1.15,7);
+ // ---------- 2nd FLOOR (balcony) ----------
+ const f2w=44,f2t=r1t-7,f2b=r1t+18;
+ ctx.fillStyle=b.team==='P1'?'#d9c08c':'#cda096';rr(-f2w,f2t,f2w*2,f2b-f2t,2);ctx.fill();
+ ctx.strokeStyle='#4a3311';ctx.lineWidth=2;rr(-f2w,f2t,f2w*2,f2b-f2t,2);ctx.stroke();
+ // balcony railing (veranda)
+ ctx.fillStyle='#6b4a2b';ctx.fillRect(-f2w-6,f2b-15,f2w*2+12,4.4);
+ ctx.fillStyle='rgba(255,220,180,0.2)';ctx.fillRect(-f2w-6,f2b-15,f2w*2+12,1.2);
+ ctx.strokeStyle='#4a3311';ctx.lineWidth=1.7;
+ for(let i=0;i<=11;i++){const rx=-f2w+i*(f2w*2/11);ctx.beginPath();ctx.moveTo(rx,f2b-11);ctx.lineTo(rx,f2b-1.4);ctx.stroke()}
+ ctx.fillStyle='#4a3311';ctx.fillRect(-f2w-6,f2b-1.4,f2w*2+12,2.6);
+ shoji(-17,f2t+9,16,15,7);shoji(17,f2t+9,16,15,7);
+ ctx.strokeStyle=TC.p;ctx.lineWidth=2;rr(-f2w,f2t,f2w*2,f2b-f2t,2);ctx.stroke();
+ // ---------- 2nd ROOF ----------
+ const r2b=f2t-4,r2t=f2t-34;
+ pagodaRoof(0,r2b,r2t,f2w+15,palB,broken,b.x*1.6,1,5);
+ // ---------- 3rd FLOOR (golden) ----------
+ const f3w=27,f3t=r2t-6,f3b=r2t+15;
+ ctx.fillStyle=b.team==='P1'?'#e6d3a6':'#dcb3a7';rr(-f3w,f3t,f3w*2,f3b-f3t,2);ctx.fill();
+ ctx.strokeStyle='#4a3311';ctx.lineWidth=1.8;rr(-f3w,f3t,f3w*2,f3b-f3t,2);ctx.stroke();
+ shoji(0,f3t+8,19,14,7);
+ ctx.strokeStyle=TC.p;ctx.lineWidth=1.8;rr(-f3w,f3t,f3w*2,f3b-f3t,2);ctx.stroke();
+ // ---------- TOP ROOF + SHRINE SPIRE ----------
+ const r3b=f3t-3,r3t=f3t-24;
+ pagodaRoof(0,r3b,r3t,f3w+11,palC,broken,b.x*2.3,0.85,4);
+ // golden koi on the top ridge
+ tcKoi(-f3w-8,r3t+1,1.3,1);tcKoi(f3w+8,r3t+1,1.3,-1);
+ // sorin (golden spire)
+ const spY=r3t-4;
+ ctx.strokeStyle='#c9a227';ctx.lineWidth=2.6;
+ ctx.beginPath();ctx.moveTo(0,spY);ctx.lineTo(0,spY-30);ctx.stroke();
+ for(let i=0;i<7;i++){
+  const ry=spY-6-i*3.6,rr2=5-i*0.6;
+  ctx.fillStyle=i%2?'#e8c34a':'#c9a227';
+  ctx.beginPath();ctx.ellipse(0,ry,rr2,1.6,0,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.beginPath();ctx.ellipse(-rr2*0.3,ry-0.4,rr2*0.4,0.5,0,0,7);ctx.fill();
+ }
+ ctx.fillStyle='#e8c34a';ctx.beginPath();ctx.arc(0,spY-31.5,2.8,0,7);ctx.fill();
+ addGlow(b.x,b.y+spY-16,15,'rgba(255,210,90,0.26)');
+ // ---------- hanging lanterns at the main eaves ----------
+ tcLantern(-halfW-7,gTop-28,1.15,TC.p);
+ tcLantern(halfW+7,gTop-28,1.15,TC.p);
+ // ---------- stone lanterns + garden on both sides ----------
+ for(const s2 of [-1,1]){
+  const lx=s2*(halfW+16);
+  ctx.fillStyle='#6e6a62';ctx.fillRect(lx-3,halfH-16,6,12);
+  ctx.fillStyle='#5a5550';ctx.fillRect(lx-6,halfH-20,12,4);
+  ctx.fillStyle='#7e7a70';ctx.beginPath();
+  ctx.moveTo(lx-7,halfH-20);ctx.lineTo(lx,halfH-27);ctx.lineTo(lx+7,halfH-20);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#5a5550';ctx.fillRect(lx-4,halfH-23.4,8,1.2);
+  const gl=broken?0.25:(0.55+0.45*Math.sin(frame/15+b.x));
+  ctx.fillStyle='rgba(255,200,90,'+gl+')';ctx.beginPath();ctx.arc(lx,halfH-12,2.9,0,7);ctx.fill();
+  addGlow(b.x+lx,b.y+halfH-12,14,'rgba(255,190,90,'+(0.22*gl)+')');
+  // garden bed
+  ctx.fillStyle='#3f7d22';ctx.beginPath();ctx.arc(lx,halfH-3,6,0,7);ctx.fill();
+  ctx.fillStyle='#2d5a15';ctx.beginPath();ctx.arc(lx-2.4,halfH-4,3.6,0,7);ctx.fill();
+  if(s2<0){ctx.fillStyle='#e11d48';ctx.beginPath();ctx.arc(lx-1,halfH-6,1.6,0,7);ctx.fill()}
+  else{ctx.fillStyle='#ffd93d';ctx.beginPath();ctx.arc(lx+1.4,halfH-6.4,1.5,0,7);ctx.fill()}
+  // rocks
+  ctx.fillStyle='#9a8a6a';
+  ctx.beginPath();ctx.ellipse(lx-s2*7,halfH+1,3.6,1.8,0,0,7);ctx.ellipse(lx-s2*1,halfH+2,2.8,1.4,0,0,7);ctx.fill();
+ }
+ // ---------- nobori banner poles ----------
+ for(const s2 of [-1,1]){
+  const nx=s2*(halfW+26);
+  ctx.strokeStyle='#3a2a10';ctx.lineWidth=2.4;
+  ctx.beginPath();ctx.moveTo(nx,halfH+6);ctx.lineTo(nx,r1t-14);ctx.stroke();
+  ctx.fillStyle='#3a2a10';ctx.beginPath();ctx.ellipse(nx,halfH+6,4,1.8,0,0,7);ctx.fill();
+  const nw2=sway(b.x*0.04+s2,3.4);
+  ctx.fillStyle=TC.p;ctx.beginPath();
+  ctx.moveTo(nx,r1t-14);ctx.quadraticCurveTo(nx+9+nw2*0.4,r1t-12,nx+17+nw2,r1t-9);
+  ctx.lineTo(nx+17+nw2,r1t+14);ctx.quadraticCurveTo(nx+9+nw2*0.5,r1t+9,nx,r1t+11);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.8;ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
+  ctx.fillText(b.team==='P1'?'侍':'兵',nx+8+nw2*0.5,r1t+4);ctx.textAlign='left';
+ }
+ // ---------- smoke from the hall roof (chimney-ish) ----------
+ if(frame%26===0&&!broken)smoke(b.x+rnd(-6,6),b.y+r1t-6,5,0,'rgba(210,206,196,0.35)');
+ // ---------- damage overlays ----------
+ if(broken){
+  ctx.strokeStyle='rgba(20,14,10,0.5)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(-halfW+16,gTop+10);ctx.lineTo(-halfW+22,gTop+26);ctx.lineTo(-halfW+14,gTop+38);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(halfW-18,gTop+6);ctx.lineTo(halfW-12,gTop+20);ctx.stroke();
+ }
+ if(dmg<0.4){
+  ctx.fillStyle='rgba(30,20,14,'+(0.30-dmg*0.3)+')';rr(-halfW+6,gTop,w-12,gH,3);ctx.fill();
+ }
+}
 function bracket(x,y,s,col){
  ctx.fillStyle=col;
  ctx.beginPath();ctx.moveTo(x-2*s,y);ctx.lineTo(x+7*s,y);ctx.lineTo(x+7*s,y+2*s);
@@ -1455,7 +1717,7 @@ function bracket(x,y,s,col){
  ctx.fillStyle='rgba(255,230,190,0.22)';ctx.fillRect(x-1.4*s,y+0.4*s,7.6*s,0.8*s);
  ctx.fillStyle='rgba(0,0,0,0.28)';ctx.fillRect(x-2*s,y+4*s,9*s,0.9*s);
 }
-function shoji(x,y,w,h){
+function shoji(x,y,w,h,glowR){
  const g=ctx.createLinearGradient(x,y,x,y+h);
  g.addColorStop(0,'#ffeec0');g.addColorStop(0.5,'#f5c96e');g.addColorStop(1,'#c98f2e');
  ctx.fillStyle=g;ctx.fillRect(x-w/2,y-h/2,w,h);
@@ -1465,7 +1727,7 @@ function shoji(x,y,w,h){
  ctx.beginPath();ctx.moveTo(x-w/2,y);ctx.lineTo(x+w/2,y);ctx.stroke();
  ctx.strokeStyle='rgba(80,50,16,0.45)';ctx.lineWidth=0.6;
  for(let i=0;i<4;i++){const yy=y-h/2+h*(0.15+i*0.24);ctx.beginPath();ctx.moveTo(x-w/2+1,yy);ctx.lineTo(x+w/2-1,yy+0.6);ctx.stroke()}
- addGlow(x,y,10+w,'rgba(255,190,90,0.22)');
+ addGlow(x,y,(glowR==null?10+w:glowR),'rgba(255,190,90,0.22)');
 }
 function noren(x,y,w,h,col){
  for(let i=0;i<4;i++){
@@ -1480,11 +1742,11 @@ function noren(x,y,w,h,col){
 }
 function drawTorch(x,y,s,col){
  const fl2=s*(0.85+Math.sin(frame/5+x)*0.16+Math.random()*0.14);
- const g=ctx.createRadialGradient(x,y-fl2*0.5,0.5,x,y-fl2*0.6,fl2*4);
+ const g=ctx.createRadialGradient(x,y-fl2*0.5,0.5,x,y-fl2*0.6,fl2*3.4);
  g.addColorStop(0,'#fffbe0');g.addColorStop(0.25,'#ffd24a');g.addColorStop(0.55,'#ff7a1a');g.addColorStop(1,'rgba(200,40,0,0)');
- ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y-fl2*0.6,fl2*4,0,7);ctx.fill();
+ ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y-fl2*0.6,fl2*3.4,0,7);ctx.fill();
  ctx.fillStyle='#fff3b0';ctx.beginPath();ctx.ellipse(x,y-fl2*0.5,fl2*0.42,fl2*0.9,0,0,7);ctx.fill();
- addGlow(x,y-fl2*0.6,fl2*11,'rgba(255,168,60,0.5)');
+ addGlow(x,y-fl2*0.6,fl2*7,'rgba(255,168,60,0.34)');
 }
 function drawBld(b){
  if(b.hp<=0&&!b.dying)return;
@@ -1514,18 +1776,18 @@ function drawBld(b){
  ctx.save();ctx.translate(b.x,b.y);
  if(!b.done){ctx.globalAlpha=0.8;ctx.translate(0,(1-Math.min(1,b.prog/b.need))*20)}
  drawBldBody(b,TC,dmg,broken);
- // team flag (badi buildings par aur bhi shaan!)
- if(b.done){
-  const fw=Math.sin(frame*0.08+b.id)*3;
-  ctx.strokeStyle='#5b4326';ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(b.w/2-10,-b.h/2-30);ctx.lineTo(b.w/2-10,-b.h/2+2);ctx.stroke();
-  ctx.fillStyle=TC.p;ctx.beginPath();ctx.moveTo(b.w/2-10,-b.h/2-30);ctx.lineTo(b.w/2+12+fw,-b.h/2-24);ctx.lineTo(b.w/2-10,-b.h/2-17);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke();
-  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(b.w/2-10,-b.h/2-31,3,0,7);ctx.fill();
- }
- ctx.restore();
- // HP / progress bar
- const wpx=b.w;
- const by=b.y-b.h/2-(b.kind==='tc'?58:38);
+  // team flag (TC ka apna pagoda + banner hai, isliye TC par nahi)
+  if(b.done&&b.kind!=='tc'){
+   const fw=Math.sin(frame*0.08+b.id)*3;
+   ctx.strokeStyle='#5b4326';ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(b.w/2-10,-b.h/2-30);ctx.lineTo(b.w/2-10,-b.h/2+2);ctx.stroke();
+   ctx.fillStyle=TC.p;ctx.beginPath();ctx.moveTo(b.w/2-10,-b.h/2-30);ctx.lineTo(b.w/2+12+fw,-b.h/2-24);ctx.lineTo(b.w/2-10,-b.h/2-17);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke();
+   ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(b.w/2-10,-b.h/2-31,3,0,7);ctx.fill();
+  }
+  ctx.restore();
+  // HP / progress bar (TC pagoda bahut upar jaata hai isliye bar oopar)
+  const wpx=b.w;
+  const by=b.y-b.h/2-(b.kind==='tc'?132:38);
  if(!b.done){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(b.x-wpx/2,by,wpx,5);
   ctx.fillStyle='#fde047';ctx.fillRect(b.x-wpx/2,by,wpx*Math.min(1,b.prog/b.need),5)}
  else if(b.hp<b.maxHp||sel.bld===b.id){
@@ -1542,9 +1804,11 @@ function drawBldBody(b,TC,dmg,broken){
  const k=b.kind,w=b.w,h=b.h;
  const halfW=w/2,halfH=h/2;
  const wallA=b.team==='P1'?'#e6d3a6':'#d8aca2',wallB=b.team==='P1'?'#b49a66':'#a57a72';
- // ---------- contact AO ----------
- contactAO(0,halfH+2,halfW*0.95,halfH*0.28,0.36);
- // ---------- FARM ----------
+  // ---------- contact AO ----------
+  contactAO(0,halfH+2,halfW*0.95,halfH*0.28,0.36);
+  // ---------- TOWN HALL (dedicated grand pagoda) ----------
+  if(k==='tc'){drawTownHall(b,TC,dmg,broken);return}
+  // ---------- FARM ----------
  if(k==='farm'){
   ctx.fillStyle='#6b4a28';rr(-halfW,-halfH,w,h,4);ctx.fill();
   ctx.strokeStyle='#3f2c14';ctx.lineWidth=2.4;rr(-halfW,-halfH,w,h,4);ctx.stroke();
@@ -1695,28 +1959,10 @@ function drawBldBody(b,TC,dmg,broken){
  // ridge ornaments
  ctx.fillStyle='#4a463f';
  ctx.fillRect(-7,eaveY-tall-4,5,5);ctx.fillRect(2,eaveY-tall-4,5,5);
- if(k==='tc'){
-  ctx.strokeStyle='#3a2a10';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(0,eaveY-tall-6);ctx.lineTo(0,eaveY-tall-24);ctx.stroke();
-  for(let si=0;si<3;si++){ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(0,eaveY-tall-8-si*5,3.2-si*0.7,0,7);ctx.fill();
-   ctx.fillStyle='rgba(255,255,255,0.4)';ctx.beginPath();ctx.arc(-0.8,eaveY-tall-8.6-si*5,0.9,0,7);ctx.fill()}
-  // shachihoko (fish ornament)
-  ctx.fillStyle='#5a6a7a';
-  ctx.beginPath();ctx.moveTo(-w*0.30,eaveY-tall-2);ctx.quadraticCurveTo(-w*0.30,eaveY-tall-14,-w*0.24,eaveY-tall-16);
-  ctx.quadraticCurveTo(-w*0.20,eaveY-tall-13,-w*0.22,eaveY-tall-3);ctx.closePath();ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.ellipse(-w*0.265,eaveY-tall-8,2,4.4,0.2,0,7);ctx.fill();
-  // second storey gallery
-  ctx.fillStyle=b.team==='P1'?'#c9b183':'#bd948c';rr(-w*0.30,eaveY-tall-27,w*0.60,15,3);ctx.fill();
-  ctx.strokeStyle='#4a3311';ctx.lineWidth=1.8;rr(-w*0.30,eaveY-tall-27,w*0.60,15,3);ctx.stroke();
-  ctx.strokeStyle='rgba(74,51,17,0.75)';ctx.lineWidth=1;
-  for(let gx=-w*0.30+4;gx<w*0.30;gx+=6){ctx.beginPath();ctx.moveTo(gx,eaveY-tall-26);ctx.lineTo(gx,eaveY-tall-13);ctx.stroke()}
-  ctx.strokeStyle='#4a3311';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-w*0.30,eaveY-tall-19);ctx.lineTo(w*0.30,eaveY-tall-19);ctx.stroke();
-  const pal2=['#5e1a1a','#7d2626','#4a1414','#8f3030'];
-  roofBand(0,eaveY-tall-25,eaveY-tall-38,w*0.30+9,3,pal2,broken,b.x*1.7);
- }else{
-  ctx.fillStyle='#c9a227';ctx.fillRect(-3,eaveY-tall-6,6,7);
-  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(-2.4,eaveY-tall-5.4,1.6,4);
- }
+  if(k!=='tc'){
+   ctx.fillStyle='#c9a227';ctx.fillRect(-3,eaveY-tall-6,6,7);
+   ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(-2.4,eaveY-tall-5.4,1.6,4);
+  }
  // raised floor + stilts (looks grounded)
  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillRect(-halfW-3,halfH-2,w+6,4);
  // ---- per-kind props ----
@@ -1880,6 +2126,34 @@ function joint(x,y,a1,l1,a2,l2,w,col){
  return{kx,ky,fx,fy};
 }
 function teamCol(t){return t==='P1'?{p:'#2f6fe0',d:'#17356e',l:'#8fb8f5',rim:'#bcd8ff'}:{p:'#d93a34',d:'#6e1512',l:'#f5a49e',rim:'#ffc4bf'}}
+// ---- depth + collision helpers ----
+// TC pagoda bohot upar jaata hai, isliye uska sort/collision box alag se define karta hoon
+// depth key: building ka sabse NEECHE wala hissa (y bada = camera ke paas)
+function bldSortY(b){
+ if(b.kind==='tc')return b.y+62;                      // terrace + steps
+ return b.y+b.h/2;
+}
+function uSortY(u){return u.y+(u.type==='elephant'?8:0)}
+// solid footprint (units andar na ghusen, terrace/steps par bhi na khade)
+function bldSolid(b){
+ if(b.kind==='tc')return{x:b.x,y:b.y+14,hw:b.w/2+4,hh:48};
+ return{x:b.x,y:b.y,hw:b.w/2+2,hh:b.h/2+2};
+}
+function collideBuildings(){
+ for(const u of units){
+  if(u.hp<=0)continue;
+  for(const b of blds){
+   if(b.hp<=0)continue;
+   const s=bldSolid(b);
+   const dx=u.x-s.x,dy=u.y-s.y;
+   if(Math.abs(dx)<s.hw&&Math.abs(dy)<s.hh){
+    const px=s.hw-Math.abs(dx),py=s.hh-Math.abs(dy);
+    if(px<py)u.x+=dx<0?-px:px;
+    else u.y+=dy<0?-py:py;
+   }
+  }
+ }
+}
 const SKIN='#f0c396',SKIN_D='#c08f60';
 function eyeBlink(u,ph){return (Math.sin(frame/7+u.id*1.7)>0.985)?0.12:1}
 
@@ -2961,10 +3235,7 @@ function draw(){
   ctx.font='bold 15px sans-serif';ctx.fillText(c.kind==='gold'?'🪙':c.kind==='heal'?'💚':c.kind==='army'?'⚔️':'📦',c.x-8,c.y-14+bob);
   addGlow(c.x,c.y+bob,26,'rgba(253,224,71,0.4)');
  }
- // ---- buildings (sorted by depth) ----
- const bsorted=[...blds].sort((a,b)=>(a.y+a.h/2)-(b.y+b.h/2));
- for(const b of bsorted)if(b.team==='P1'||isVis(b.x,b.y))drawBld(b);
- // ---- corpses (blood decals) ----
+ // ---- corpses (blood decals, ground level) ----
  for(const c of corpses){
   if(!isSeen(c.x,c.y)&&c.team==='AI')continue;
   ctx.globalAlpha=Math.min(0.85,c.life/120);
@@ -2975,10 +3246,24 @@ function draw(){
   ctx.fillStyle='rgba(120,20,20,0.5)';ctx.beginPath();ctx.ellipse(c.x+7,c.y+2,3.4,1.6,0,0,7);ctx.fill();
   ctx.globalAlpha=1;
  }
- // ---- units (depth sorted) ----
- const sorted=[...units].sort((a,b)=>(a.y+(a.type==='elephant'?8:0))-(b.y+(b.type==='elephant'?8:0)));
- for(const u of sorted){
-  if(u.hp>0||u.deadT>0){if(u.team==='P1'||isVis(u.x,u.y))drawUnit(u)}
+ // ---- UNIFIED DEPTH SORT: buildings + units ek hi list me ----
+ // (pehle buildings phir units alag-alag draw hote the, isliye unit kabhi
+ //  building ke PEECHE nahi ja sakta tha — TC jaise bade structures me
+ //  log chhat ke upar khade lagte the)
+ const drawList=[];
+ for(const b of blds){
+  if(!(b.team==='P1'||isVis(b.x,b.y)))continue;
+  if(b.hp<=0&&!b.dying)continue;
+  drawList.push({k:bldSortY(b),b:1,o:b});
+ }
+ for(const u of units){
+  if(!(u.hp>0||u.deadT>0))continue;
+  if(!(u.team==='P1'||isVis(u.x,u.y)))continue;
+  drawList.push({k:uSortY(u),b:0,o:u});
+ }
+ drawList.sort((a,b)=>a.k-b.k);
+ for(const it of drawList){
+  if(it.b)drawBld(it.o);else drawUnit(it.o);
  }
  // ---- slash arcs ----
  for(const s of slashes){
@@ -3004,11 +3289,11 @@ function draw(){
   // warm light pool on the ground that pulses with the flame
   const fl=0.72+0.28*Math.sin(frame*0.21+bz.x*0.07)+0.14*Math.sin(frame*0.53+bz.x*0.11);
   ctx.save();ctx.globalCompositeOperation='lighter';
-  const lg2=ctx.createRadialGradient(bz.x,bz.y-10,2,bz.x,bz.y-10,52*fl);
-  lg2.addColorStop(0,'rgba(255,178,80,'+(0.20*fl)+')');
-  lg2.addColorStop(0.5,'rgba(255,140,50,'+(0.07*fl)+')');
+  const lg2=ctx.createRadialGradient(bz.x,bz.y-10,2,bz.x,bz.y-10,26*fl);
+  lg2.addColorStop(0,'rgba(255,178,80,'+(0.16*fl)+')');
+  lg2.addColorStop(0.5,'rgba(255,140,50,'+(0.05*fl)+')');
   lg2.addColorStop(1,'rgba(255,120,40,0)');
-  ctx.fillStyle=lg2;ctx.beginPath();ctx.ellipse(bz.x,bz.y-10,52*fl,44*fl,0,0,7);ctx.fill();
+  ctx.fillStyle=lg2;ctx.beginPath();ctx.ellipse(bz.x,bz.y-10,26*fl,22*fl,0,0,7);ctx.fill();
   ctx.restore();
   ctx.fillStyle='#3a2a10';ctx.fillRect(bz.x-2,bz.y-11,4,13);
   ctx.fillStyle='#2a1e0c';ctx.fillRect(bz.x-5,bz.y-13,10,3.4);
@@ -3259,6 +3544,7 @@ function step(){
    for(let j=i+1;j<units.length;j++){const c=units[j];if(c.hp<=0)continue;
     const dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);
     if(d>0.1&&d<15){const p=(15-d)/d*0.3;a.x-=dx*p;a.y-=dy*p;c.x+=dx*p;c.y+=dy*p}}}
+  collideBuildings();   // buildings ke andar se bahar push
   updateBlds();
    // ⚡ powers cooldown + 🔥 combo + 🤴 hero regen + 📦 crates
    for(const k in powers)if(powers[k].cd>0)powers[k].cd=Math.max(0,powers[k].cd-1/60);
@@ -3430,9 +3716,10 @@ function startGame(){
  blds.push({id:bid++,team:'AI',kind:'tc',x:AIBX,y:AIBY,w:124,h:92,hp:1500,maxHp:1500,prog:1,need:1,done:true,queue:[],rx:AIBX,ry:AIBY+100,cool:0,cloth:null,dying:false,dieT:0});
  for(const b of blds)addBldCloth(b);
  const nv=civOf('P1').extraVill?4:3;
- for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',P1BX+rnd(-60,60),P1BY+rnd(-60,60));u.state='idle'}
- for(let i=0;i<3;i++){const u=mkUnit('AI','villager',AIBX+rnd(-60,60),AIBY+rnd(-60,60));u.state='idle'}
- {const h=mkUnit('P1','hero',P1BX+rnd(-40,40),P1BY+rnd(-40,40));h.state='idle';float(h.x,h.y-40,'🤴 Maharaja aaya!','#FFD700')}
+ // villagers TC ke AAGE khade (building ke andar nahi)
+ for(let i=0;i<nv;i++){const u=mkUnit('P1','villager',P1BX+rnd(-70,70),P1BY+70+rnd(-14,26));u.state='idle'}
+ for(let i=0;i<3;i++){const u=mkUnit('AI','villager',AIBX+rnd(-70,70),AIBY+70+rnd(-14,26));u.state='idle'}
+ {const h=mkUnit('P1','hero',P1BX+rnd(-52,52),P1BY+80+rnd(-6,14));h.state='idle';float(h.x,h.y-40,'🤴 Maharaja aaya!','#FFD700')}
  view={x:P1BX+50,y:P1BY-50,z:0.7};
  updateFog();
  started=true;
