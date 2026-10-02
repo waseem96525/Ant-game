@@ -601,7 +601,7 @@ function dealDmg(t,v,dmg){
    addTrauma(v.type?0.09:0.3);
    if(v.type)hitStopT(2);
    if(v.team==='AI'&&t==='P1'){try{onEnemyKilled(v)}catch(_){}}
-   }else spark(v.x,v.y-8,3,'#ffd9a0');
+   }
    if(!v.type){
     if(v.hp<=0){
      // 🛡️ collapse/rubble/cinematic SIRF tootne par — pehli kharoch par nahi
@@ -613,6 +613,7 @@ function dealDmg(t,v,dmg){
     }else{
      // halki kharoch par sirf halka shake — building khadi rehti hai
      shake=Math.max(shake,4);
+     spark(v.x,v.y-8,3,'#ffd9a0');
     }
    }
  }
