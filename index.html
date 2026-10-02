@@ -601,12 +601,20 @@ function dealDmg(t,v,dmg){
    addTrauma(v.type?0.09:0.3);
    if(v.type)hitStopT(2);
    if(v.team==='AI'&&t==='P1'){try{onEnemyKilled(v)}catch(_){}}
-  }else spark(v.x,v.y-8,3,'#ffd9a0');
-  if(!v.type){
-   if(v.kind==='tc'){shake=Math.max(shake,16);addTrauma(0.85);zoomPunch(1);cinematicBars(46);hitStopT(7)}
-   else{shake=Math.max(shake,7);addTrauma(0.42);hitStopT(3)}
-   collapseBld(v);
-  }
+   }else spark(v.x,v.y-8,3,'#ffd9a0');
+   if(!v.type){
+    if(v.hp<=0){
+     // 🛡️ collapse/rubble/cinematic SIRF tootne par — pehli kharoch par nahi
+     // (pehle har hit par dying=true ho jata tha, isliye TC tootne par
+     //  animation skip karke ekdum gayab lagta tha)
+     if(v.kind==='tc'){shake=Math.max(shake,16);addTrauma(0.85);zoomPunch(1);cinematicBars(46);hitStopT(7)}
+     else{shake=Math.max(shake,7);addTrauma(0.42);hitStopT(3)}
+     collapseBld(v);
+    }else{
+     // halki kharoch par sirf halka shake — building khadi rehti hai
+     shake=Math.max(shake,4);
+    }
+   }
  }
  function collapseBld(b){
   if(b.dying)return;
@@ -3960,7 +3968,9 @@ function step(){
   for(const s of slashes)s.life--;slashes=slashes.filter(s=>s.life>0);
   if(shake>0)shake--;
   // jeet/haar
-  const myTC=blds.some(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0),aiTC=blds.some(b=>b.team==='AI'&&b.kind==='tc'&&b.hp>0);
+   // jeet/haar — TC ki collapse animation (dieT) poori hone ke baad hi faisla,
+   // taaki TC ekdum se gayab na lage
+   const myTC=blds.some(b=>b.team==='P1'&&b.kind==='tc'&&(b.hp>0||(b.dieT||0)>0)),aiTC=blds.some(b=>b.team==='AI'&&b.kind==='tc'&&(b.hp>0||(b.dieT||0)>0));
   if(!myTC&&!aiTC){endGame(false);break}
   if(!myTC){endGame(false);break}
   if(!aiTC){endGame(true);break}
