@@ -131,11 +131,11 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <div class="guide">
 <b>🎮 Kaise khelein:</b><br>
 🖱️ <b>PC:</b> Left-click = chuno · Left-drag = box select (max 60) · Right-click = bhejo/katwao/hamla · <b>Shift+right-click = waypoint queue</b> · <b>Shift+click</b> = jodo/hatao · <b>Double-click</b> = same type sab. <kbd>Q</kbd>=Fauj <kbd>E</kbd>=Villager <kbd>R</kbd>=Sab <kbd>F</kbd>=Fullscreen <kbd>H</kbd>=Pan <kbd>W</kbd>=Wall <kbd>1-4</kbd>=Formation <kbd>Space</kbd>=Pause.<br>
-🏰 <b>Walls (NAYA!):</b> Topbar me <b>💾 Save</b> ke paas naya wall button aayega jab villager select ho — click karke <b>click &amp; drag</b> se wall segments draw karo. Enemy wall ko tod ke hi aage badh sakta hai!<br>
+🏰 <b>Walls (NAYA!):</b> Villager select karo → <kbd>W</kbd> (ya wall button) dabao — map par click &amp; drag se wall segments draw karo. Enemy wall ko tod ke hi aage badh sakta hai!<br>
 ⚔️ <b>Formations (NAYA!):</b> Fauj chuno → upar wale bar me Line/Wedge/Box/Spread me se ek chuno (ya <kbd>1</kbd>-<kbd>4</kbd> dabao). Ab jab right-click karega to fauj us formation me march karegi.<br>
 🎯 <b>Waypoints (NAYA!):</b> <b>Shift + right-click</b> = order ko queue me add karo (numbered flags dikhenge). Fauj poore route pe chalegi.<br>
 ⛪ <b>Monastery &amp; Monk (NAYA!):</b> Yug 3 me Monastery banao → Monk train karo → Monk wounded units ko heal karta hai + enemy unit ko convert kar sakta hai (⛪ Convert button).<br>
-💾 <b>Save/Load (NAYA!):</b> Topbar me <b>💾 Save</b> — 3 slots. Browser band karke wapas khel sakte ho!<br>
+💾 <b>Save/Load:</b> Menu me <b>💾 SAVE / LOAD</b> ya topbar me <b>💾 Save</b> — 3 slots. Bharie slot par 💾 dabao = overwrite. Browser band karke bhi wapas khel sakte ho!<br>
 🏠 Ghar = +5 abaadi · 🏟 Barracks = foj · 🗼 Burj = teer raksha · 🌾 Khet = khana · 🛒 Market = trade · 📦 Khalon/Godown/Kotla = storage Lv1→3 · ⛪ Monastery = monk · 🏰 Wall = defense<br>
 🗺️ 3 Maps: Grassland · Desert · Snow (menu me select karo)<br>
 ⚡ <b>Powers:</b> ⚡ Bijli · 💚 Heal · 🎁 Gift · ⛪ Convert
@@ -187,7 +187,9 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <button class="opt sel" data-q="3">✨ ULTRA</button></div>
 <div style="font-size:12px;color:#c8b48c;margin-top:2px">ULTRA = full detail + bloom + day/night + shadows. Kam FPS aaye to <b>⚡ Auto</b> khud adjust kar lega.</div></div>
 <div><b>🎯 Campaign (10 mission — jeeto aur agla kholo):</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;color:#f0e2c0">Free play ya koi level chuno!</div></div>
+<div id="contWrap"></div>
 <button id="startBtn" onclick="LEVEL=null;startGame()">▶ FREE PLAY ⚔️</button>
+<button id="openSavesBtn" onclick="openSaves()" style="width:100%;margin-top:8px">💾 SAVE / LOAD</button>
 </div></div>
 
 <!-- 🏁 END SCREEN -->
@@ -1236,92 +1238,188 @@ function aiTick(){
 }
 
 // ============ SAVE / LOAD ============
+const SAVE_VER=2;
 function saveGame(slot){
+ if(!started){msg('⚠️ Pehle game start karo, phir save karo!');return false}
  try{
   const data={
-   v:1,
+   v:SAVE_VER,
    myCiv,aiCiv,difficulty,MAPTYPE,
    res:JSON.parse(JSON.stringify(res)),
    age:{...age},tech:JSON.parse(JSON.stringify(tech)),
-   frame,elapsed,treaty,score,kills,highScore,
-   units:units.filter(u=>u.hp>0).map(u=>({id:u.id,team:u.team,type:u.type,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp,dmg:u.dmg,state:'idle',carry:0,lvl:u.lvl,xp:u.xp})),
-   blds:blds.filter(b=>b.hp>0).map(b=>({id:b.id,team:b.team,kind:b.kind,x:b.x,y:b.y,hp:b.hp,maxHp:b.maxHp,done:b.done,prog:b.prog,need:b.need,lvl:b.lvl,rx:b.rx,ry:b.ry})),
-   nodes:nodes.filter(n=>n.amt>0).map(n=>({kind:n.kind,x:n.x,y:n.y,amt:n.amt})),
+   frame,elapsed,treaty,score,kills,highScore,combo,comboT,
+   levelIdx:LEVEL?LEVELS.indexOf(LEVEL):-1,
+   objT,relicsGot,
+   units:units.filter(u=>u.hp>0).map(u=>({
+    id:u.id,team:u.team,type:u.type,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp,dmg:u.dmg,
+    carry:u.carry,carryKind:u.carryKind,gatherT:u.gatherT,
+    state:(u.state==='build'||u.state==='gather'||u.state==='return')?u.state:'idle',
+    nodeId:(u.state==='gather'&&u.node)?u.node.id:null,
+    bldId:(u.state==='build'&&u.bld!=null)?u.bld:null,
+    waypoints:u.waypoints||[],
+    lvl:u.lvl,xp:u.xp,healT:u.healT,convertT:u.convertT
+   })),
+   blds:blds.filter(b=>b.hp>0).map(b=>({
+    id:b.id,team:b.team,kind:b.kind,x:b.x,y:b.y,hp:b.hp,maxHp:b.maxHp,
+    done:b.done,prog:b.prog,need:b.need,lvl:b.lvl,rx:b.rx,ry:b.ry,
+    queue:(b.queue||[]).map(q=>({type:q.type,t:q.t}))
+   })),
+   nodes:nodes.filter(n=>n.amt>0).map(n=>({
+    kind:n.kind,x:n.x,y:n.y,amt:n.amt,tag:n.tag||0,seed:n.seed||0,
+    hx:n.hx,hy:n.hy,ph:n.ph,flee:n.flee||0,fx:n.fx||0,fy:n.fy||0
+   })),
+   relics:relics.map(r=>({x:r.x,y:r.y,taken:r.taken,ph:r.ph})),
+   crates:crates.map(c=>({x:c.x,y:c.y,kind:c.kind,ph:c.ph})),
+   crateT,
+   powers:JSON.parse(JSON.stringify(powers)),
+   currentFormation,wallMode,
+   view:{x:view.x,y:view.y,z:view.z},
+   aiPlan:{t:aiPlan.t,attackSent:aiPlan.attackSent},
    savedAt:Date.now(),
    civName:civOf('P1').name,
    ageName:AGES[age.P1].name
   };
   localStorage.setItem('sySave'+slot,JSON.stringify(data));
   return true;
- }catch(e){return false}
+ }catch(e){msg('❌ Save fail: '+e.message);return false}
 }
 function listSaves(){
  const out=[];
  for(let i=1;i<=3;i++){
   try{
    const raw=localStorage.getItem('sySave'+i);
-   if(raw){const d=JSON.parse(raw);out.push({slot:i,data:d,valid:true})}
-   else out.push({slot:i,valid:false});
-  }catch(e){out.push({slot:i,valid:false})}
+   if(!raw){out.push({slot:i,valid:false});continue}
+   const d=JSON.parse(raw);
+   if(!d||!Array.isArray(d.units)||!Array.isArray(d.blds)||!d.res){out.push({slot:i,valid:false,corrupt:true});continue}
+   out.push({slot:i,data:d,valid:true});
+  }catch(e){out.push({slot:i,valid:false,corrupt:true})}
  }
  return out;
+}
+function newestSaveSlot(){
+ let best=-1,bt=0;
+ for(let i=1;i<=3;i++){
+  try{
+   const raw=localStorage.getItem('sySave'+i);
+   if(!raw)continue;
+   const d=JSON.parse(raw);
+   if(!d||!Array.isArray(d.units))continue;
+   const t=d.savedAt||0;
+   if(t>bt){bt=t;best=i}
+  }catch(e){}
+ }
+ return best;
 }
 function loadGame(slot){
  try{
   const raw=localStorage.getItem('sySave'+slot);
-  if(!raw)return false;
-  const d=JSON.parse(raw);
-  // Setup fresh game first
-  LEVEL=null;
+  if(!raw){msg('❌ Slot '+slot+' khaali hai!');return false}
+  let d;
+  try{d=JSON.parse(raw)}catch(e){msg('❌ Slot '+slot+' ka save corrupt hai (valid JSON nahi). Delete karke naya banao.');return false}
+  if(!d||!Array.isArray(d.units)||!Array.isArray(d.blds)||!d.res){msg('❌ Slot '+slot+' ka save corrupt hai!');return false}
+  // Settings first — startGame() reads them to build the world.
+  // Validate before use: a bad civ id would make civOf() return undefined
+  // and take startGame() down with it.
+  if(CIVS[d.myCiv])myCiv=d.myCiv;
+  if(CIVS[d.aiCiv])aiCiv=d.aiCiv;
+  if(d.difficulty)difficulty=d.difficulty;
+  MAPTYPE=(d.MAPTYPE==='desert'||d.MAPTYPE==='snow')?d.MAPTYPE:'grass';
+  LEVEL=(typeof d.levelIdx==='number'&&d.levelIdx>=0&&d.levelIdx<LEVELS.length)?LEVELS[d.levelIdx]:null;
+  // Fresh game first, then overwrite with saved data
   startGame();
-  // Then override with saved data
-  myCiv=d.myCiv;aiCiv=d.aiCiv;difficulty=d.difficulty;MAPTYPE=d.MAPTYPE||'grass';
   res=JSON.parse(JSON.stringify(d.res));
   age={...d.age};tech=JSON.parse(JSON.stringify(d.tech));
-  treaty=d.treaty;score=d.score;kills=d.kills;
-  elapsed=d.elapsed||0;
+  treaty=d.treaty;score=d.score;kills=d.kills;highScore=d.highScore;
+  combo=d.combo||0;comboT=d.comboT||0;
+  elapsed=d.elapsed||0;frame=d.frame||0;
+  objT=d.objT||0;relicsGot=d.relicsGot||0;
+  if(d.powers)powers=JSON.parse(JSON.stringify(d.powers));
+  if(d.crates){crates=d.crates.map(c=>({x:c.x,y:c.y,kind:c.kind,ph:c.ph||0}))}
+  crateT=d.crateT!=null?d.crateT:40*60;
+  if(d.aiPlan)aiPlan={t:d.aiPlan.t||0,attackSent:d.aiPlan.attackSent||0};
+  // Buildings (ids preserved so villager build orders still resolve)
   units=[];blds=[];uid=1;bid=1;
   for(const bu of d.blds){
-   const B=BLD[bu.kind];
-   const b={id:bid++,team:bu.team,kind:bu.kind,x:bu.x,y:bu.y,w:B.w,h:B.h,hp:bu.hp,maxHp:bu.maxHp,prog:bu.prog||0,need:bu.need||B.time||1,done:!!bu.done,queue:[],rx:bu.rx||bu.x,ry:bu.ry||bu.y,cool:0,cloth:null,dying:false,dieT:0};
+   const B=BLD[bu.kind];if(!B)continue;
+   const b={id:bu.id,team:bu.team,kind:bu.kind,x:bu.x,y:bu.y,w:B.w,h:B.h,
+    hp:bu.hp,maxHp:bu.maxHp,prog:bu.prog||0,need:bu.need||B.time||1,
+    done:!!bu.done,queue:[],rx:bu.rx!=null?bu.rx:bu.x,ry:bu.ry!=null?bu.ry:bu.y,
+    cool:0,cloth:null,dying:false,dieT:0};
    if(B.store)b.lvl=bu.lvl||1;
+   for(const q of (bu.queue||[]))if(UNITS[q.type])b.queue.push({type:q.type,t:q.t});
    blds.push(b);
+   if(b.id>=bid)bid=b.id+1;
    if(b.done)addBldCloth(b);
   }
+  for(const bu of d.blds)if(BLD[bu.kind]&&bu.hp>0&&(bu.id||0)>=bid)bid=(bu.id||0)+1;
+  // Units
+  const nodeById={};
+  const restoredNodes=[];
+  for(const nn of d.nodes){
+   const n={id:uid++,kind:nn.kind,x:nn.x,y:nn.y,amt:nn.amt,tag:nn.tag||0,seed:nn.seed||0,cutT:0};
+   if(nn.kind==='hunt'){n.hx=(nn.hx!=null)?nn.hx:n.x;n.hy=(nn.hy!=null)?nn.hy:n.y;n.ph=nn.ph||0;n.flee=nn.flee||0;n.fx=nn.fx||0;n.fy=nn.fy||0}
+   nodeById[n.id]=n;restoredNodes.push(n);
+  }
   for(const uu of d.units){
+   if(!UNITS[uu.type])continue;
    const u=mkUnit(uu.team,uu.type,uu.x,uu.y);
    u.hp=uu.hp;u.maxHp=uu.maxHp;u.dmg=uu.dmg;
+   u.carry=uu.carry||0;u.carryKind=uu.carryKind||null;u.gatherT=uu.gatherT||0;
+   u.waypoints=Array.isArray(uu.waypoints)?uu.waypoints:[];
    if(uu.type==='hero'){u.lvl=uu.lvl||1;u.xp=uu.xp||0}
-   u.state='idle';
+   if(uu.type==='monk'){u.healT=uu.healT||0;u.convertT=uu.convertT||0}
+   // Only resume a task if its target actually came back with the save
+   if(uu.state==='return'&&u.carry>0)u.state='return';
+   else if(uu.state==='gather'){const n=nodeById[uu.nodeId];if(n){u.state='gather';u.node=n}else u.state='idle'}
+   else if(uu.state==='build'&&blds.some(b=>b.id===uu.bldId)){u.state='build';u.bld=uu.bldId}
+   else u.state='idle';
+   if(u.id>=uid)uid=u.id+1;
   }
-  nodes=[];for(const nn of d.nodes)nodes.push({id:uid++,kind:nn.kind,x:nn.x,y:nn.y,amt:nn.amt,tag:0,cutT:0});
-  // Restore relics + hunts
-  relics=[];for(const rp of [[1100,650],[850,800],[1350,500]])relics.push({x:rp[0]+rnd(-30,30),y:rp[1]+rnd(-30,30),taken:false,ph:rnd(0,6.28)});
-  msg('💾 Save loaded!');
+  nodes=restoredNodes;
+  if(d.relics)relics=d.relics.map(r=>({x:r.x,y:r.y,taken:!!r.taken,ph:r.ph||0}));
+  if(d.view){view.x=d.view.x;view.y=d.view.y;view.z=d.view.z;clampView()}
+  if(d.currentFormation)currentFormation=d.currentFormation;
+  wallMode=false;document.getElementById('wallBar').classList.remove('on');
+  crates=crates.filter(c=>!c.taken);
+  updateFog();
+  // Never come back from a load into a frozen/overlay state
+  paused=false;gameOver=false;hitStop=0;trauma=0;camKickX=0;camKickY=0;
+  document.getElementById('pauseOverlay').classList.remove('on');
+  document.getElementById('endScreen').style.display='none';
+  sel={units:[],bld:null};placing=null;placingPower=null;
+  const pc=document.getElementById('bPause');
+  if(pc)pc.textContent='⏸';
+  msg('💾 Save loaded! Slot '+slot);
   updateHUD();refreshPanel();
   return true;
  }catch(e){msg('❌ Load fail: '+e.message);return false}
 }
 function openSaves(){
  const p=document.getElementById('savesPanel');
- const list=document.getElementById('savesList');
  const saves=listSaves();
+ const canSave=started&&!gameOver;
+ refreshContinue();
  let html='';
  for(const s of saves){
   if(s.valid){
    const d=s.data;
    const dt=new Date(d.savedAt);
-   html+='<div class="saveSlot"><b>Slot '+s.slot+'<small>'+d.civName+' · '+d.ageName+' · '+dt.toLocaleString()+'</small></b>'
+   const age=Math.max(1,Math.round((Date.now()-d.savedAt)/60000));
+   const ago=age<1?'abhi':(age<60?age+' min':Math.round(age/60)+' ghante');
+   const nU=(d.units||[]).length,nB=(d.blds||[]).length;
+   html+='<div class="saveSlot"><b>Slot '+s.slot+'<small>'+d.civName+' · '+d.ageName+' · '+nU+' units, '+nB+' buildings · '+ago+' pehle</small></b>'
     +'<button onclick="if(confirm(\'Slot '+s.slot+' load karein?\')){loadGame('+s.slot+');closeSaves()}">📂 Load</button>'
-    +'<button onclick="if(confirm(\'Slot '+s.slot+' delete karein?\')){localStorage.removeItem(\'sySave'+s.slot+'\');openSaves()}">🗑️</button></div>';
+    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'💾 Slot '+s.slot+' overwrite ho gaya!\')}" '+(canSave?'':'disabled')+'>💾</button>'
+    +'<button onclick="if(confirm(\'Slot '+s.slot+' delete karein?\')){try{localStorage.removeItem(\'sySave'+s.slot+'\')}catch(_){}openSaves()}">🗑️</button></div>';
   }else{
    html+='<div class="saveSlot"><b>Slot '+s.slot+'<small style="color:#777">(khaali)</small></b>'
     +'<button disabled>📂 Load</button>'
-    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'💾 Save ho gaya!\')}" '+(started?'':'disabled')+'>💾 Save</button></div>';
+    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'💾 Save ho gaya!\')}" '+(canSave?'':'disabled')+'>💾 Save</button></div>';
   }
  }
- document.getElementById('savesList').innerHTML=html;
- p.classList.add('on');
+  if(!canSave)html+='<div style="font-size:12px;color:#c8b48c;margin-top:6px">⚠️ Slot me save karne ke liye pehle ek game start karo. Load bina start kiye bhi ho sakta hai.</div>';
+  document.getElementById('savesList').innerHTML=html;
+  p.classList.add('on');
 }
 function closeSaves(){document.getElementById('savesPanel').classList.remove('on')}// ============================================================
 //  GFX ENGINE v2 — noise, wind, cloth, sun, light, post
@@ -3537,7 +3635,20 @@ function refreshLevels(){
  });
 }
 function playLevel(i){LEVEL=LEVELS[i];startGame()}
-refreshLevels();
+function refreshContinue(){
+ const box=document.getElementById('contWrap');
+ if(!box)return;
+ const s=newestSaveSlot();
+ if(s<0){box.innerHTML='';return}
+ let info='';
+ try{const d=JSON.parse(localStorage.getItem('sySave'+s));
+  const mt=Math.max(1,Math.round((Date.now()-(d.savedAt||0))/60000));
+  const ago=mt<1?'abhi':(mt<60?mt+' min':Math.round(mt/60)+' ghante');
+  info=(d.civName||'')+' · '+(d.ageName||'')+' · '+((d.units||[]).length)+' units · '+ago+' pehle';
+ }catch(e){}
+ box.innerHTML='<button onclick="if(confirm(\'Slot '+s+' load karein?\')){closeSaves();loadGame('+s+')}" style="width:100%;margin-top:8px;background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f">▶ CONTINUE — Slot '+s+'<span style="display:block;font-size:11px;font-weight:400">'+info+'</span></button>';
+}
+refreshLevels();refreshContinue();
 function startGame(){
  ac();S.click();musStart();
  units=[];blds=[];parts=[];floats=[];corpses=[];slashes=[];rubble=[];rings=[];shake=0;uid=1;bid=1;frame=0;elapsed=0;gameOver=false;paused=false;speed=1;
@@ -3572,9 +3683,11 @@ function startGame(){
  {const h=mkUnit('P1','hero',P1BX+rnd(-52,52),P1BY+86+rnd(0,16));h.state='idle'}
  view={x:P1BX+50,y:P1BY-50,z:0.7};
  updateFog();
- started=true;
- document.getElementById('menu').style.display='none';
- document.getElementById('bPause').textContent='⏸';
+  started=true;
+  document.getElementById('menu').style.display='none';
+  document.getElementById('endScreen').style.display='none';
+  document.getElementById('pauseOverlay').classList.remove('on');
+  document.getElementById('bPause').textContent='⏸';
  msg(LEVEL?('🎯 Lv'+(LEVELS.indexOf(LEVEL)+1)+' '+LEVEL.icon+' '+LEVEL.name):'🕊 40s Sandhi! Villager se resource jama karo!');
  updateHUD();refreshPanel();
 }
