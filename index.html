@@ -2670,7 +2670,7 @@ function drawLoad(u,TC,VA){
  ctx.fillStyle='#fff';ctx.font='bold 8px sans-serif';ctx.textAlign='center';
  ctx.save();if(Math.cos(u.face)<0)ctx.scale(-1,1);
  ctx.fillText(u.carry,-4,-18);ctx.restore();ctx.textAlign='left';
- ctx.restore();ctx.restore();
+ ctx.restore();
 }
 function drawCorpse(u){
  const t=Math.min(1,1-u.deadT/Math.max(1,u.deadMax||qn(36)));
