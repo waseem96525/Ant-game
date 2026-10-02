@@ -3125,6 +3125,18 @@ function draw(){
  ctx.fillText(Math.round(fpsAvg)+' fps · '+QNAMES[qIdx]+' · '+DPR.toFixed(1)+'x',VW-8,14);
  ctx.restore();
  drawMM();
+ drawErrBanner();
+}
+function drawErrBanner(){
+ if(errBannerT<=0)return;
+ const txt=errBannerTxt||'unknown error';
+ ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
+ ctx.fillStyle='rgba(140,10,10,0.92)';ctx.fillRect(0,VH-64,VW,64);
+ ctx.fillStyle='#fff';ctx.font='bold 15px monospace';ctx.textAlign='left';
+ ctx.fillText('⚠ RENDER ERROR (game yahin ruk gaya)',10,VH-44);
+ ctx.font='12px monospace';
+ ctx.fillText(String(txt).slice(0,120),10,VH-24);
+ ctx.restore();
 }
 function drawMM(){
  const sx=150/W,sy=94/H;
@@ -3252,6 +3264,7 @@ function updateHUD(){
 // ============ LOOP ============
 let elapsed=0;
 function step(){
+ if(errBannerT>0)errBannerT--;
  if(gameOver||!started||paused)return;
  for(let s=0;s<speed;s++){
   frame++;
@@ -3350,11 +3363,13 @@ function toggleSpeed(){speed=speed===1?2:1;document.getElementById('bSpeed').tex
 function toggleMenu(){const t=document.getElementById('topbar');t.classList.toggle('open');const b=document.getElementById('bBurger');if(b)b.textContent=t.classList.contains('open')?'✖':'☰';S.click()}
 function toggleFull(){try{if(document.fullscreenElement){document.exitFullscreen()}else{const w=document.getElementById('wrap');if(w&&w.requestFullscreen)w.requestFullscreen()}}catch(e){}}
 document.addEventListener('fullscreenchange',()=>{const b=document.getElementById('bFull');if(b)b.textContent=document.fullscreenElement?'🗗 Exit':'⛶ Full';if(started)fitCanvas()});
-let lastFrameT=0;
+ let lastFrameT=0;
+ let errBannerT=0,errBannerTxt='';
 function loop(){const t0=performance.now();
 requestAnimationFrame(loop);
 try{if(hitStop>0){hitStop--;stepCamera()}else{step();stepCamera()}if(started)draw()}
-catch(err){if(!window.__loopErr||frame-(window.__loopErrF||0)>600){window.__loopErr=err;window.__loopErrF=frame;try{console.error('[loop]',err)}catch(_){}}}
+catch(err){if(!window.__loopErr||frame-(window.__loopErrF||0)>600){window.__loopErr=err;window.__loopErrF=frame;try{console.error('[loop]',err)}catch(_){}}
+if(!errBannerT)errBannerT=180;try{errBannerTxt=String(err&&err.message||err)}catch(_){}}
 if(lastFrameT>0){const realDt=t0-lastFrameT;fpsAvg=fpsAvg*0.92+(1000/Math.max(1,realDt))*0.08}
 lastFrameT=t0}
 
