@@ -945,7 +945,17 @@ mm.addEventListener('pointercancel',()=>{mmDown=false});
 function nearestNode(x,y,kind,maxD){let best=null,bd=maxD||1e9;for(const n of nodes){if(n.amt<=0)continue;if(kind&&n.kind!==kind)continue;const d=Math.hypot(n.x-x,n.y-y);if(d<bd){bd=d;best=n}}return best}
 function enemyUnitNear(u,range){let best=null,bd=range;for(const e of units){if(e.team===u.team||e.hp<=0)continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}return best}
 function enemyBldNear(u,range){let best=null,bd=range;for(const b of blds){if(b.team===u.team||b.hp<=0)continue;const d=Math.hypot(u.x-b.x,u.y-b.y);if(d<bd){bd=d;best=b}}return best}
-function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;const s=u.speed;u.x+=dx/d*Math.min(s,d);u.y+=dy/d*Math.min(s,d);u.face=Math.atan2(dy,dx);return false}
+function angLerp(a,b,t){
+ let d=((b-a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+ return a+d*Math.max(0,Math.min(1,t));
+}
+// Turn toward a heading over time instead of snapping, so units bank into
+// their turns. Combat snaps (see updateUnit) so attacks stay crisp.
+function turnTo(u,target,rate){
+ const r=rate||9;
+ u.face=angLerp(u.face,target,Math.max(0.05,Math.min(1,r/60)));
+}
+function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;const s=u.speed;u.x+=dx/d*Math.min(s,d);u.y+=dy/d*Math.min(s,d);turnTo(u,Math.atan2(dy,dx),u.type==='elephant'?5:9);return false}
 
 function dealDmg(t,v,dmg){
  if(treaty>0||gameOver||v.hp<=0)return;
@@ -1257,6 +1267,7 @@ function saveGame(slot){
     nodeId:(u.state==='gather'&&u.node)?u.node.id:null,
     bldId:(u.state==='build'&&u.bld!=null)?u.bld:null,
     waypoints:u.waypoints||[],
+    lastStepHalf:u.lastStepHalf,
     lvl:u.lvl,xp:u.xp,healT:u.healT,convertT:u.convertT
    })),
    blds:blds.filter(b=>b.hp>0).map(b=>({
@@ -1366,6 +1377,7 @@ function loadGame(slot){
    u.hp=uu.hp;u.maxHp=uu.maxHp;u.dmg=uu.dmg;
    u.carry=uu.carry||0;u.carryKind=uu.carryKind||null;u.gatherT=uu.gatherT||0;
    u.waypoints=Array.isArray(uu.waypoints)?uu.waypoints:[];
+   u.lastStepHalf=uu.lastStepHalf!=null?uu.lastStepHalf:null;
    if(uu.type==='hero'){u.lvl=uu.lvl||1;u.xp=uu.xp||0}
    if(uu.type==='monk'){u.healT=uu.healT||0;u.convertT=uu.convertT||0}
    // Only resume a task if its target actually came back with the save
@@ -2490,48 +2502,121 @@ function collideBuildings(){
 const SKIN='#f0c396',SKIN_D='#c08f60';
 function eyeBlink(u,ph){return (Math.sin(frame/7+u.id*1.7)>0.985)?0.12:1}
 
+// Per-villager look. Derived from the unit id with a splitmix-style mix so
+// consecutive ids land on very different palettes, and it is stable across
+// frames and across save/load without storing anything.
+const VSKIN=['#f0c396','#e8b787','#d9a06a','#c98d5e','#f6d0a4','#b87a4e'];
+const VHAT=['#d9b64a','#c9a86a','#9fb6c4','#c47b4a','#8fa86a','#b89ac4'];
+const VCLOTH=['#c9b89a','#b8a888','#a8b8a0','#c0a8b0','#a8b0c8','#c8b090'];
+function villLook(u){
+ const civ=u.team==='P1'?myCiv:aiCiv;
+ // Bitwise ops yield a signed int32 in JS, so re-apply >>>0 after each
+ // step — otherwise s can go negative and index the colour arrays with -1.
+ let s=Math.imul(u.id,2654435761)>>>0;
+ s=Math.imul(s^(s>>>15),2246822519)>>>0;
+ s=Math.imul(s^(s>>>13),3266489917)>>>0;
+ s=(s^(s>>>16))>>>0;
+ const r=n=>s%n;
+ return{
+  civ,
+  skin:VSKIN[r(VSKIN.length)],
+  skinD:SKIN_D,
+  hat:VHAT[(s>>>8)%VHAT.length],
+  cloth:VCLOTH[(s>>>16)%VCLOTH.length],
+  beard:(s>>>4)%5===0,
+  // Take height/head from independent bit windows so they do not correlate
+  tall:0.94+((s>>>21)%5)*0.13,       // height variation
+  headR:0.92+((s>>>11)%4)*0.17,     // head size variation
+  sash:(s>>>2)%2===0,                // waist sash detail
+  bald:(s>>>6)%6===0
+ };
+}
+
+// Tool swing curve for a villager at work: anticipation (wind up), a fast
+// strike, a brief impact hold, then a slower follow-through and recovery.
+// Returns tool angle, torso twist, and how deep into the strike we are.
 function villSwingPose(f){
- let a,tw,tl;
- if(f<0.32){const k=easeOut(f/0.32);a=-0.85-1.45*k;tw=-0.10*k;tl=-1.80+0.80*k}
- else if(f<0.47){const k=Math.pow((f-0.32)/0.15,2.2);a=-2.30+3.00*k;tw=-0.10+0.30*k;tl=-1.00+2.45*k}
- else{const k=easeOut((f-0.47)/0.53);a=0.70-1.55*k;tw=0.20*(1-k);tl=1.45-2.45*k}
- return{a:a,tw:tw,tl:tl};
+ let a,tw,tl,strike;
+ if(f<0.26){        // anticipation — pull back and coil
+  const k=easeOut(f/0.26);
+  a=-0.85-1.45*k;tw=-0.10*k;tl=-1.80+0.80*k;strike=0;
+ }else if(f<0.42){  // strike — fast swing through
+  const k=Math.pow((f-0.26)/0.16,0.55);
+  a=-2.30+3.30*k;tw=-0.10+0.32*k;tl=-1.00+2.55*k;strike=k;
+ }else if(f<0.52){  // impact — brief hold at contact
+  const k=(f-0.42)/0.10;
+  a=1.00-0.10*Math.sin(k*Math.PI);tw=0.22-0.06*k;tl=1.55-0.10*k;strike=1;
+ }else{             // recovery — ease back to guard
+  const k=easeOut((f-0.52)/0.48);
+  a=0.90-1.75*k;tw=0.16*(1-k);tl=1.45-2.45*k;strike=0;
+ }
+ return{a:a,tw:tw,tl:tl,strike:strike};
 }
 function villAnim(u,sc){
  const off=u.id*37,mv=u.mv?1:0;
- const A={off:off,sc:sc,wph:frame*0.40+off,working:false,hit:false,sw:0,
-          carry:u.carry>0,armB:0,armF:-0.35,lunge:0,headDX:0,headDY:0,headTilt:0,crouch:0,tool:-0.9,
-          stride:0.46,legLen:6.95};
+ const A={off:off,sc:sc,wph:frame*0.40+off,working:false,hit:false,sw:0,strike:0,
+           carry:u.carry>0,armB:0,armF:-0.35,lunge:0,headDX:0,headDY:0,headTilt:0,crouch:0,tool:-0.9,
+           stride:0.46,legLen:6.95,hipShift:0,breath:0,look:0,foot:0,armReach:0,lean:0};
  const wph=A.wph;
  A.strideAmp=mv?1:0.18;
- A.crouch=mv?0:0.35+Math.sin(frame*0.05+off)*0.22;
- A.bobY=mv?-Math.abs(Math.sin(wph*2))*1.75:Math.sin(frame*0.062+off)*0.42;
- A.torsoLean=mv?0.19+Math.sin(wph*2)*0.045:0.03+Math.sin(frame*0.05+off)*0.02;
+ // Idle: slow breathing plus a lazy weight shift from one hip to the other
+ A.breath=Math.sin(frame*0.045+off)*0.5+0.5;
+ const shift=Math.sin(frame*0.021+off*0.6);
+ A.hipShift=mv?Math.sin(wph)*0.42:shift*0.55;
+ A.crouch=mv?0:(0.35+A.breath*0.22+shift*0.10);
+ A.bobY=mv?-Math.abs(Math.sin(wph*2))*1.75:(Math.sin(frame*0.062+off)*0.42+Math.sin(frame*0.09+off)*0.22);
+ A.torsoLean=mv?0.19+Math.sin(wph*2)*0.045:(0.03+Math.sin(frame*0.05+off)*0.02);
  A.armSwing=mv?Math.sin(wph)*0.72:Math.sin(frame*0.06+off)*0.09;
+ // Head bobs with the stride, then settles; idle adds a periodic glance
  const glance=Math.sin(frame*0.0125+off*1.7);
  A.headDX=mv?Math.sin(wph*2+Math.PI)*0.55*sc:(glance>0.94?-1.3*sc:0);
  A.headDY=mv?Math.abs(Math.sin(wph*2))*0.30*sc:Math.sin(frame*0.062+off)*0.32*sc;
  A.headTilt=mv?Math.sin(wph*2+1)*0.05:0;
+ // Head turns toward whatever the villager is working on
+ let look=0;
+ if(u.state==='gather'&&u.node){
+  const tx=u.node.x-u.x,ty=(u.node.y-(u.node.kind==='wood'?18:4))-(u.y-20*sc);
+  look=Math.max(-1,Math.min(1,tx/70));
+ }else if(u.state==='build'&&u.bld!=null){
+  const bb=blds.find(x=>x.id===u.bld);
+  if(bb)look=Math.max(-1,Math.min(1,(bb.x-u.x)/70));
+ }
+ A.look=look;
  if(u.state==='gather'||u.state==='build'){
   A.working=true;
-  const per=u.state==='build'?15:22;
+  const per=u.state==='build'?17:23;
   const raw=frame+u.id*29;
   const sw=Math.floor(raw/per);
   const f=(raw%per)/per;
   const P=villSwingPose(f);
-  A.sw=sw;A.hit=(u.vsw!==sw);
+  A.sw=sw;A.hit=(u.vsw!==sw);A.strike=P.strike;
   A.tool=P.tl;A.armF=P.a;A.torsoLean=0.16+P.tw;
   A.crouch=1.5+Math.abs(Math.sin(f*Math.PI))*0.55;
-  A.headDX=-1.15*sc;A.headDY=1.6*sc;A.headTilt=0.16;
-  if(f>=0.30&&f<0.50)A.lunge=Math.sin((f-0.30)/0.20*Math.PI)*2.0;
+  // Lean into the work, head follows the target, body rotates on the strike
+  A.headDX=(-1.15+look*0.9)*sc;A.headDY=1.6*sc;
+  A.headTilt=0.16+look*0.10;
+  A.lean=Math.sin(f*Math.PI*2)*0.05;
+  // Reach forward on the strike, pull back on the wind-up
+  A.armReach=(P.strike>0?-1.1*P.strike:0.55*(1-P.strike))*(u.state==='build'?1.1:1);
+  if(f>=0.24&&f<0.46)A.lunge=Math.sin((f-0.24)/0.22*Math.PI)*2.4;
   A.armB=-P.a*0.5-0.2;
  }else{
-  if(A.carry)A.armB=-2.50+(mv?Math.sin(wph)*0.14:Math.sin(frame*0.06+off)*0.06);
+  if(A.carry){
+   A.armB=-2.50+(mv?Math.sin(wph)*0.14:Math.sin(frame*0.06+off)*0.06);
+   // Lean back a touch under the load, and bob with each step
+   A.torsoLean-=0.06;A.bobY+=mv?Math.abs(Math.sin(wph*2))*0.5:0;
+  }
   else   A.armB=-0.15+(mv?Math.sin(wph)*0.62:Math.sin(frame*0.06+off)*0.07);
   A.armF=A.carry?-0.62:-0.35-A.armSwing;
   A.tool=-1.95+(mv?Math.sin(wph*2)*0.07:0);
   A.headTilt=A.carry?0.07:0;
  }
+ // Foot-plant flag: fires once per step so dust and sound can hook to it
+ if(mv){
+  const half=Math.floor(wph/Math.PI);
+  A.foot=(u.lastStepHalf!==half)?1:0;
+  u.lastStepHalf=half;
+ }else{u.lastStepHalf=null;A.foot=0}
  return A;
 }
 function drawLegs(u,ph,col,dark,sk,sc,y0,VA){
@@ -2539,26 +2624,37 @@ function drawLegs(u,ph,col,dark,sk,sc,y0,VA){
  const stride=VA&&VA.stride?VA.stride:0.36;
  const seg=(VA&&VA.legLen)||6.6;
  const cr=VA&&VA.crouch?VA.crouch:0;
+ const hip=VA&&VA.hipShift?VA.hipShift:0;
+ const br=VA&&VA.breath!=null?VA.breath:0;
  const hipY=y0+cr*sc*0.45;
  const walking=u.mv&&amp>0.5;
  for(const side of [-1,1]){
   const p=ph+(side>0?0:Math.PI);
   const k=Math.sin(p);
-  const thigh=stride*k*amp*sc;
-  const knee=-0.30-Math.max(0,Math.cos(p))*0.72*amp;
+  // Front leg drives, back leg drags; knee flexes more on the recovery half
+  const lead=side>0?1:-1;
+  const thigh=stride*k*amp*sc+hip*lead*0.35;
+  const knee=-0.30-Math.max(0,Math.cos(p))*0.72*amp-(1-Math.max(0,k))*0.22*amp;
   const colr=side>0?col:dark;
-  const hip=[side*2.5*sc,hipY];
-  const th=seg*sc,sh=seg*sc;
-  const kx=hip[0]+Math.sin(thigh)*th,ky=hip[1]+Math.cos(thigh)*th;
+  const hx=side*2.5*sc+hip*lead*0.8;
+  const hipP=[hx,hipY];
+  const th=seg*sc,sh=seg*sc*(1-cr*0.02);
+  const kx=hipP[0]+Math.sin(thigh)*th,ky=hipP[1]+Math.cos(thigh)*th;
   const fa=thigh+knee;
   const fx=kx+Math.sin(fa)*sh,fy=ky+Math.cos(fa)*sh;
   ctx.strokeStyle=colr;ctx.lineWidth=3.6*sc;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
-  ctx.save();ctx.translate(fx+1*sc,fy+0.6);ctx.rotate(-k*0.34*amp);
+  ctx.beginPath();ctx.moveTo(hipP[0],hipP[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
+  // Foot rolls from heel to toe as the step lands
+  const roll=walking?Math.max(-0.3,Math.min(0.45,-k*0.42*lead)):0;
+  ctx.save();ctx.translate(fx+1*sc,fy+0.6);ctx.rotate(roll);
   ctx.fillStyle=side>0?'#3a2f22':'#2a2118';
   ctx.beginPath();ctx.ellipse(0,0,3.2*sc,1.6*sc,0,0,7);ctx.fill();
+  if(qIdx>=2){ctx.fillStyle='rgba(255,255,255,0.10)';ctx.beginPath();ctx.ellipse(-0.5*sc,-0.35*sc,1.9*sc,0.7*sc,0,0,7);ctx.fill()}
   ctx.restore();
   if(walking&&Math.abs(k)>0.85)addFootDust(u,fx,fy);
+  // Scuff marks while working, so a chopping villager is not floating
+  if(VA&&VA.working&&VA.strike>0.5&&qIdx>=1&&side>0&&(frame+u.id)%7===0)
+   emit('dust',u.x+rnd(-3,3),u.y+rnd(-1,1),rnd(-.15,.15),rnd(-.3,-.1),qn(7),{r:rnd(1,2),c:'rgba(170,152,116,0.30)',g:0.01});
  }
 }
 let footT=0;
@@ -2568,9 +2664,11 @@ function addFootDust(u,lx,ly){
  const c=Math.cos(u.face),sn=Math.sin(u.face);
  emit('dust',u.x+c*lx-sn*ly,u.y+sn*lx+c*ly,rnd(-.2,.2),rnd(-.35,-.1),qn(15),{r:rnd(1.6,3.2),c:'rgba(178,160,120,0.4)',g:0.01});
 }
-function drawTorso(u,TC,sc,yHip,ySh,armored,lean){
+function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK){
  const w1=5.6*sc,w2=7.2*sc;
  ctx.save();ctx.rotate(lean);
+ // Base is always the team gradient: friend/foe must stay readable at a
+ // glance. Per-villager personality is layered on top, never replacing it.
  const g=ctx.createLinearGradient(-w2,0,w2,0);
  g.addColorStop(0,TC.d);g.addColorStop(0.35,TC.p);g.addColorStop(0.75,TC.l);g.addColorStop(1,TC.p);
  ctx.fillStyle=g;
@@ -2581,13 +2679,44 @@ function drawTorso(u,TC,sc,yHip,ySh,armored,lean){
  ctx.quadraticCurveTo(0,yHip+3.4,-w1,yHip+1);
  ctx.closePath();ctx.fill();
  ctx.strokeStyle='rgba(10,10,14,0.75)';ctx.lineWidth=0.9;ctx.stroke();
- ctx.strokeStyle=TC.rim;ctx.lineWidth=1.5*sc;ctx.lineCap='round';
+ ctx.strokeStyle=armored?TC.rim:'rgba(255,255,255,0.20)';ctx.lineWidth=1.5*sc;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(-w1*0.7,ySh-1.5);ctx.lineTo(0,ySh-6*sc);
  ctx.lineTo(w1*0.7,ySh-1.5);ctx.stroke();
- ctx.fillStyle=armored?'#e6dcc0':'#8a2b2b';
- ctx.fillRect(-w1*1.05,yHip-1.6,w1*2.1,3.2*sc);
- ctx.fillStyle=armored?'#c9b98a':'#e8c46a';
- ctx.fillRect(-w1*1.05,yHip-1.6,w1*2.1,0.9*sc);
+ if(!armored&&LK){
+  // Cloth folds so the tunic is not a flat blob
+  if(qIdx>=2){
+   ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=0.7*sc;
+   const yMid=(yHip+ySh)/2;
+   for(let i=0;i<2;i++){const xx=(i?1:-1)*w1*0.42;
+    ctx.beginPath();ctx.moveTo(xx*0.7,ySh-2*sc);ctx.quadraticCurveTo(xx,yMid,xx*1.05,yHip+1.5);ctx.stroke()}
+  }
+  // Diagonal shoulder sash in the villager's own colour
+  ctx.fillStyle=LK.cloth;
+  ctx.beginPath();
+  ctx.moveTo(-w1*0.85,ySh-1);ctx.lineTo(-w1*0.18,ySh-1);
+  ctx.lineTo(w1*0.62,yHip+1.2);ctx.lineTo(w1*0.10,yHip+1.0);
+  ctx.closePath();ctx.fill();
+  if(qIdx>=2){
+   ctx.fillStyle='rgba(0,0,0,0.16)';
+   ctx.beginPath();
+   ctx.moveTo(-w1*0.85,ySh-1);ctx.lineTo(-w1*0.62,ySh-1);
+   ctx.lineTo(w1*0.16,yHip+1.1);ctx.lineTo(w1*0.10,yHip+1.0);
+   ctx.closePath();ctx.fill();
+  }
+  // Waist sash uses the team rim so ownership still reads
+  ctx.fillStyle=TC.rim;ctx.fillRect(-w1*1.02,yHip-1.4,w1*2.04,2.6*sc);
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillRect(-w1*1.02,yHip+0.5*sc,w1*2.04,0.7*sc);
+  if(LK.sash){
+   ctx.fillStyle=LK.hat;
+   ctx.beginPath();ctx.moveTo(-w1*0.5,yHip+0.4);ctx.lineTo(-w1*1.3,yHip+6.5*sc);
+   ctx.lineTo(-w1*0.55,yHip+6.8*sc);ctx.lineTo(-w1*0.05,yHip+0.6);ctx.closePath();ctx.fill();
+  }
+ }else{
+  ctx.fillStyle=armored?'#e6dcc0':'#8a2b2b';
+  ctx.fillRect(-w1*1.05,yHip-1.6,w1*2.1,3.2*sc);
+  ctx.fillStyle=armored?'#c9b98a':'#e8c46a';
+  ctx.fillRect(-w1*1.05,yHip-1.6,w1*2.1,0.9*sc);
+ }
  if(armored){
   ctx.strokeStyle=TC.d;ctx.lineWidth=0.8;
   for(let r=0;r<3;r++){const yy=ySh-2.5*sc-r*2.6*sc;ctx.beginPath();ctx.moveTo(-w2*0.8,yy);ctx.lineTo(w2*0.8,yy);ctx.stroke()}
@@ -2599,25 +2728,46 @@ function drawTorso(u,TC,sc,yHip,ySh,armored,lean){
   ctx.fillStyle='#4c5568';
   for(const s2 of [-1,1]){ctx.beginPath();ctx.ellipse(s2*w1*0.95,ySh-1.5,3.1*sc,2.3*sc,s2*0.3,0,7);ctx.fill()}
  }
- ctx.fillStyle=TC.d;
+ // Skirt / dhoti — team coloured so ownership still reads from the lower body
+ ctx.fillStyle=armored?TC.d:TC.d;
  const sk0=armored?1:0.55;
  ctx.beginPath();ctx.moveTo(-w1,yHip+1);ctx.quadraticCurveTo(-w1*1.5,yHip+6*sc*sk0,-w1*1.1,yHip+7.5*sc*sk0);
  ctx.lineTo(w1*1.1,yHip+7.5*sc*sk0);ctx.quadraticCurveTo(w1*1.5,yHip+6*sc*sk0,w1,yHip+1);ctx.closePath();ctx.fill();
+ if(!armored&&qIdx>=2){
+  ctx.strokeStyle='rgba(0,0,0,0.20)';ctx.lineWidth=0.7*sc;
+  const yb=yHip+7.5*sc*sk0;
+  for(let i=1;i<3;i++){const xx=-w1*1.1+(w1*2.2)*(i/3);
+   ctx.beginPath();ctx.moveTo(xx*0.98,yHip+2);ctx.lineTo(xx,yb);ctx.stroke()}
+ }
  ctx.restore();
 }
 function drawHead(u,TC,sc,x,y,helmet,blink,bk){
  const civH=u.team==='P1'?myCiv:aiCiv;
- ctx.strokeStyle=SKIN_D;ctx.lineWidth=2.6*sc;ctx.beginPath();ctx.moveTo(x-1.2*sc,y+3*sc);ctx.lineTo(x-0.6*sc,y+0.6*sc);ctx.stroke();
+ const LK=(u.type==='villager')?villLook(u):null;
+ const skin=LK?LK.skin:SKIN, skinD=LK?LK.skinD:SKIN_D;
+ const hr=LK?LK.headR:1;
+ // Neck
+ ctx.strokeStyle=skinD;ctx.lineWidth=2.6*sc;ctx.beginPath();ctx.moveTo(x-1.2*sc,y+3*sc);ctx.lineTo(x-0.6*sc,y+0.6*sc);ctx.stroke();
+ // Back of the head, then face over it, so turning shows a bit of profile
  const hg=ctx.createLinearGradient(x-3*sc,y-3*sc,x+3*sc,y+3*sc);
- hg.addColorStop(0,SKIN);hg.addColorStop(1,SKIN_D);
- ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x,y,3.5*sc,3.9*sc,0,0,7);ctx.fill();
+ hg.addColorStop(0,skin);hg.addColorStop(1,skinD);
+ ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x,y,3.5*sc*hr,3.9*sc*hr,0,0,7);ctx.fill();
  ctx.fillStyle=civH==='india'?'#241a12':'#1c1512';
- ctx.beginPath();ctx.ellipse(x-1.6*sc,y-0.4*sc,3.2*sc,3.6*sc,0,0,7);ctx.fill();
- ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x+0.5*sc,y,3.1*sc,3.5*sc,0,0,7);ctx.fill();
+ ctx.beginPath();ctx.ellipse(x-1.6*sc,y-0.4*sc,3.2*sc*hr,3.6*sc*hr,0,0,7);ctx.fill();
+ ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x+0.5*sc,y,3.1*sc*hr,3.5*sc*hr,0,0,7);ctx.fill();
+ // Ear
+ if(qIdx>=2){ctx.fillStyle=skinD;ctx.beginPath();ctx.ellipse(x-1.5*sc,y+0.7*sc,0.85*sc,1.1*sc,-0.2,0,7);ctx.fill()}
  if(!bk){
   if(blink>0.3){ctx.fillStyle='#1a1410';ctx.beginPath();ctx.ellipse(x+1.9*sc,y-0.4*sc,0.75*sc,1.0*sc*blink,0,0,7);ctx.fill();
    ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x+2.15*sc,y-0.75*sc,0.3*sc,0,7);ctx.fill()}
+  else if(qIdx>=2){ctx.fillStyle='rgba(255,255,255,0.16)';ctx.beginPath();ctx.ellipse(x+1.6*sc,y-1.0*sc,0.9*sc,0.5*sc,-0.4,0,7);ctx.fill()}
  }
+ // Nose — only when facing us, sells the head direction
+ if(!bk&&qIdx>=2){ctx.strokeStyle=skinD;ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+2.7*sc,y+0.1*sc);ctx.lineTo(x+3.3*sc,y+0.7*sc);ctx.stroke()}
+ // Moustache / beard
+ if(LK&&LK.beard){ctx.fillStyle=civH==='india'?'#2a2018':'#241c16';
+  ctx.beginPath();ctx.ellipse(x+2.0*sc,y+1.5*sc,1.5*sc,0.85*sc,0,0,7);ctx.fill();
+  if(qIdx>=2){ctx.beginPath();ctx.ellipse(x+1.5*sc,y+2.2*sc,1.1*sc,1.3*sc,0,0,7);ctx.fill()}}
  if(helmet===1){ // Kabuto
   ctx.fillStyle=civH==='china'?'#5a6a7a':civH==='india'?'#7d7468':'#2b2e36';
   ctx.beginPath();ctx.arc(x-0.2*sc,y-0.6*sc,4.1*sc,Math.PI*0.98,Math.PI*2.06);ctx.fill();
@@ -2630,9 +2780,27 @@ function drawHead(u,TC,sc,x,y,helmet,blink,bk){
  }else if(helmet===3){ // Turban
   ctx.fillStyle=civH==='japan'?'#f0e6d2':'#e8ddc4';
   ctx.beginPath();ctx.arc(x-0.2*sc,y-1.4*sc,4.2*sc,Math.PI*0.9,Math.PI*2.12);ctx.fill();
- }else{ // Villager cap
-  ctx.fillStyle=civH==='china'?'#c9a86a':'#d9b64a';
-  ctx.beginPath();ctx.ellipse(x+0.2*sc,y-2.2*sc,3.9*sc,1.3*sc,0,0,7);ctx.fill();
+ }else{ // Villager: cloth cap with a visible wrap and knot
+  if(LK&&!LK.bald){
+   ctx.fillStyle=civH==='india'?'#1a1410':'#171310';
+   ctx.beginPath();ctx.ellipse(x-0.4*sc,y-0.9*sc,3.5*sc*hr,3.3*sc*hr,0,Math.PI*1.06,Math.PI*2.02);ctx.fill();
+  }
+  ctx.fillStyle=LK?LK.hat:(civH==='china'?'#c9a86a':'#d9b64a');
+  ctx.beginPath();ctx.ellipse(x+0.2*sc,y-2.2*sc,3.9*sc*hr,1.3*sc,0,0,7);ctx.fill();
+  if(qIdx>=2){
+   // wrap band across the cap
+   ctx.fillStyle='rgba(0,0,0,0.20)';
+   ctx.beginPath();ctx.ellipse(x+0.2*sc,y-2.0*sc,3.9*sc*hr,0.6*sc,0,0,7);ctx.fill();
+   // trailing knot that lags behind the turn
+   const k=Math.sin(frame*0.05+u.id)*0.6+0.9;
+   ctx.fillStyle=LK?LK.hat:(civH==='china'?'#c9a86a':'#d9b64a');
+   ctx.beginPath();
+   ctx.moveTo(x-2.6*sc,y-2.6*sc);
+   ctx.quadraticCurveTo(x-4.4*sc-k*0.5,y-2.0*sc,x-4.8*sc-k,y-0.4*sc);
+   ctx.lineTo(x-3.4*sc-k,y-0.2*sc);
+   ctx.quadraticCurveTo(x-3.2*sc,y-1.6*sc,x-2.2*sc,y-2.2*sc);
+   ctx.closePath();ctx.fill();
+  }
  }
 }
 function drawKatana(hx,hy,ang){
@@ -2668,36 +2836,60 @@ function drawLance(hx,hy,ang){
  ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(17,-2.6);ctx.lineTo(25,0);ctx.lineTo(17,2.6);ctx.closePath();ctx.fill();
  ctx.restore();
 }
+function toolHandle(x0,y0,x1,y1,w){
+ ctx.strokeStyle='#6b4a22';ctx.lineWidth=w;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+ if(qIdx>=2){
+  ctx.strokeStyle='rgba(255,235,190,0.16)';ctx.lineWidth=w*0.34;
+  ctx.beginPath();ctx.moveTo(x0,y0-w*0.2);ctx.lineTo(x1,y1-w*0.2);ctx.stroke();
+ }
+}
 function drawAxe(hx,hy,ang){
  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);ctx.scale(0.82,0.82);
- ctx.strokeStyle='#5a3c18';ctx.lineWidth=2;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(-2.6,4.6);ctx.lineTo(7.4,-7.6);ctx.stroke();
- ctx.fillStyle='#6f7784';
+ toolHandle(-2.6,4.6,7.4,-7.6,2);
+ const g=ctx.createLinearGradient(6.4,-8.2,12.2,-1);
+ g.addColorStop(0,'#9aa3b0');g.addColorStop(0.5,'#6f7784');g.addColorStop(1,'#4c525d');
+ ctx.fillStyle=g;
  ctx.beginPath();ctx.moveTo(6.4,-6.4);ctx.quadraticCurveTo(12,-8.2,12.2,-3.2);
  ctx.quadraticCurveTo(9.4,-0.4,6.6,-2.4);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=0.7;
+ ctx.beginPath();ctx.moveTo(6.5,-6.2);ctx.quadraticCurveTo(11.6,-7.8,12.1,-3.4);ctx.stroke();
+ if(qIdx>=2){ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=0.6;
+  ctx.beginPath();ctx.moveTo(7.0,-6.0);ctx.quadraticCurveTo(11.2,-7.4,11.9,-4.0);ctx.stroke()}
+ ctx.fillStyle='#4a4038';ctx.fillRect(6.0,-7.4,1.5,5.4);
  ctx.restore();
 }
 function drawPick(hx,hy,ang){
  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);ctx.scale(0.82,0.82);
- ctx.strokeStyle='#5a3c18';ctx.lineWidth=2;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(-2.6,4.6);ctx.lineTo(7.4,-8.4);ctx.stroke();
- ctx.strokeStyle='#767f8c';ctx.lineWidth=1.9;
+ toolHandle(-2.6,4.6,7.4,-8.4,2);
+ const g=ctx.createLinearGradient(3.6,-11.6,16,-5.4);
+ g.addColorStop(0,'#8d96a3');g.addColorStop(1,'#5a616d');
+ ctx.strokeStyle=g;ctx.lineWidth=1.9;
  ctx.beginPath();ctx.moveTo(3.6,-6.2);ctx.quadraticCurveTo(12.6,-11.6,16,-5.4);ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,0.28)';ctx.lineWidth=0.6;
+ ctx.beginPath();ctx.moveTo(4.2,-6.6);ctx.quadraticCurveTo(12.4,-11.2,15.4,-5.8);ctx.stroke();
+ ctx.fillStyle='#4a4038';ctx.beginPath();ctx.arc(7.4,-8.4,1.5,0,7);ctx.fill();
  ctx.restore();
 }
 function drawHammer(hx,hy,ang){
  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);ctx.scale(0.82,0.82);
- ctx.strokeStyle='#5a3c18';ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(-2.6,4.6);ctx.lineTo(6.4,-6.6);ctx.stroke();
- ctx.fillStyle='#5c616b';ctx.fillRect(3.8,-10.4,7,5);
+ toolHandle(-2.6,4.6,6.4,-6.6,2);
+ const g=ctx.createLinearGradient(3.8,-10.4,10.8,-5.4);
+ g.addColorStop(0,'#767d89');g.addColorStop(1,'#4a4f59');
+ ctx.fillStyle=g;ctx.fillRect(3.8,-10.4,7,5);
+ ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=0.6;ctx.strokeRect(3.8,-10.4,7,5);
+ if(qIdx>=2){ctx.fillStyle='rgba(255,255,255,0.22)';ctx.fillRect(4.2,-10.0,6.2,1.2)}
+ ctx.fillStyle='#3f444d';ctx.fillRect(3.2,-5.6,8.2,1.1);
  ctx.restore();
 }
 function drawSickle(hx,hy,ang){
  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);ctx.scale(0.82,0.82);
- ctx.strokeStyle='#5a3c18';ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(-2.6,4.6);ctx.lineTo(6,-5.4);ctx.stroke();
- ctx.strokeStyle='#767f8c';ctx.lineWidth=1.9;
+ toolHandle(-2.6,4.6,6,-5.4,2);
+ ctx.strokeStyle='#8d96a3';ctx.lineWidth=1.9;
  ctx.beginPath();ctx.arc(6.8,-7,4.6,2.5,-0.55);ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,0.45)';ctx.lineWidth=0.6;
+ ctx.beginPath();ctx.arc(6.8,-7.35,4.6,2.55,-0.6);ctx.stroke();
+ ctx.fillStyle='#5a3c18';ctx.beginPath();ctx.arc(2.6,-3.2,1.3,0,7);ctx.fill();
  ctx.restore();
 }
 function drawBackGear(u,TC,sc,ySh){
@@ -2774,11 +2966,13 @@ function drawUnit(u){
  if(t==='cannon'){drawCannonRig(u,TC,ph,ap);ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return}
  if(t==='knight'){drawHorse(u,TC,ph,ap,blink);ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return}
  const sc=1.45;
- const yHip=(t==='villager')?-13.4*sc:-11*sc, ySh=-20.5*sc;
+ const LK=(t==='villager')?villLook(u):null;
+ const scu=LK?sc*LK.tall:sc;
+ const yHip=(t==='villager')?-13.4*scu:-11*sc, ySh=-20.5*scu;
  const armored=t!=='villager'&&t!=='monk';
  const gk=u.node?u.node.kind:(u.carryKind==='w'?'wood':u.carryKind==='g'?'gold':'food');
  const working=u.state==='gather'||u.state==='return'||u.state==='build';
- const VA=(t==='villager')?villAnim(u,sc):null;
+  const VA=(t==='villager')?villAnim(u,scu):null;
  if(VA)ctx.translate(VA.lunge,VA.bobY);
  if(VA&&VA.working&&VA.hit&&u.vsw!=null){
   u.vsw=VA.sw;
@@ -2798,26 +2992,27 @@ function drawUnit(u){
    addTrauma(0.018);
   }
  }
- drawLegs(u,VA?VA.wph:ph,TC.p,TC.d,SKIN,sc,yHip,VA);
- const swing=moving?Math.sin(ph)*0.55:Math.sin(frame*0.06+u.id)*0.1;
- const bSh=[-1.2*sc,ySh+0.6*sc];
- const bA=VA?VA.armB:(swing*0.9+0.35);
- joint(bSh[0],bSh[1],VA?VA.armB:(-0.5+bA),4.6*sc,1.0,4.4*sc,2.3*sc,SKIN_D);
- drawBackGear(u,TC,sc,ySh);
- drawTorso(u,TC,sc,yHip,ySh,armored,VA?VA.torsoLean:(ap<=1?(t==='archer'?-0.03:0.05):moving?0.06:0));
- if(armored){for(const sx of [-3.6*sc,3.6*sc]){ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(sx,ySh+0.6*sc,2.7*sc,0,7);ctx.fill();ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke()}}
- const fSh=[1.4*sc,ySh+0.6*sc];
- let fa,fe;
- if(VA){fa=VA.armF}
- else if(working){fa=-0.9-Math.abs(Math.sin(frame/6.5+u.id))*0.95}
- else if(ap<=1){
-  if(t==='archer')fa=-0.15-(1-ap)*0.15;
-  else if(t==='spear')fa=-0.35-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.35;
-  else if(t==='sword'||t==='hero')fa=-0.5-Math.sin(Math.min(1,ap*1.25)*Math.PI)*1.5;
-  else if(t==='monk')fa=-0.4-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.6;
-  else fa=-0.3-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.9;
- }else fa=-0.35-swing*0.75;
- fe=joint(fSh[0],fSh[1],fa,4.8*sc,1.05,4.6*sc,2.5*sc,SKIN);
+  drawLegs(u,VA?VA.wph:ph,TC.p,TC.d,(LK?LK.skin:SKIN),scu,yHip,VA);
+  const swing=moving?Math.sin(ph)*0.55:Math.sin(frame*0.06+u.id)*0.1;
+  const vSkin=LK?LK.skin:SKIN, vSkinD=LK?LK.skinD:SKIN_D;
+  const bSh=[-1.2*scu,ySh+0.6*scu];
+  const bA=VA?VA.armB:(swing*0.9+0.35);
+  joint(bSh[0],bSh[1],VA?VA.armB:(-0.5+bA),4.6*scu,1.0,4.4*scu,2.3*scu,vSkinD);
+  drawBackGear(u,TC,scu,ySh);
+  drawTorso(u,TC,scu,yHip,ySh,armored,VA?VA.torsoLean:(ap<=1?(t==='archer'?-0.03:0.05):moving?0.06:0),LK);
+  if(armored){for(const sx of [-3.6*scu,3.6*scu]){ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(sx,ySh+0.6*scu,2.7*scu,0,7);ctx.fill();ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke()}}
+  const fSh=[1.4*scu+(VA&&VA.armReach?VA.armReach:0),ySh+0.6*scu];
+  let fa,fe;
+  if(VA){fa=VA.armF}
+  else if(working){fa=-0.9-Math.abs(Math.sin(frame/6.5+u.id))*0.95}
+  else if(ap<=1){
+   if(t==='archer')fa=-0.15-(1-ap)*0.15;
+   else if(t==='spear')fa=-0.35-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.35;
+   else if(t==='sword'||t==='hero')fa=-0.5-Math.sin(Math.min(1,ap*1.25)*Math.PI)*1.5;
+   else if(t==='monk')fa=-0.4-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.6;
+   else fa=-0.3-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.9;
+  }else fa=-0.35-swing*0.75;
+  fe=joint(fSh[0],fSh[1],fa,4.8*scu,1.05,4.6*scu,2.5*scu,vSkin);
  if(u.type==='villager'){
   const ta=VA?VA.tool:(fa-0.55);
   if(u.state==='gather'&&gk==='gold')drawPick(fe.fx,fe.fy,VA?ta:fa-0.5);
@@ -2827,18 +3022,21 @@ function drawUnit(u){
  }else if(t==='sword'||t==='hero')drawKatana(fe.fx,fe.fy,fa-0.55);
  else if(t==='spear')drawSpear(fe.fx,fe.fy,fa-1.5,ap<=1?Math.sin(Math.min(1,ap)*Math.PI)*7:0);
  else if(t==='archer')drawBow(fe.fx,fe.fy,-0.15,ap<=1?Math.min(6,ap*9):2.5);
- const hx=VA?VA.headDX:((working?0.2:1.5)*sc+Math.sin(ph*2)*0.4*sc);
- const hy=(VA?(ySh-4.6*sc+VA.headDY):(ySh-4.6*sc+(working?-0.6:0)));
- const helmet=u.type==='villager'?0:u.type==='archer'?2:u.type==='spear'?3:u.type==='monk'?3:1;
- if(VA&&VA.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(VA.headTilt);ctx.translate(-hx,-hy)}
- drawHead(u,TC,sc,hx,hy,helmet,blink,isBack);
- if(VA&&VA.headTilt)ctx.restore();
+  const hx=VA?VA.headDX:((working?0.2:1.5)*sc+Math.sin(ph*2)*0.4*sc);
+  const hy=(VA?(ySh-4.6*scu+VA.headDY):(ySh-4.6*sc+(working?-0.6:0)));
+  const helmet=u.type==='villager'?0:u.type==='archer'?2:u.type==='spear'?3:u.type==='monk'?3:1;
+  if(VA&&VA.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(VA.headTilt);ctx.translate(-hx,-hy)}
+  drawHead(u,TC,scu,hx,hy,helmet,blink,isBack);
+  if(VA&&VA.headTilt)ctx.restore();
  if(flash>0){
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=flash*0.5;
   ctx.fillStyle='#ff5555';ctx.beginPath();ctx.ellipse(0,-16*sc,9*sc,13*sc,0,0,7);ctx.fill();ctx.restore();
  }
- ctx.restore();
- if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('🤴',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.textAlign='left'}}
+  ctx.restore();
+  if(VA&&VA.foot&&u.team==='P1'&&isVis(u.x,u.y)&&qIdx>=1){
+   if(Math.random()<0.5)addFootDust(u,0,0);
+  }
+  if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('🤴',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.textAlign='left'}}
  if(u.carry>0)drawLoad(u,TC,VA);
  if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);
 }
@@ -2854,19 +3052,53 @@ function drawUnitBar(u,isSel){
 function drawLoad(u,TC,VA){
  const bob=VA?VA.bobY*0.85:0;
  const tilt=VA?Math.sin(VA.wph*2)*0.06:0;
+ const sc=1.45;
  ctx.save();ctx.translate(u.x,u.y);
  const fs2=Math.max(-1,Math.min(1,Math.sin(u.face)));
  ctx.rotate(fs2*0.13+tilt);
  if(Math.cos(u.face)<0)ctx.scale(-1,1);
  ctx.translate(0,bob);
  if(u.carryKind==='w'){
+  // Log bundle with a rope binding
   ctx.fillStyle='#6b4a1f';ctx.beginPath();ctx.arc(-7,-24,4.4,0,7);ctx.arc(-2.4,-25.4,4.4,0,7);ctx.arc(-4.6,-19.6,4.4,0,7);ctx.fill();
+  if(qIdx>=2){
+   ctx.strokeStyle='#4a3416';ctx.lineWidth=0.7;
+   for(const lx of [-8.6,-0.6]){ctx.beginPath();ctx.arc(lx,-22.2,3.6,-0.9,0.9);ctx.stroke()}
+   ctx.fillStyle='rgba(255,235,200,0.16)';
+   ctx.beginPath();ctx.ellipse(-8,-26,2.2,1.1,-0.4,0,7);ctx.fill();
+   ctx.beginPath();ctx.ellipse(-3,-27.4,2.2,1.1,-0.4,0,7);ctx.fill();
+  }
+  // Rope holding it on the shoulder
+  if(qIdx>=1){ctx.strokeStyle='rgba(60,42,22,0.85)';ctx.lineWidth=1.1;
+   ctx.beginPath();ctx.moveTo(-4.6,-19.2);ctx.quadraticCurveTo(1.2,-16.4,3.2,-19.4);ctx.stroke()}
  }else if(u.carryKind==='g'){
   const gg=ctx.createRadialGradient(-7.4,-23.4,0.5,-6,-22,5.4);
   gg.addColorStop(0,'#fff3b0');gg.addColorStop(0.5,'#FFD700');gg.addColorStop(1,'#b8860b');
   ctx.fillStyle=gg;ctx.beginPath();ctx.ellipse(-6,-22,5,4.4,0,0,7);ctx.fill();
+  if(qIdx>=2){
+   ctx.fillStyle='rgba(255,255,255,0.55)';
+   ctx.beginPath();ctx.ellipse(-7.4,-23.6,1.5,0.9,-0.4,0,7);ctx.fill();
+   ctx.strokeStyle='rgba(120,80,10,0.4)';ctx.lineWidth=0.5;
+   ctx.beginPath();ctx.ellipse(-6,-22,5,4.4,0,0,7);ctx.stroke();
+  }
+  // Cloth wrapping the gold
+  ctx.fillStyle='#c9b89a';
+  ctx.beginPath();ctx.moveTo(-11,-19.4);ctx.lineTo(-1,-19.4);ctx.lineTo(-3.4,-15.6);ctx.lineTo(-8.6,-15.6);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(-11,-18.2,10,1);
  }else{
-  ctx.fillStyle='#8a5f28';ctx.beginPath();ctx.moveTo(-11,-24);ctx.lineTo(1,-24);ctx.lineTo(-1,-17.5);ctx.lineTo(-9,-17.5);ctx.closePath();ctx.fill();
+  // Sack: tied neck, bulging base
+  ctx.fillStyle='#8a5f28';
+  ctx.beginPath();ctx.moveTo(-11,-24);ctx.lineTo(1,-24);ctx.lineTo(-1,-17.5);ctx.lineTo(-9,-17.5);ctx.closePath();ctx.fill();
+  if(qIdx>=2){
+   ctx.fillStyle='rgba(255,255,255,0.13)';
+   ctx.beginPath();ctx.moveTo(-9.4,-23.4);ctx.lineTo(-6,-23.4);ctx.lineTo(-6.4,-18.4);ctx.lineTo(-8.4,-18.4);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(0,0,0,0.22)';ctx.lineWidth=0.5;
+   ctx.beginPath();ctx.moveTo(-11,-22.2);ctx.lineTo(1,-22.2);ctx.stroke();
+  }
+  // Rope tie at the neck
+  ctx.strokeStyle='#5a4020';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(-10.4,-24.4);ctx.lineTo(-0.6,-24.4);ctx.stroke();
+  ctx.beginPath();ctx.arc(-5.5,-25.4,1.5,0,7);ctx.stroke();
  }
  ctx.fillStyle='#fff';ctx.font='bold 8px sans-serif';ctx.textAlign='center';
  ctx.save();if(Math.cos(u.face)<0)ctx.scale(-1,1);
