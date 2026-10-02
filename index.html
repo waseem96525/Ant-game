@@ -708,8 +708,9 @@ function updateUnit(u){
    return;
   }
   if(u.state==='move'){if(moveTo(u,u.tx,u.ty))u.state='idle';return}
-  return;
-// foji
+   return;
+  }
+ // foji
   let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
   let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
   if(!tgt&&!tgtB){
