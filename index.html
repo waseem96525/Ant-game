@@ -709,14 +709,13 @@ function updateUnit(u){
   }
   if(u.state==='move'){if(moveTo(u,u.tx,u.ty))u.state='idle';return}
   return;
- }
- // foji
- let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
- let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
- if(!tgt&&!tgtB){
-  const leash=u.team==='AI'?(treaty>0?0:220):70;
-  if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
- }
+// foji
+  let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
+  let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
+  if(!tgt&&!tgtB){
+   const leash=u.team==='AI'?(treaty>0?0:220):70;
+   if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
+  }
   if(tgt){u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);const d=dist(u,tgt);
    if(d>u.range){moveTo(u,tgt.x,tgt.y)}
     else if(u.cool<=0){
@@ -737,31 +736,31 @@ function updateUnit(u){
      if(u.type==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5);
      if(u.type==='cannon')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<42)dealDmg(u.team,e,u.dmg*0.5);
      if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
-   return;
-  }
-  if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
-   if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
-   else if(u.cool<=0){
-    u.cool=u.type==='cannon'?110:40;
-    const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);
-    dealDmg(u.team,tgtB,bd2);
-    if(u.type==='cannon'){
-     const mx=u.x+Math.cos(u.face)*22,my=u.y+Math.sin(u.face)*22-6;
-     emit('fire',mx,my,0,0,qn(20),{r:6,add:true});
-     for(let i=0;i<qn(9);i++)smoke(mx+rnd(-5,5),my-rnd(0,6),rnd(5,11),0,'rgba(120,118,116,0.5)');
-     spark(mx,my,12,'#ffd27a');flame(mx,my,5);
-     chips(tgtB.x,tgtB.y,5);dustP(tgtB.x,tgtB.y,4);
-     shake=Math.max(shake,4);
-    }
-    slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});
-    chips(tgtB.x+rnd(-15,15),tgtB.y+rnd(-10,10),2);
-    if(u.type==='cannon')S.boom();else S.sword();
-    if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
-   return;
-  }
- if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle'}return}
-}
-function updateBlds(){
+    return;
+   }
+   if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
+    if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
+    else if(u.cool<=0){
+     u.cool=u.type==='cannon'?110:40;
+     const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);
+     dealDmg(u.team,tgtB,bd2);
+     if(u.type==='cannon'){
+      const mx=u.x+Math.cos(u.face)*22,my=u.y+Math.sin(u.face)*22-6;
+      emit('fire',mx,my,0,0,qn(20),{r:6,add:true});
+      for(let i=0;i<qn(9);i++)smoke(mx+rnd(-5,5),my-rnd(0,6),rnd(5,11),0,'rgba(120,118,116,0.5)');
+      spark(mx,my,12,'#ffd27a');flame(mx,my,5);
+      chips(tgtB.x,tgtB.y,5);dustP(tgtB.x,tgtB.y,4);
+      shake=Math.max(shake,4);
+     }
+     slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});
+     chips(tgtB.x+rnd(-15,15),tgtB.y+rnd(-10,10),2);
+     if(u.type==='cannon')S.boom();else S.sword();
+     if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
+    return;
+   }
+  if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle'}return}
+ }
+ function updateBlds(){
  for(const b of blds){
   if(b.hp<=0)continue;
   if(b.done&&b.queue.length){const q=b.queue[0];q.t--;
