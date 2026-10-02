@@ -810,6 +810,7 @@ cv.addEventListener('pointerleave',()=>{mouseIn=false});
 document.addEventListener('keydown',e=>{
  if(e.code==='Escape'){if(placingPower){placingPower=null;msg('❌ Power cancel');return}if(placing){placing=null;refreshPanel();return}if(wallMode){toggleWallMode();return}deselect();return}
  if(!started||gameOver)return;
+ if(e.code==='Home'||e.code==='KeyG'){goHome();return}
  if(e.code==='KeyQ'){selectAllArmy();return}
  if(e.code==='KeyE'){selectAllVillagers();return}
  if(e.code==='KeyR'){selectAllUnits();return}
@@ -3128,7 +3129,46 @@ function draw(){
  ctx.fillText(Math.round(fpsAvg)+' fps · '+QNAMES[qIdx]+' · '+DPR.toFixed(1)+'x',VW-8,14);
  ctx.restore();
  drawMM();
+ drawTcPointer();
+ drawDebugHud();
  drawErrBanner();
+}
+// 🧭 Town Center kabhi "gayab" nahi hoga — screen se bahar ho to edge par arrow + distance
+function drawTcPointer(){
+ if(!started||gameOver)return;
+ const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&(b.hp>0||b.dying));
+ if(!tc)return;
+ const sx=(tc.x-view.x)*view.z+VW/2,sy=(tc.y-view.y)*view.z+VH/2,pad=46;
+ if(sx>pad&&sx<VW-pad&&sy>pad&&sy<VH-pad)return;
+ const cx=VW/2,cy=VH/2,dx=sx-cx,dy=sy-cy;
+ const m=Math.max(Math.abs(dx)/(VW/2-pad),Math.abs(dy)/(VH/2-pad))||1;
+ const ex=cx+dx/m,ey=cy+dy/m,a=Math.atan2(dy,dx);
+ const dist=Math.round(Math.hypot(tc.x-view.x,tc.y-view.y)/10);
+ ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
+ ctx.translate(ex,ey);
+ ctx.fillStyle='rgba(20,83,45,0.9)';ctx.beginPath();ctx.arc(0,0,20,0,7);ctx.fill();
+ ctx.strokeStyle='#4ade80';ctx.lineWidth=2;ctx.stroke();
+ ctx.rotate(a);ctx.fillStyle='#86efac';
+ ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-7,-9);ctx.lineTo(-7,9);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#052e16';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.rotate(-a);
+ ctx.fillStyle='#dcfce7';ctx.font='bold 10px monospace';ctx.textAlign='center';
+ ctx.fillText('🏰 TC '+dist+'m',0,34);
+ ctx.restore();
+}
+function drawDebugHud(){
+ const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc');
+ const hw=VW/2/view.z,hh=VH/2/view.z;
+ let s='tc='+(tc?1:0);
+ if(tc){s+=' hp='+Math.round(tc.hp)+' at('+Math.round(tc.x)+','+Math.round(tc.y)+')';
+  s+=' onscreen='+((Math.abs(tc.x-view.x)<hw+80&&Math.abs(tc.y-view.y)<hh+80)?'YES':'NO');}
+ s+=' | view='+Math.round(view.x)+','+Math.round(view.y)+' z='+view.z.toFixed(2);
+ ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
+ ctx.font='12px monospace';ctx.textAlign='left';
+ const tw=ctx.measureText(s).width;
+ ctx.fillStyle='rgba(0,0,0,0.72)';ctx.fillRect(6,18,tw+14,20);
+ ctx.fillStyle='#7CFF9B';ctx.fillText(s,13,32);
+ ctx.restore();
 }
 function drawErrBanner(){
  if(errBannerT<=0)return;
