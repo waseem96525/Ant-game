@@ -91,6 +91,7 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <span>💀 <b id="killT">0</b></span><span>🏆 <b id="scoreT">0</b></span><span id="comboT">🔥 -</span><span id="heroT">🤴 -</span>
 <button id="bPause" class="tbtn" onclick="togglePause()">⏸</button>
 <button id="bSnd" class="tbtn" onclick="toggleSnd()">🔊</button>
+<button id="bMus" class="tbtn" onclick="toggleMusic()" title="Background music">🎵</button>
 <button id="bSpeed" class="tbtn" onclick="toggleSpeed()">🚀 1x</button>
 <button class="tbtn" onclick="zoomBy(1.25)">🔍+</button><button class="tbtn" onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
 <button id="bFol" class="tbtn" onclick="toggleFollow()">📷 Follow: OFF</button>
@@ -213,7 +214,7 @@ function tone(f,d,type,v,pan){try{if(!AC||!soundOn)return;const c=ac();const o=c
 const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))},age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
 let soundOn=true,lastSw=0,lastBow=0;
 function noiseHit(dur,freq,v,pan){try{if(!AC||!soundOn)return;const c=ac();const len=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,len,c.sampleRate),dt=b.getChannelData(0);for(let i=0;i<len;i++)dt[i]=(Math.random()*2-1)*(1-i/len);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=b;f.type='lowpass';f.frequency.value=freq;g.gain.value=v;s.connect(f);f.connect(g);if(pan!==undefined&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,pan));g.connect(p);p.connect(c.destination);}else g.connect(c.destination);s.start()}catch(e){}}
-function toggleSnd(){soundOn=!soundOn;document.getElementById('bSnd').textContent=soundOn?'🔊':'🔇';if(soundOn)S.click()}
+function toggleSnd(){soundOn=!soundOn;document.getElementById('bSnd').textContent=soundOn?'🔊':'🔇';if(soundOn)S.click();try{if(musBus)musBus.gain.setTargetAtTime(soundOn&&musOn?0.16:0,ac().currentTime,0.4)}catch(_){}}
 S.sword=()=>{if(!soundOn)return;const n=performance.now();if(n-lastSw<110)return;lastSw=n;noiseHit(0.09,3000,0.10);tone(700+Math.random()*300,0.05,'square',0.04)};
 S.bow=()=>{if(!soundOn)return;const n=performance.now();if(n-lastBow<140)return;lastBow=n;tone(900,0.09,'square',0.05);setTimeout(()=>tone(350,0.08,'square',0.04),40)};
 S.boom=()=>{if(!soundOn)return;tone(58,0.5,'sine',0.22);noiseHit(0.4,500,0.20)};
@@ -221,6 +222,108 @@ S.coin=()=>{if(!soundOn)return;tone(950,0.09,'sine',0.09);setTimeout(()=>tone(14
 S.horn=()=>{if(!soundOn)return;tone(130,0.5,'sawtooth',0.12);setTimeout(()=>tone(98,0.6,'sawtooth',0.12),180)};
 S.drum=(hi)=>{if(!soundOn)return;tone(hi?82:66,0.13,'sine',0.06)};
 S.repair=()=>{tone(300,0.06,'triangle',0.06)};
+
+// ============ BACKGROUND MUSIC (procedural — koi file nahi) ============
+// Lookahead scheduler + tanpura drone + raga-flavoured melody + tabla loop.
+// Raat/ladai ke hisaab se mood apne aap badalta hai.
+let musOn=true,musTimer=null,musNext=0,musStep=0,musBus=null,musMode='';
+const MUS_ROOT=146.83;                                   // D3
+const MUS_PENTA=[0,2,4,7,9,12,14,16,19,21];               // D major pentatonic (bhoopali feel)
+const MUS_MELODY=[                                        // 32-step phrase, null = rest
+  4,3,2,null,3,4,6,null, 5,4,3,null,2,1,2,null,
+  0,null,1,2,3,null,2,1, null,0,null,null,null,null,null];
+const MUS_COUNTER=[                                        // softer second voice
+  null,null,1,null,null,null,0,null, null,null,null,2,null,null,null,
+  3,null,null,2,null,1,null, 0,null,null,null,null,null,null];
+function musFreq(deg,oct){return MUS_ROOT*Math.pow(2,(MUS_PENTA[Math.max(0,Math.min(MUS_PENTA.length-1,deg))]+(oct||0)*12)/12)}
+function musInit(){
+ if(musBus)return;
+ const c=ac();if(!c)return;
+ try{
+ musBus=c.createGain();musBus.gain.value=0;
+ // simple feedback delay = space/reverb ka halka substitute
+ const dly=c.createDelay(1.0);dly.delayTime.value=0.34;
+ const fb=c.createGain();fb.gain.value=0.30;
+ const wet=c.createGain();wet.gain.value=0.32;
+ const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
+ musBus.connect(c.destination);
+ musBus.connect(lp);lp.connect(dly);dly.connect(fb);fb.connect(dly);dly.connect(wet);wet.connect(c.destination);
+ }catch(e){musBus=null;musOn=false;try{const b=document.getElementById('bMus');if(b)b.style.display='none'}catch(_){}}
+}
+function musVoices(){
+ if(musVoices.done||!musBus)return;
+ const c=ac();if(!c)return;
+ try{
+ // tanpura-ish drone: Sa + Pa, dono par halka tremolo
+ [[MUS_ROOT,0.055],[MUS_ROOT*1.5,0.035],[MUS_ROOT*2,0.018]].forEach(([f,g])=>{
+  const o=c.createOscillator(),gn=c.createGain(),lfo=c.createOscillator(),lg=c.createGain();
+  o.type='sawtooth';o.frequency.value=f;o.detune.value=(Math.random()*8-4);
+  lfo.frequency.value=0.16+Math.random()*0.1;lg.gain.value=g*0.55;
+  gn.gain.value=g;lfo.connect(lg);lg.connect(gn.gain);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=620;
+  o.connect(gn);gn.connect(lp);lp.connect(musBus);
+  o.start();lfo.start();
+ });
+ musVoices.done=true;
+ }catch(e){musVoices.done=true;musOn=false;try{const b=document.getElementById('bMus');if(b)b.style.display='none'}catch(_){}}
+}
+function musHit(t,f,dur,vol,type,detune){
+ const c=ac();if(!c||!musBus)return;
+ const o=c.createOscillator(),g=c.createGain();
+ o.type=type||'triangle';o.frequency.value=f;if(detune)o.detune.value=detune;
+ g.gain.setValueAtTime(0.0001,t);
+ g.gain.linearRampToValueAtTime(vol,t+0.035);           // soft sitar-like attack
+ g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+ o.connect(g);g.connect(musBus);o.start(t);o.stop(t+dur+0.04);
+}
+function musPerc(t,vol){
+ const c=ac();if(!c||!musBus)return;
+ const o=c.createOscillator(),g=c.createGain();
+ o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(52,t+0.13);
+ g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.19);
+ o.connect(g);g.connect(musBus);o.start(t);o.stop(t+0.22);
+}
+function musMood(){
+ if(!started||gameOver)return 'calm';
+ if(treaty<=0){
+  const foes=units.some(u=>u.hp>0&&u.team!=='P1'&&Math.hypot(u.x-view.x,u.y-view.y)<520);
+  if(foes)return 'battle';
+ }
+ return SUN&&SUN.drift>0.35?'night':'calm';
+}
+function musStepPlay(step,t,mode){
+ const s=step%32;
+ const m=MUS_MELODY[s];
+ if(m!==null&&m!==undefined)musHit(t,musFreq(m,mode==='battle'?1:1),mode==='battle'?0.5:0.72,m>=6?0.085:0.062,'triangle',m>=6?-4:3);
+ const c2=MUS_COUNTER[s];
+ if(c2!==null&&c2!==undefined)musHit(t,musFreq(c2,0),0.5,0.026,'sine');
+ if(step%8===0)musHit(t,musFreq(step%32===0?7:4,1),1.1,0.03,'sine');
+ if(mode==='battle'){
+  if(s%4===0)musPerc(t,0.085);
+  if(s===6||s===14)musPerc(t,0.045);
+ }
+ if(mode==='night'&&s%2===0&&m!=null)musHit(t,musFreq(m,2),0.9,0.012,'sine');
+}
+function musTick(){
+ const c=ac();if(!c||!musOn)return;
+ musInit();musVoices();
+ const mode=musMood();
+ if(mode!==musMode){musMode=mode;
+  try{musBus.gain.setTargetAtTime(mode==='battle'?0.20:mode==='night'?0.13:0.16,c.currentTime,1.2)}catch(_){}}
+ const spb=60/(mode==='battle'?84:68)/2;
+ if(musNext<c.currentTime)musNext=c.currentTime+0.05;
+ while(musNext<c.currentTime+0.5){musStepPlay(musStep,musNext,mode);musNext+=spb;musStep++}
+}
+function musStart(){
+ try{musInit();}catch(e){return}
+ if(!musTimer)musTimer=setInterval(musTick,140);
+ try{if(musBus)musBus.gain.setTargetAtTime(musOn&&soundOn?0.16:0,ac().currentTime,0.8)}catch(_){}
+}
+function toggleMusic(){
+ musOn=!musOn;
+ const b=document.getElementById('bMus');if(b)b.textContent=musOn?'🎵':'🎵';
+ if(musOn){musStart();msg('🎵 Music ON')}else{if(musBus){try{musBus.gain.setTargetAtTime(0,ac().currentTime,0.3)}catch(_){}}msg('🔇 Music OFF')}
+}
 
 // ============ DATA ============
 const CIVS={
@@ -3436,7 +3539,7 @@ function refreshLevels(){
 function playLevel(i){LEVEL=LEVELS[i];startGame()}
 refreshLevels();
 function startGame(){
- ac();S.click();
+ ac();S.click();musStart();
  units=[];blds=[];parts=[];floats=[];corpses=[];slashes=[];rubble=[];rings=[];shake=0;uid=1;bid=1;frame=0;elapsed=0;gameOver=false;paused=false;speed=1;
  trauma=0;hitStop=0;camKickX=0;camKickY=0;camZoomPunch=0;letterbox=0;cbT=0;camFocus=0;camTX=null;camTY=null;camTZ=null;
  res={P1:{f:5000,w:5000,g:5000},AI:{f:300,w:200,g:100}};
