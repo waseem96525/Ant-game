@@ -678,6 +678,15 @@ let sel={units:[],bld:null},placing=null,uid=1,bid=1;
 let birds=[],rings=[],relics=[];
 const BRAZIERS=[{x:250,y:1055},{x:390,y:1185},{x:1810,y:215},{x:1950,y:345}];
 let aiPlan={t:0,attackSent:0};
+// Debug hook for the browser console. Lives inside the script scope so it can
+// read the live game state directly.
+window.__GAME_DEBUG__={
+ getUnits:()=>units,
+ getVillagers:()=>units.filter(u=>u.type==='villager'),
+ getVillagerState:(id)=>units.find(u=>u.id===id)?.state,
+ setTreaty:(seconds)=>{treaty=seconds*60},
+ giveResources:()=>{res.P1={f:9999,w:9999,g:9999}}
+};
 function rnd(a,b){return a+Math.random()*(b-a)}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function msg(t){document.getElementById('msg').textContent=t}
