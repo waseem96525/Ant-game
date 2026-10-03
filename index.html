@@ -3135,28 +3135,12 @@ for(const u of units){
    if(b.kind==='gate'&&b.team===u.team)continue;
    const s=bldSolid(b);
    const dx=u.x-s.x,dy=u.y-s.y;
-   if(Math.abs(dx)<s.hw&&Math.abs(dy)<s.hh){
-    u.pushT=(u.pushT||0)+1;
+if(Math.abs(dx)<s.hw&&Math.abs(dy)<s.hh){
     const px=s.hw-Math.abs(dx),py=s.hh-Math.abs(dy);
     // Push out on the axis of least penetration. A push of nearly zero (the unit
     // is exactly on the edge) cannot free it, so fall through to the other axis.
     if(px<py&&px>0.5)u.x+=dx<0?-px:px;
     else u.y+=dy<0?-py:py;
-    // Pure minimum-push deadlocks: walk straight into a flat wall and you are
-    // pushed back exactly as far as you moved, forever, so a villager ordered
-    // to a site on the far side of a building can never arrive. Nudge along the
-    // wall toward whichever end is on the way to the goal, and the unit slides
-    // around instead of grinding against the corner. Face is the freshest
-    // statement of intent (turnTo aims it at the current destination). The
-    // nudge grows the longer it stays pinned so a tight corner still breaks.
-    const boost=Math.min(9,2+u.pushT);
-    if(px<py&&px>0.5){
-     const sgn=Math.sin(u.face);
-     u.y+=(sgn<-0.15?-1:(sgn>0.15?1:((Math.abs(dy+s.hh)<Math.abs(dy-s.hh))?-1:1)))*Math.min(boost,py+1);
-    }else{
-     const sgn=Math.cos(u.face);
-u.x+=(sgn<-0.15?-1:(sgn>0.15?1:((Math.abs(dx+s.hw)<Math.abs(dx-s.hw))?-1:1)))*Math.min(boost,px+1);
-    }
    }
   }
  }
