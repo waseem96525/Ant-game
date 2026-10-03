@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -279,6 +279,159 @@ function syncViewport(){
  clampView();
  return true;
 }
+
+// ============ NAVIGATION ============
+// Grid A* over building footprints. Without it a unit walking to a spot behind a
+// building presses into it forever: the collision push moves it back exactly as
+// far as it advanced, so it never gets around. Buildings never move once placed,
+// so the blocked grid is rebuilt only when the building set really changes.
+const NAV_CELL=20,NAV_PAD=10,NAV_MAX_EXPAND=5000;
+let navW=0,navH=0,navBlk=null,navSig=-1,navClosed=null;
+let navG=null,navCame=null,navHeap=null,navHf=null,navHn=0;
+let navBudget=10;
+function navSigOf(){
+ let s=blds.length*7919;
+ for(const b of blds)s+=(b.hp>0?b.id*31:5)+((b.done?1:0)*17);
+ return s;
+}
+function navEnsure(){
+ const s=navSigOf();
+ if(s===navSig&&navBlk)return;
+ navSig=s;
+ navW=Math.ceil(W/NAV_CELL);navH=Math.ceil(H/NAV_CELL);
+ const n=navW*navH;
+ if(!navBlk||navBlk.length!==n){
+  navBlk=new Uint8Array(n);navClosed=new Uint8Array(n);
+  navG=new Float32Array(n);navCame=new Int32Array(n);
+  navHeap=new Int32Array(n+1);navHf=new Float32Array(n+1);
+ }
+ navBlk.fill(0);
+ for(const b of blds){
+  if(b.hp<=0)continue;
+  const so=bldSolid(b);
+  // Inflate by NAV_PAD so the path keeps clearance instead of hugging corners.
+  const x0=Math.max(0,Math.floor((so.x-so.hw-NAV_PAD)/NAV_CELL)),x1=Math.min(navW-1,Math.floor((so.x+so.hw+NAV_PAD)/NAV_CELL));
+  const y0=Math.max(0,Math.floor((so.y-so.hh-NAV_PAD)/NAV_CELL)),y1=Math.min(navH-1,Math.floor((so.y+so.hh+NAV_PAD)/NAV_CELL));
+  for(let y=y0;y<=y1;y++){const row=y*navW;for(let x=x0;x<=x1;x++)navBlk[row+x]=1}
+ }
+}
+function navIdx(cx,cy){return cy*navW+cx}
+function navPush(i,f){
+ navHeap[navHn]=i;navHf[navHn]=f;navHn++;
+ let c=navHn-1;
+ while(c>0){
+  const p=(c-1)>>1;
+  if(navHf[p]<=navHf[c])break;
+  const ti=navHeap[p];navHeap[p]=navHeap[c];navHeap[c]=ti;
+  const tf=navHf[p];navHf[p]=navHf[c];navHf[c]=tf;
+  c=p;
+ }
+}
+function navPop(){
+ const top=navHeap[0];navHn--;
+ if(navHn>0){
+  navHeap[0]=navHeap[navHn];navHf[0]=navHf[navHn];
+  let c=0;
+  for(;;){
+   const l=c*2+1,r=l+1;let m=c;
+   if(l<navHn&&navHf[l]<navHf[m])m=l;
+   if(r<navHn&&navHf[r]<navHf[m])m=r;
+   if(m===c)break;
+   const ti=navHeap[m];navHeap[m]=navHeap[c];navHeap[c]=ti;
+   const tf=navHf[m];navHf[m]=navHf[c];navHf[c]=tf;
+   c=m;
+  }
+ }
+ return top;
+}
+// Grid raycast: is the straight line between two world points free of buildings?
+function navClear(ax,ay,bx,by){
+ let x0=Math.floor(ax/NAV_CELL),y0=Math.floor(ay/NAV_CELL);
+ const x1=Math.floor(bx/NAV_CELL),y1=Math.floor(by/NAV_CELL);
+ if(x0<0||y0<0||x0>=navW||y0>=navH||x1<0||y1<0||x1>=navW||y1>=navH)return true;
+ const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx2=x0<x1?1:-1,sy2=y0<y1?1:-1;
+ let err=dx-dy,x=x0,y=y0;
+ for(let guard=0;guard<4000;guard++){
+  if(navBlk[navIdx(x,y)])return false;
+  if(x===x1&&y===y1)return true;
+  const e2=2*err;
+  if(e2>-dy){err-=dy;x+=sx2}
+  if(e2<dx){err+=dx;y+=sy2}
+  if(x<0||y<0||x>=navW||y>=navH)return true;
+ }
+ return false;
+}
+function navFreeNear(cx,cy){
+ cx=Math.max(0,Math.min(navW-1,cx));cy=Math.max(0,Math.min(navH-1,cy));
+ if(!navBlk[navIdx(cx,cy)])return[cx,cy];
+ for(let r=1;r<=7;r++){
+  for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
+   if(Math.abs(dx)!==r&&Math.abs(dy)!==r)continue;
+   const nx=cx+dx,ny=cy+dy;
+   if(nx<0||ny<0||nx>=navW||ny>=navH)continue;
+   if(!navBlk[navIdx(nx,ny)])return[nx,ny];
+  }
+ }
+ return null;
+}
+// String-pulling: drop every waypoint we can see past, so the unit walks in
+// straight diagonals instead of following the staircase of the grid.
+function navSmooth(sx,sy,pts){
+ const out=[];
+ let cx=sx,cy=sy,i=0;
+ while(i<pts.length){
+  let j=pts.length-1;
+  while(j>i&&!navClear(cx,cy,pts[j].x,pts[j].y))j--;
+  out.push(pts[j]);cx=pts[j].x;cy=pts[j].y;
+  if(j===i)i++;else i=j;
+ }
+ return out;
+}
+function findPath(sx,sy,tx,ty){
+ navEnsure();
+ const s0=navFreeNear(Math.floor(sx/NAV_CELL),Math.floor(sy/NAV_CELL));
+ const g0=navFreeNear(Math.floor(tx/NAV_CELL),Math.floor(ty/NAV_CELL));
+ if(!s0||!g0)return null;
+ const si=navIdx(s0[0],s0[1]),gi=navIdx(g0[0],g0[1]);
+ if(si===gi)return [{x:tx,y:ty}];
+ navG.fill(Infinity);navClosed.fill(0);navCame.fill(-1);
+ navHn=0;navG[si]=0;
+ const h0=(dx,dy)=>{const ax=Math.abs(dx),ay=Math.abs(dy);return (ax+ay)+(1.4142-2)*Math.min(ax,ay)};
+ navPush(si,h0(g0[0]-s0[0],g0[1]-s0[1]));
+ let found=false,exp=0;
+ while(navHn>0&&exp<NAV_MAX_EXPAND){
+  const cur=navPop();exp++;
+  if(navClosed[cur])continue;
+  navClosed[cur]=1;
+  if(cur===gi){found=true;break}
+  const cx=cur%navW,cy=(cur/navW)|0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+   if(!dx&&!dy)continue;
+   const nx=cx+dx,ny=cy+dy;
+   if(nx<0||ny<0||nx>=navW||ny>=navH)continue;
+   const ni=navIdx(nx,ny);
+   if(navBlk[ni]||navClosed[ni])continue;
+   // No squeezing through diagonal gaps between two buildings.
+   if(dx&&dy&&(navBlk[navIdx(cx+dx,cy)]||navBlk[navIdx(cx,cy+dy)]))continue;
+   const ng=navG[cur]+((dx&&dy)?1.4142:1);
+   if(ng<navG[ni]){
+    navG[ni]=ng;navCame[ni]=cur;
+    navPush(ni,ng+h0(g0[0]-nx,g0[1]-ny));
+   }
+  }
+ }
+ if(!found)return null;
+ const cells=[];
+ for(let c=gi;c!==-1;c=navCame[c]){cells.push(c);if(c===si)break}
+ cells.reverse();
+ const pts=[];
+ for(let i=0;i<cells.length;i++){
+  const cx=cells[i]%navW,cy=(cells[i]/navW)|0;
+  pts.push({x:cx*NAV_CELL+NAV_CELL/2,y:cy*NAV_CELL+NAV_CELL/2});
+ }
+ if(pts.length)pts[pts.length-1]={x:tx,y:ty};
+ return navSmooth(sx,sy,pts);
+}
 cv.addEventListener('wheel',e=>{e.preventDefault();if(!started||paused)return;const before=s2w(e.clientX,e.clientY);zoomBy(e.deltaY<0?1.15:1/1.15);const after=s2w(e.clientX,e.clientY);view.x+=before.x-after.x;view.y+=before.y-after.y;clampView()},{passive:false});
 
 // ============ AUDIO ============
@@ -413,7 +566,7 @@ const AGES=[
  {icon:'ðŸ‘‘',name:'Imperial',cost:{f:1000,w:600,g:400}}
 ];
 const UNITS={
- villager:{hp:40,dmg:3,range:20,speed:2.1,cost:{f:50},time:10*60,icon:'ðŸ‘·'},
+ villager:{hp:40,dmg:3,range:20,speed:2.8,cost:{f:50},time:10*60,icon:'ðŸ‘·'},
  sword:{hp:95,dmg:12,range:26,speed:2.3,cost:{f:60,w:20},time:10*60,icon:'ðŸ—¡ï¸',minAge:1},
  archer:{hp:65,dmg:9,range:175,speed:2.3,cost:{f:50,w:40},time:12*60,icon:'ðŸ¹',minAge:1},
  knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'ðŸŽ',minAge:2},
@@ -1064,7 +1217,29 @@ function turnTo(u,target,rate){
  const r=rate||9;
  u.face=angLerp(u.face,target,Math.max(0.05,Math.min(1,r/60)));
 }
-function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;const s=u.speed;u.x+=dx/d*Math.min(s,d);u.y+=dy/d*Math.min(s,d);turnTo(u,Math.atan2(dy,dx),u.type==='elephant'?5:9);return false}
+function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;
+ // Walk the goal directly when the line is clear; only pay for A* when a
+ // building is actually in the way. Falls back to straight steering whenever a
+ // path cannot be found, so behaviour is never worse than before.
+ let ax=tx,ay=ty;
+ navEnsure();
+ if(!navClear(u.x,u.y,tx,ty)){
+  const key=(tx|0)*7919+(ty|0);
+  const stale=!u.nav||u.navK!==key||u.navS!==navSig||u.navI>=(u.nav?u.nav.length:0);
+  if(stale&&navBudget>0){
+   navBudget--;
+   u.nav=findPath(u.x,u.y,tx,ty);u.navK=key;u.navS=navSig;u.navI=0;
+  }
+  if(u.nav&&u.navI<u.nav.length){
+   while(u.navI<u.nav.length&&Math.hypot(u.x-u.nav[u.navI].x,u.y-u.nav[u.navI].y)<NAV_CELL*0.85)u.navI++;
+   if(u.navI<u.nav.length){ax=u.nav[u.navI].x;ay=u.nav[u.navI].y}
+  }
+ }
+ const ddx=ax-u.x,ddy=ay-u.y,dd=Math.hypot(ddx,ddy)||1;
+ const s=u.speed;
+ u.x+=ddx/dd*Math.min(s,dd);u.y+=ddy/dd*Math.min(s,dd);
+ turnTo(u,Math.atan2(ddy,ddx),u.type==='elephant'?5:9);
+ return false}
 
 function dealDmg(t,v,dmg,fx,fy){
  if(treaty>0||gameOver||v.hp<=0)return;
@@ -1205,15 +1380,7 @@ function updateUnit(u){
 if(u.state==='build'){
     const b=blds.find(x=>x.id===u.bld);
     if(!b){u.state='idle';return}
-    if(dist(u,b)>80){
-     // Steer at the site and stop at the build radius rather than walking to
-     // the exact centre: the centre, and b.y+50, can sit inside a neighbouring
-     // building, and a unit that keeps pressing into a wall never "arrives".
-     const a=Math.atan2(b.y-u.y,b.x-u.x);
-     u.x+=Math.cos(a)*u.speed;u.y+=Math.sin(a)*u.speed;
-     turnTo(u,a,u.type==='elephant'?5:9);
-     return;
-    }
+    if(dist(u,b)>80){moveTo(u,b.x,b.y+50);return}
     if(!b.done){b.prog++;if(Math.random()<0.05&&u.team==='P1')S.build();
      if(b.prog>=b.need){
       b.done=true;b.hp=b.maxHp;addBldCloth(b);
@@ -4576,8 +4743,9 @@ let elapsed=0;
 function step(){
  if(errBannerT>0)errBannerT--;
  if(gameOver||!started||paused)return;
- for(let s=0;s<speed;s++){
-  frame++;
+for(let s=0;s<speed;s++){
+   navBudget=10;   // cap A* calls per frame so a mass re-order cannot spike
+   frame++;
   updateSun();updateWind();simCloth();
   if(treaty>0){treaty--;if(treaty===0){msg('âš” SANDHI KHATM!');S.age()}}
   else elapsed+=1/60;
