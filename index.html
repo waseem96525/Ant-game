@@ -286,9 +286,15 @@ function syncViewport(){
 // far as it advanced, so it never gets around. Buildings never move once placed,
 // so the blocked grid is rebuilt only when the building set really changes.
 const NAV_CELL=20,NAV_PAD=10,NAV_MAX_EXPAND=5000;
-let navW=0,navH=0,navBlk=null,navSig=-1,navClosed=null;
+let navW=0,navH=0,navBlk=null,navGat=null,navSig=-1,navClosed=null;
 let navG=null,navCame=null,navHeap=null,navHf=null,navHn=0;
 let navBudget=10;
+function navTeam(t){return t==='P1'?1:2}
+// A cell is blocked for a team if it is solid for everyone, or if it holds a
+// gate that belongs to the other side. This mirrors collideBuildings, which lets
+// a unit walk through its own gate, so an army marches out of its own gate
+// instead of walking the long way round the wall.
+function navBlockedAt(i,tm){return navBlk[i]||(navGat[i]&&navGat[i]!==tm)?1:0}
 function navSigOf(){
  let s=blds.length*7919;
  for(const b of blds)s+=(b.hp>0?b.id*31:5)+((b.done?1:0)*17);
@@ -301,18 +307,21 @@ function navEnsure(){
  navW=Math.ceil(W/NAV_CELL);navH=Math.ceil(H/NAV_CELL);
  const n=navW*navH;
  if(!navBlk||navBlk.length!==n){
-  navBlk=new Uint8Array(n);navClosed=new Uint8Array(n);
+  navBlk=new Uint8Array(n);navGat=new Uint8Array(n);navClosed=new Uint8Array(n);
   navG=new Float32Array(n);navCame=new Int32Array(n);
   navHeap=new Int32Array(n+1);navHf=new Float32Array(n+1);
  }
- navBlk.fill(0);
+ navBlk.fill(0);navGat.fill(0);
  for(const b of blds){
   if(b.hp<=0)continue;
   const so=bldSolid(b);
   // Inflate by NAV_PAD so the path keeps clearance instead of hugging corners.
   const x0=Math.max(0,Math.floor((so.x-so.hw-NAV_PAD)/NAV_CELL)),x1=Math.min(navW-1,Math.floor((so.x+so.hw+NAV_PAD)/NAV_CELL));
   const y0=Math.max(0,Math.floor((so.y-so.hh-NAV_PAD)/NAV_CELL)),y1=Math.min(navH-1,Math.floor((so.y+so.hh+NAV_PAD)/NAV_CELL));
-  for(let y=y0;y<=y1;y++){const row=y*navW;for(let x=x0;x<=x1;x++)navBlk[row+x]=1}
+  const tm=navTeam(b.team);
+  for(let y=y0;y<=y1;y++){const row=y*navW;for(let x=x0;x<=x1;x++){
+   if(b.kind==='gate')navGat[row+x]=tm;else navBlk[row+x]=1;
+  }}
  }
 }
 function navIdx(cx,cy){return cy*navW+cx}
@@ -345,14 +354,15 @@ function navPop(){
  return top;
 }
 // Grid raycast: is the straight line between two world points free of buildings?
-function navClear(ax,ay,bx,by){
+function navClear(ax,ay,bx,by,tm){
+ tm=tm||1;
  let x0=Math.floor(ax/NAV_CELL),y0=Math.floor(ay/NAV_CELL);
  const x1=Math.floor(bx/NAV_CELL),y1=Math.floor(by/NAV_CELL);
  if(x0<0||y0<0||x0>=navW||y0>=navH||x1<0||y1<0||x1>=navW||y1>=navH)return true;
  const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx2=x0<x1?1:-1,sy2=y0<y1?1:-1;
  let err=dx-dy,x=x0,y=y0;
  for(let guard=0;guard<4000;guard++){
-  if(navBlk[navIdx(x,y)])return false;
+  if(navBlockedAt(navIdx(x,y),tm))return false;
   if(x===x1&&y===y1)return true;
   const e2=2*err;
   if(e2>-dy){err-=dy;x+=sx2}
@@ -361,36 +371,38 @@ function navClear(ax,ay,bx,by){
  }
  return false;
 }
-function navFreeNear(cx,cy){
+function navFreeNear(cx,cy,tm){
+ tm=tm||1;
  cx=Math.max(0,Math.min(navW-1,cx));cy=Math.max(0,Math.min(navH-1,cy));
- if(!navBlk[navIdx(cx,cy)])return[cx,cy];
+ if(!navBlockedAt(navIdx(cx,cy),tm))return[cx,cy];
  for(let r=1;r<=7;r++){
   for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
    if(Math.abs(dx)!==r&&Math.abs(dy)!==r)continue;
    const nx=cx+dx,ny=cy+dy;
    if(nx<0||ny<0||nx>=navW||ny>=navH)continue;
-   if(!navBlk[navIdx(nx,ny)])return[nx,ny];
+   if(!navBlockedAt(navIdx(nx,ny),tm))return[nx,ny];
   }
  }
  return null;
 }
 // String-pulling: drop every waypoint we can see past, so the unit walks in
 // straight diagonals instead of following the staircase of the grid.
-function navSmooth(sx,sy,pts){
+function navSmooth(sx,sy,pts,tm){
  const out=[];
  let cx=sx,cy=sy,i=0;
  while(i<pts.length){
   let j=pts.length-1;
-  while(j>i&&!navClear(cx,cy,pts[j].x,pts[j].y))j--;
+  while(j>i&&!navClear(cx,cy,pts[j].x,pts[j].y,tm))j--;
   out.push(pts[j]);cx=pts[j].x;cy=pts[j].y;
   if(j===i)i++;else i=j;
  }
  return out;
 }
-function findPath(sx,sy,tx,ty){
+function findPath(sx,sy,tx,ty,team){
  navEnsure();
- const s0=navFreeNear(Math.floor(sx/NAV_CELL),Math.floor(sy/NAV_CELL));
- const g0=navFreeNear(Math.floor(tx/NAV_CELL),Math.floor(ty/NAV_CELL));
+ const tm=navTeam(team);
+ const s0=navFreeNear(Math.floor(sx/NAV_CELL),Math.floor(sy/NAV_CELL),tm);
+ const g0=navFreeNear(Math.floor(tx/NAV_CELL),Math.floor(ty/NAV_CELL),tm);
  if(!s0||!g0)return null;
  const si=navIdx(s0[0],s0[1]),gi=navIdx(g0[0],g0[1]);
  if(si===gi)return [{x:tx,y:ty}];
@@ -410,9 +422,9 @@ function findPath(sx,sy,tx,ty){
    const nx=cx+dx,ny=cy+dy;
    if(nx<0||ny<0||nx>=navW||ny>=navH)continue;
    const ni=navIdx(nx,ny);
-   if(navBlk[ni]||navClosed[ni])continue;
+   if(navBlockedAt(ni,tm)||navClosed[ni])continue;
    // No squeezing through diagonal gaps between two buildings.
-   if(dx&&dy&&(navBlk[navIdx(cx+dx,cy)]||navBlk[navIdx(cx,cy+dy)]))continue;
+   if(dx&&dy&&(navBlockedAt(navIdx(cx+dx,cy),tm)||navBlockedAt(navIdx(cx,cy+dy),tm)))continue;
    const ng=navG[cur]+((dx&&dy)?1.4142:1);
    if(ng<navG[ni]){
     navG[ni]=ng;navCame[ni]=cur;
@@ -430,7 +442,7 @@ function findPath(sx,sy,tx,ty){
   pts.push({x:cx*NAV_CELL+NAV_CELL/2,y:cy*NAV_CELL+NAV_CELL/2});
  }
  if(pts.length)pts[pts.length-1]={x:tx,y:ty};
- return navSmooth(sx,sy,pts);
+ return navSmooth(sx,sy,pts,tm);
 }
 cv.addEventListener('wheel',e=>{e.preventDefault();if(!started||paused)return;const before=s2w(e.clientX,e.clientY);zoomBy(e.deltaY<0?1.15:1/1.15);const after=s2w(e.clientX,e.clientY);view.x+=before.x-after.x;view.y+=before.y-after.y;clampView()},{passive:false});
 
@@ -1223,12 +1235,13 @@ function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)re
  // path cannot be found, so behaviour is never worse than before.
  let ax=tx,ay=ty;
  navEnsure();
- if(!navClear(u.x,u.y,tx,ty)){
+ const tm=navTeam(u.team);
+ if(!navClear(u.x,u.y,tx,ty,tm)){
   const key=(tx|0)*7919+(ty|0);
   const stale=!u.nav||u.navK!==key||u.navS!==navSig||u.navI>=(u.nav?u.nav.length:0);
   if(stale&&navBudget>0){
    navBudget--;
-   u.nav=findPath(u.x,u.y,tx,ty);u.navK=key;u.navS=navSig;u.navI=0;
+   u.nav=findPath(u.x,u.y,tx,ty,u.team);u.navK=key;u.navS=navSig;u.navI=0;
   }
   if(u.nav&&u.navI<u.nav.length){
    while(u.navI<u.nav.length&&Math.hypot(u.x-u.nav[u.navI].x,u.y-u.nav[u.navI].y)<NAV_CELL*0.85)u.navI++;
