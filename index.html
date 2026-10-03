@@ -627,7 +627,12 @@ function mkUnit(team,type,x,y){
  let hp=U.hp*am*(1+0.15*tech[team].def);if(cv2.hp)hp*=cv2.hp;
  let dmg=U.dmg*am*(1+0.15*tech[team].atk);if(type==='sword')dmg*=cv2.swordDmg;
  if(team==='AI'){const m=difficulty==='easy'?0.85:difficulty==='hard'?1.15:1;hp*=m;dmg*=m}
-  const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0,hurt:0,deadT:0,deadMax:36,warnedT:0,mv:0,stepT:0,vsw:null,waypoints:[]};
+  // atkT/atkF/atkMax/atkHit drive the swing timeline, the rest is pure
+  // animation state rebuilt every frame (never saved, always re-derived).
+  const u={id:uid++,team,type,x,y,hp,maxHp:hp,dmg,speed:U.speed,range:U.range,carry:0,carryKind:null,state:'idle',tx:x,ty:y,node:null,bld:null,target:null,tgtB:null,cool:0,gatherT:0,face:0,hurt:0,deadT:0,deadMax:48,warnedT:0,mv:0,stepT:0,vsw:null,waypoints:[],
+   atkT:0,atkF:0,atkMax:8,atkHit:0,atkCM:32,atkTgt:null,atkTB:null,
+   hurtDir:0,hurtPow:0,deadFace:null,deadFall:null,didLand:0,
+   tr:null,cap:null,pf:0};
   if(type==='hero'){u.lvl=1;u.xp=0}
   if(type==='monk'){u.healT=0;u.convertT=0}
   units.push(u);return u;
@@ -957,9 +962,17 @@ function turnTo(u,target,rate){
 }
 function moveTo(u,tx,ty){const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(d<3)return true;const s=u.speed;u.x+=dx/d*Math.min(s,d);u.y+=dy/d*Math.min(s,d);turnTo(u,Math.atan2(dy,dx),u.type==='elephant'?5:9);return false}
 
-function dealDmg(t,v,dmg){
+function dealDmg(t,v,dmg,fx,fy){
  if(treaty>0||gameOver||v.hp<=0)return;
- v.hp-=dmg;v.hurt=6;
+ v.hp-=dmg;v.hurt=8;
+ // Remember where the blow came from: the flinch and the death fall both read
+ // from this, and fx/fy is passed by melee swings so it costs nothing extra.
+ if(fx!==undefined&&fy!==undefined){v.hurtDir=Math.atan2(v.y-fy,v.x-fx);v.hurtPow=Math.min(1,dmg/30)}
+ else if(v.type){
+  let a=null;
+  for(const e of units)if(e.team!==v.team&&e.hp>0){const d=dist(v,e);if(!a||d<a.d)a={d:d,x:e.x,y:e.y}}
+  if(a){v.hurtDir=Math.atan2(v.y-a.y,v.x-a.x);v.hurtPow=Math.min(1,dmg/30)}
+ }
  bloodP(v.x,v.y-6,5);
  if(v.type){decal(v.x,v.y+2,7,'rgba(96,12,12,0.4)',0.42)}
  else decal(v.x,v.y,Math.max(10,v.w*0.18),'rgba(70,20,10,0.25)',0.3);
@@ -970,9 +983,13 @@ function dealDmg(t,v,dmg){
    addTrauma(wgt*0.06);
    if(wgt>0.5)hitStopT(1);
   }else spark(v.x,v.y-8,3,'#ffd9a0');
-  if(v.hp<=0){
-   v.hp=0;
-   v.deadT=v.deadMax=qn(36);
+if(v.hp<=0){
+    v.hp=0;
+    v.deadT=v.deadMax=qn(48);
+    v.deadFace=v.face;
+    // Topple away from the blow; with no known attacker, fall forward.
+    v.deadFall=(v.hurtPow>0)?v.hurtDir:v.face;
+    v.didLand=0;v.tr=null;
    chips(v.x,v.y,4);dustP(v.x,v.y,3);
    decal(v.x,v.y+1,11,'rgba(84,10,10,0.5)',0.5);
     corpses.push({x:v.x,y:v.y,team:v.team,life:300});
@@ -1099,55 +1116,35 @@ function updateUnit(u){
   if(u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle';if(u.waypoints&&u.waypoints.length)executeNextWaypoint(u)}return}
    return;
   }
- // foji
-  let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
-  let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
-  if(!tgt&&!tgtB){
-   const leash=u.team==='AI'?(treaty>0?0:220):70;
-   if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
-  }
-  if(tgt){u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);const d=dist(u,tgt);
-   if(d>u.range){moveTo(u,tgt.x,tgt.y)}
-    else if(u.cool<=0){
-     u.cool=u.type==='archer'?70:u.type==='cannon'?110:u.type==='spear'?34:u.type==='monk'?80:32;
-     let dd=u.dmg;if(u.type==='spear'&&(tgt.type==='knight'||tgt.type==='elephant'))dd*=3;
-     if(u.type!=='monk')dealDmg(u.team,tgt,dd);
-    if(u.type==='archer')S.bow();else if(u.type==='cannon')S.boom();else if(u.type!=='monk')S.sword();
-    if(u.type!=='archer'&&u.type!=='cannon'&&u.type!=='monk')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});
-    if(u.type==='archer')emit('spark',u.x+Math.cos(u.face)*9,u.y-10,(tgt.x-u.x)/d*7,(tgt.y-u.y)/d*7,qn(14),{r:1.6,c:'#ffe9a8',g:0,add:true});
-    if(u.type==='cannon'){
-     const mx=u.x+Math.cos(u.face)*22,my=u.y+Math.sin(u.face)*22-6;
-     emit('fire',mx,my,0,0,qn(20),{r:6,add:true});
-     for(let i=0;i<qn(9);i++)smoke(mx+rnd(-5,5),my-rnd(0,6),rnd(5,11),0,'rgba(120,118,116,0.5)');
-     spark(mx,my,12,'#ffd27a');flame(mx,my,5);
-     decal(mx,my,9,'rgba(20,16,12,0.4)',0.3);
-     shake=Math.max(shake,3);
-    }
-     if(u.type==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5);
-     if(u.type==='cannon')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<42)dealDmg(u.team,e,u.dmg*0.5);
-     if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}}
-    return;
+// foji
+   let tgt=u.target!=null?units.find(e=>e.id===u.target&&e.hp>0):null;
+   let tgtB=u.tgtB!=null?blds.find(b=>b.id===u.tgtB&&b.hp>0):null;
+   if(!tgt&&!tgtB){
+    const leash=u.team==='AI'?(treaty>0?0:220):70;
+    if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
    }
-   if(tgtB){const d=Math.hypot(u.x-tgtB.x,u.y-tgtB.y);
-    if(d>u.range+30){moveTo(u,tgtB.x,tgtB.y)}
-    else if(u.cool<=0){
-     u.cool=u.type==='cannon'?110:u.type==='monk'?80:40;
-     if(u.type!=='monk'){const bd2=u.dmg*(u.type==='cannon'?3.2:0.8);dealDmg(u.team,tgtB,bd2)}
-     if(u.type==='cannon'){
-      const mx=u.x+Math.cos(u.face)*22,my=u.y+Math.sin(u.face)*22-6;
-      emit('fire',mx,my,0,0,qn(20),{r:6,add:true});
-      for(let i=0;i<qn(9);i++)smoke(mx+rnd(-5,5),my-rnd(0,6),rnd(5,11),0,'rgba(120,118,116,0.5)');
-      spark(mx,my,12,'#ffd27a');flame(mx,my,5);
-      chips(tgtB.x,tgtB.y,5);dustP(tgtB.x,tgtB.y,4);
-      shake=Math.max(shake,4);
-     }
-     if(u.type!=='monk'){slashes.push({x:tgtB.x+rnd(-15,15),y:tgtB.y+rnd(-10,10),ang:rnd(0,6.28),life:10});chips(tgtB.x+rnd(-15,15),tgtB.y+rnd(-10,10),2)}
-     if(u.type==='cannon')S.boom();else if(u.type!=='monk')S.sword();
-     if(tgtB.hp<=0){u.tgtB=null;u.state='idle'}}
-    return;
+   // Swing timeline. The unit commits to a target, winds up, and the blow
+   // lands on the impact frame — the leftover of the old cooldown becomes the
+   // recovery, so the attack rate is identical to before.
+   if(u.atkT>0){
+    u.atkT--;
+    u.atkF=1-u.atkT/u.atkMax;
+    if(!u.atkHit&&u.atkF>=ATK_HIT){u.atkHit=1;swingHit(u)}
+    if(u.atkT<=0){u.atkT=0;u.atkF=0;u.cool=Math.max(1,u.atkCM-u.atkMax)}
    }
+   if(tgt)u.face=Math.atan2(tgt.y-u.y,tgt.x-u.x);
+   else if(tgtB)u.face=Math.atan2(tgtB.y-u.y,tgtB.x-u.x);
+   const dT=tgt?dist(u,tgt):1e9,dB=tgtB?Math.hypot(tgtB.x-u.x,tgtB.y-u.y):1e9;
+   if(u.atkT===0&&u.cool<=0){
+    if(tgt&&dT<=u.range)startSwing(u,u.type==='archer'?70:u.type==='cannon'?110:u.type==='spear'?34:u.type==='monk'?80:32);
+    else if(tgtB&&dB<=u.range+30)startSwing(u,u.type==='cannon'?110:u.type==='monk'?80:40);
+   }
+   // A committed swing finishes even if the target walks off, so no retreat
+   // mid-swing: the lunge reads as a committed step instead of a stall.
+   if(tgt){if(dT>u.range&&u.atkT<=0)moveTo(u,tgt.x,tgt.y);return}
+   if(tgtB){if(dB>u.range+30&&u.atkT<=0)moveTo(u,tgtB.x,tgtB.y);return}
   if(u.state==='attack'||u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle';if(u.waypoints&&u.waypoints.length)executeNextWaypoint(u)}return}
- }
+  }
  function updateBlds(){
  for(const b of blds){
   if(b.hp<=0)continue;
@@ -2776,10 +2773,217 @@ function drawBldBody(b,TC,dmg,broken){
   ctx.textAlign='left';
  }
 }// ============ UNIT ANIMATION CORE ============
-function atkP(u){
- const mx=u.type==='archer'?70:u.type==='cannon'?110:u.type==='spear'?34:32;
- return u.cool>0?1-Math.min(1,u.cool/mx):2;
+// ---- Attack timeline -------------------------------------------------------
+// SWING[unit] is how many frames the weapon itself takes; the rest of the old
+// cooldown becomes recovery, so DPS is untouched. ATK_HIT is the phase where
+// the blow lands, which is also the frame every pose curve peaks on.
+const SWING={sword:9,hero:10,spear:8,archer:14,cannon:17,monk:12,knight:13,elephant:14,villager:0};
+const ATK_HIT=0.46;
+const ATK_GUARD={armF:-0.45,armB:-0.15,lean:0.04,tw:0,lunge:0,hTilt:0,crouch:0.15,reach:0,ext:0,pull:0,wAng:null,trailLen:0};
+const ATK_KEYS={
+ // Sword/hero: coiled over-the-shoulder cut that finishes low and forward. The
+ // blade keeps a fading trail through the follow-through, not just the strike.
+ slash:[
+  [0,null],
+  [0.34,{armF:-2.55,armB:-0.95,lean:-0.10,tw:-0.24,lunge:-1.0,hTilt:-0.12,crouch:0.9,reach:-0.5,wAng:-2.55},0.7],
+  [0.46,{armF:0.62,armB:0.55,lean:0.30,tw:0.36,lunge:3.9,hTilt:0.20,crouch:0.05,reach:1.2,trailLen:19,wAng:0.62},2.6],
+  [0.60,{armF:0.50,armB:0.62,lean:0.24,tw:0.30,lunge:3.2,hTilt:0.15,crouch:0.15,reach:0.95,trailLen:14,wAng:0.50}],
+  [1,null,0.9]],
+ // Spear/knight: draw the point back behind the hip, then punch it out level.
+ thrust:[
+  [0,null],
+  [0.34,{armF:-1.45,armB:-0.30,lean:-0.14,tw:-0.18,lunge:-1.7,hTilt:-0.08,crouch:0.8,reach:-1.0,ext:-4,wAng:-2.95},0.8],
+  [0.46,{armF:0.75,armB:0.30,lean:0.30,tw:0.22,lunge:3.4,hTilt:0.06,crouch:0.1,reach:1.4,ext:10,wAng:0.02,trailLen:12},3.0],
+  [0.60,{armF:0.62,armB:0.34,lean:0.26,tw:0.20,lunge:3.0,hTilt:0.05,crouch:0.2,reach:1.3,ext:9,wAng:-0.06,trailLen:9}],
+  [1,null,0.9]],
+ // Archer: nock, draw to full, then snap the string and let the bow arm ride
+ // forward. The release keyframe sits exactly on ATK_HIT.
+ shot:[
+  [0,null],
+  [0.30,{armF:-0.62,armB:-0.20,lean:0.08,tw:0.18,pull:7.6,hTilt:0.05,crouch:0.35},0.8],
+  [0.40,{armF:-0.66,armB:-0.20,lean:0.09,tw:0.20,pull:8.0,hTilt:0.05,crouch:0.38}],
+  [0.46,{armF:-0.06,armB:-0.34,lean:0.12,tw:0.24,pull:0.8,hTilt:0.02,crouch:0.05,lunge:0.5},2.4],
+  [1,null,0.85]],
+ // Monk: both hands gather at the chest, then push the aura out.
+ cast:[
+  [0,null],
+  [0.40,{armF:-1.55,armB:-1.35,lean:-0.06,tw:-0.12,hTilt:-0.10,crouch:0.5,pull:0.55},0.85],
+  [0.46,{armF:-1.62,armB:-1.42,lean:-0.06,tw:-0.14,hTilt:-0.10,crouch:0.55,pull:0.8}],
+  [0.58,{armF:0.30,armB:0.22,lean:0.16,tw:0.16,hTilt:0.10,crouch:0,pull:0,lunge:1.2},2.0],
+  [1,null,0.9]]
+};
+// Elephant: trunk coils back (-1.6 lunge = rear up) then drives down (3.4).
+const ATK_TRUNK=[
+ [0,null],
+ [0.34,{lunge:-1.6,crouch:0.5},0.85],
+ [0.46,{lunge:3.4,crouch:-0.4},2.8],
+ [0.62,{lunge:2.8,crouch:-0.2}],
+ [1,null,0.9]
+];
+// Cannon: crew winds the rammer back, then drives it home on the shot.
+const ATK_FIRE=[
+ [0,null],
+ [0.36,{lunge:-1.0,armF:-1.5,armB:-0.9,crouch:0.35},0.85],
+ [0.46,{lunge:1.4,armF:0.25,armB:0.2,crouch:0},2.6],
+ [0.60,{lunge:1.0,armF:0.1,armB:0.1,crouch:0.1}],
+ [1,null,0.9]
+];
+function startSwing(u,cm){
+ const S=SWING[u.type]||9;
+ // Never eat the whole cooldown: keep at least a few recovery frames.
+ u.atkMax=Math.max(4,Math.min(S,cm-6));
+ u.atkT=u.atkMax;u.atkF=0;u.atkHit=0;u.atkCM=cm;
+ u.atkTgt=(u.target!=null)?u.target:null;
+ u.atkTB=(u.tgtB!=null)?u.tgtB:null;
+ u.tr=null;
 }
+function cannonBlast(u,tx,ty,sh){
+ const mx=u.x+Math.cos(u.face)*22,my=u.y+Math.sin(u.face)*22-6;
+ emit('fire',mx,my,0,0,qn(20),{r:6,add:true});
+ for(let i=0;i<qn(9);i++)smoke(mx+rnd(-5,5),my-rnd(0,6),rnd(5,11),0,'rgba(120,118,116,0.5)');
+ spark(mx,my,12,'#ffd27a');flame(mx,my,5);
+ decal(mx,my,9,'rgba(20,16,12,0.4)',0.3);
+ chips(tx,ty,5);dustP(tx,ty,4);
+ shake=Math.max(shake,sh||3);
+}
+function swingHit(u){
+ const t=u.type;
+ const tgt=(u.atkTgt!=null)?units.find(e=>e.id===u.atkTgt&&e.hp>0):null;
+ const tb=(u.atkTB!=null)?blds.find(b=>b.id===u.atkTB&&b.hp>0):null;
+ if(tgt){
+  let dd=u.dmg;
+  if(t==='spear'&&(tgt.type==='knight'||tgt.type==='elephant'))dd*=3;
+  if(t!=='monk')dealDmg(u.team,tgt,dd,u.x,u.y);
+  const d=Math.max(1,dist(u,tgt));
+  if(t==='archer')S.bow();else if(t==='cannon')S.boom();else if(t!=='monk')S.sword();
+  if(t!=='archer'&&t!=='cannon'&&t!=='monk')slashes.push({x:tgt.x,y:tgt.y,ang:u.face,life:10});
+  if(t==='archer')emit('spark',u.x+Math.cos(u.face)*9,u.y-10,(tgt.x-u.x)/d*7,(tgt.y-u.y)/d*7,qn(14),{r:1.6,c:'#ffe9a8',g:0,add:true});
+  if(t==='cannon')cannonBlast(u,tgt.x,tgt.y,3);
+  if(t==='elephant')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<36)dealDmg(u.team,e,u.dmg*0.5,u.x,u.y);
+  if(t==='cannon')for(const e of units)if(e.team!==u.team&&e.hp>0&&e!==tgt&&Math.hypot(e.x-tgt.x,e.y-tgt.y)<42)dealDmg(u.team,e,u.dmg*0.5,u.x,u.y);
+  if(tgt.hp<=0){u.target=null;if(u.state!=='attack')u.state='idle'}
+ }else if(tb){
+  if(t!=='monk'){const bd2=u.dmg*(t==='cannon'?3.2:0.8);dealDmg(u.team,tb,bd2,u.x,u.y)}
+  if(t==='cannon')cannonBlast(u,tb.x,tb.y,4);
+  if(t!=='monk'){slashes.push({x:tb.x+rnd(-15,15),y:tb.y+rnd(-10,10),ang:rnd(0,6.28),life:10});chips(tb.x+rnd(-15,15),tb.y+rnd(-10,10),2)}
+  if(t==='cannon')S.boom();else if(t!=='monk')S.sword();
+  if(tb.hp<=0){u.tgtB=null;u.state='idle'}
+ }
+}
+function swingKind(u){
+ return u.type==='spear'?'thrust':u.type==='archer'?'shot':u.type==='monk'?'cast':'slash';
+}
+// Interpolate a keyframe track. Each key carries the easing exponent used to
+// reach it: <1 eases out (windup), >1 snaps in (the strike itself). Segment t
+// runs from the previous key (t=0) to the named one (t=1).
+// ATK_WANG_REST is the neutral carry for a shaft weapon, so the spear eases
+// back to how it is held at rest instead of popping to the hand-tracking angle.
+const ATK_WANG_REST=-1.85;
+function kf(f,keys){
+ const n=keys.length;
+ for(let i=1;i<n;i++){
+  if(f<=keys[i][0]||i===n-1){
+   const a=keys[i-1],b=keys[i];
+   let t=Math.max(0,Math.min(1,(f-a[0])/(b[0]-a[0])));
+   const p=b[2];
+   if(p!=null&&p!==1)t=p>0?Math.pow(t,p):1-Math.pow(1-t,-p);
+   const A=b[1]||ATK_GUARD,B=a[1]||ATK_GUARD,o={};
+   // Walk the guard key set so a track may set a value on only one side of a
+   // segment: the archer's release owns lunge, the spear's rest owns wAng.
+   for(const k in ATK_GUARD){
+    // wAng falls back to the neutral carry angle; everything else to guard.
+    const z=(k==='wAng')?ATK_WANG_REST:0;
+    const av=(A[k]!=null)?A[k]:z,bv=(B[k]!=null)?B[k]:z;
+    o[k]=bv+(av-bv)*t;
+   }
+   o.wAng=((A.wAng!=null)||(B.wAng!=null))?o.wAng:null;
+   return o;
+  }
+ }
+ return ATK_GUARD;
+}
+function atkPose(u){
+ if(u.atkT<=0){u.tr=null;return null}
+ return kf(u.atkF,ATK_KEYS[swingKind(u)]);
+}
+// ---- Soldier body ----------------------------------------------------------
+// Hips and shoulders counter-rotate, the head is held level against the bob,
+// and the whole torso leans into turns. Without this a walk is one rigid block.
+function unitAnim(u,sc){
+ const off=u.id*37,mv=u.mv?1:0;
+ const wph=(mv?frame*0.42:frame*0.09+u.id)+u.id*0.7;
+ const A={off:off,sc:sc,mv:mv,wph:wph,strideAmp:mv?1:0.14,legLen:6.95,foot:0};
+ A.breath=Math.sin(frame*0.05+off)*0.5+0.5;
+ const shift=Math.sin(frame*0.019+off*0.6);
+ A.hipShift=mv?Math.sin(wph)*0.34:shift*0.5;
+ A.bobY=mv?-Math.abs(Math.sin(wph*2))*1.5:(Math.sin(frame*0.055+off)*0.34+Math.sin(frame*0.083+off)*0.18);
+ A.armSwing=mv?Math.sin(wph)*0.62:Math.sin(frame*0.06+off)*0.09;
+ A.twist=mv?-Math.sin(wph)*0.12:-shift*0.05;
+ A.roll=mv?Math.sin(wph)*0.055:shift*0.035;
+ // Lean into the turn using last frame's heading change, clamped so a combat
+ // face-snap reads as a sharp pivot instead of a full somersault.
+ const df=Math.max(-0.5,Math.min(0.5,((u.face-u.pf+Math.PI*3)%(Math.PI*2))-Math.PI));
+ u.pf=u.face;
+ A.lean=Math.max(-0.26,Math.min(0.26,df*1.2))+(mv?0.06:0.02);
+ A.headDX=mv?Math.sin(wph*2+Math.PI)*0.42*sc:(shift>0.94?-1.1*sc:0.9*sc);
+ A.headDY=-A.bobY*0.55+(mv?Math.abs(Math.sin(wph*2))*0.2*sc:Math.sin(frame*0.06+off)*0.22*sc);
+ A.headTilt=mv?Math.sin(wph*2+1)*0.038:shift*0.03;
+ A.crouch=mv?0.1:(0.3+A.breath*0.2);
+ if(mv){
+  const half=Math.floor(wph/Math.PI);
+  A.foot=(u.lastStepHalf!==half)?1:0;u.lastStepHalf=half;
+ }else{u.lastStepHalf=null;A.foot=0}
+ return A;
+}
+// Cape / tabard chain: three lagged points trailing the shoulders. Each point
+// eases toward the one above it, so a turn or a lunge whips it around.
+function capeChain(u,UA,sc){
+ const c=u.cap||(u.cap=[{x:0,y:0},{x:0,y:0},{x:0,y:0}]);
+ const push=(UA.mv?1:0.24)*(1+Math.min(1.4,Math.abs(UA.lean)*4));
+ const w=sway(u.id*1.7,1.1);
+ c[0].x=-1.9*sc;c[0].y=-19.4*sc;
+ for(let i=1;i<c.length;i++){
+  const p=c[i-1],q=c[i];
+  const tx=p.x-(1.7+i*0.7)*sc*push, ty=p.y+(4.9+i*0.4)*sc+w*(1+i)*0.55;
+  q.x+=(tx-q.x)*0.20;q.y+=(ty-q.y)*0.20;
+ }
+ return c;
+}
+// Unified soldier pose: same field names villAnim() produces, so the drawing
+// code below can treat villagers and soldiers through one object.
+function soldierPose(u,UA){
+ const on=u.atkT>0,A=on?atkPose(u):null;
+ const P={
+  off:UA.off,sc:UA.sc,wph:UA.wph,working:false,hit:false,sw:0,strike:0,carry:false,
+  armB:-0.15,armF:-0.35,lunge:0,headDX:UA.headDX,headDY:UA.headDY,headTilt:UA.headTilt,
+  crouch:UA.crouch,tool:-1.95,stride:UA.strideAmp?0.46:0.12,legLen:UA.legLen,
+  hipShift:UA.hipShift,breath:UA.breath,look:0,foot:UA.foot,armReach:0,
+  strideAmp:UA.strideAmp,bobY:UA.bobY,armSwing:UA.armSwing,lean:UA.lean,
+  torsoLean:UA.lean+0.05,tw:UA.twist,roll:UA.roll,push:0,
+  // pull is the bowstring draw, and doubles as the monk's cast glow. It must
+  // stay 0 for everyone else or a resting unit reads as permanently charging.
+  wAng:null,wExt:0,pull:(u.type==='archer'?2.5:0),trailLen:0
+ };
+ if(A){
+  P.armF=A.armF;P.armB=A.armB;P.lunge=A.lunge;P.headTilt=A.hTilt||0;
+  P.crouch=A.crouch;P.armReach=A.reach||0;P.torsoLean=UA.lean+A.lean;
+  P.tw=UA.twist+(A.tw||0);P.wAng=A.wAng;P.wExt=A.ext||0;P.pull=A.pull||0;
+  P.trailLen=A.trailLen||0;P.strike=A.lunge>2?1:0;
+ }else{
+  P.armF=-0.35-UA.armSwing*0.8;P.armB=-0.15+UA.armSwing*0.7;
+  P.torsoLean=UA.lean+0.05+Math.sin(UA.wph)*0.02;
+ }
+ // Flinch on top of everything: knocked along the blow axis, knees buckle and
+ // the weapon arm flies open. fwd>0 means the blow came from the front.
+ if(u.hurt>0){
+  const fl=Math.min(1,u.hurt/8),fwd=Math.cos(u.hurtDir-u.face);
+  P.flinch=fl;P.push=-fwd*fl*2.6;P.torsoLean-=fwd*fl*0.20;
+  P.headTilt-=fwd*fl*0.26;P.headDX-=fwd*fl*0.8*UA.sc;
+  P.crouch+=fl*1.0;P.armF+=fl*0.5;P.armB+=fl*0.28;P.tw-=fwd*fl*0.16;
+ }
+ return P;
+}
+function atkP(u){return u.atkT>0?u.atkF:2}
 function joint(x,y,a1,l1,a2,l2,w,col){
  const kx=x+Math.sin(a1)*l1,ky=y+Math.cos(a1)*l1;
  const fx=kx+Math.sin(a1+a2)*l2,fy=ky+Math.cos(a1+a2)*l2;
@@ -2927,13 +3131,20 @@ function villAnim(u,sc){
   A.tool=-1.95+(mv?Math.sin(wph*2)*0.07:0);
   A.headTilt=A.carry?0.07:0;
  }
- // Foot-plant flag: fires once per step so dust and sound can hook to it
- if(mv){
-  const half=Math.floor(wph/Math.PI);
-  A.foot=(u.lastStepHalf!==half)?1:0;
-  u.lastStepHalf=half;
- }else{u.lastStepHalf=null;A.foot=0}
- return A;
+// Foot-plant flag: fires once per step so dust and sound can hook to it
+  if(mv){
+   const half=Math.floor(wph/Math.PI);
+   A.foot=(u.lastStepHalf!==half)?1:0;
+   u.lastStepHalf=half;
+  }else{u.lastStepHalf=null;A.foot=0}
+  // Flinch: knocked along the blow axis, knees buckle, tool arm flies open
+  if(u.hurt>0){
+   const fl=Math.min(1,u.hurt/8),fwd=Math.cos(u.hurtDir-u.face);
+   A.flinch=fl;A.push=-fwd*fl*2.4;A.torsoLean-=fwd*fl*0.20;
+   A.headDX-=fwd*fl*0.8*sc;A.headTilt-=fwd*fl*0.26;
+   A.crouch+=fl*1.0;A.armF+=fl*0.45;A.armB+=fl*0.25;
+  }
+  return A;
 }
 function drawLegs(u,ph,col,dark,sk,sc,y0,VA){
  const amp=VA&&VA.strideAmp!=null?VA.strideAmp:1;
@@ -2980,8 +3191,11 @@ function addFootDust(u,lx,ly){
  const c=Math.cos(u.face),sn=Math.sin(u.face);
  emit('dust',u.x+c*lx-sn*ly,u.y+sn*lx+c*ly,rnd(-.2,.2),rnd(-.35,-.1),qn(15),{r:rnd(1.6,3.2),c:'rgba(178,160,120,0.4)',g:0.01});
 }
-function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK){
- const w1=5.6*sc,w2=7.2*sc;
+function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK,br){
+ let w1=5.6*sc,w2=7.2*sc;
+ // Chest expands a touch on the breath so an idle unit is never a frozen slab
+ const bch=1+(br||0)*0.045;
+ w1*=bch;w2*=bch;
  ctx.save();ctx.rotate(lean);
  // Base is always the team gradient: friend/foe must stay readable at a
  // glance. Per-villager personality is layered on top, never replacing it.
@@ -3146,10 +3360,11 @@ function drawBow(hx,hy,ang,pull){
  ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(-pull,0);ctx.lineTo(0,sy2);ctx.stroke();
  ctx.restore();
 }
-function drawLance(hx,hy,ang){
+function drawLance(hx,hy,ang,ext){
  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
- ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(17,0);ctx.stroke();
- ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(17,-2.6);ctx.lineTo(25,0);ctx.lineTo(17,2.6);ctx.closePath();ctx.fill();
+ const L=(ext||0)*0.42;
+ ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(17+L,0);ctx.stroke();
+ ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(17+L,-2.6);ctx.lineTo(25+L,0);ctx.lineTo(17+L,2.6);ctx.closePath();ctx.fill();
  ctx.restore();
 }
 function toolHandle(x0,y0,x1,y1,w){
@@ -3252,35 +3467,10 @@ function drawUnit(u){
     ctx.restore();
    }
   }
- if(u.hp<=0){drawCorpse(u);return}
+if(u.hp<=0){drawCorpse(u);return}
  const blink=eyeBlink(u);
- const ap=atkP(u);
  const moving=u.mv?1:0;
  const ph=(u.mv?frame*0.42:frame*0.09+u.id)+u.id*0.7;
- ctx.save();
- ctx.translate(u.x,u.y);
- let lunge=0,recoil=0;
- if(ap<=1){
-  if(t==='cannon')recoil=(1-ap)*5;
-  else if(t==='archer')lunge=-ap*1.2;
-  else lunge=Math.sin(Math.min(1,ap*1.35)*Math.PI)*3.4-ap*0.6;
- }
- const fSin=Math.max(-1,Math.min(1,Math.sin(u.face)));
- const isBack=fSin<-0.45;
- ctx.rotate(fSin*0.13);
- if(Math.cos(u.face)<0)ctx.scale(-1,1);
- const bobY=(t==='villager')?0:(moving?-Math.abs(Math.sin(ph*2))*1.1:Math.sin(frame*0.07+u.id)*0.35);
- ctx.translate(lunge-recoil,bobY);
- const flash=u.hurt>0?0.55:0;
- // Monk special: glow aura
- if(t==='monk'){
-  const pulse=0.5+0.5*Math.sin(frame*0.08+u.id);
-  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.25+pulse*0.15;
-  ctx.fillStyle='#c9a2ff';ctx.beginPath();ctx.arc(0,-15,14+pulse*3,0,7);ctx.fill();ctx.restore();
- }
- if(t==='elephant'){drawElephant(u,TC,ph,ap);ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return}
- if(t==='cannon'){drawCannonRig(u,TC,ph,ap);ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return}
- if(t==='knight'){drawHorse(u,TC,ph,ap,blink);ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return}
  const sc=1.45;
  const LK=(t==='villager')?villLook(u):null;
  const scu=LK?sc*LK.tall:sc;
@@ -3288,10 +3478,42 @@ function drawUnit(u){
  const armored=t!=='villager'&&t!=='monk';
  const gk=u.node?u.node.kind:(u.carryKind==='w'?'wood':u.carryKind==='g'?'gold':'food');
  const working=u.state==='gather'||u.state==='return'||u.state==='build';
-  const VA=(t==='villager')?villAnim(u,scu):null;
- if(VA)ctx.translate(VA.lunge,VA.bobY);
- if(VA&&VA.working&&VA.hit&&u.vsw!=null){
-  u.vsw=VA.sw;
+ // One pose object drives villagers and soldiers alike, so the body code below
+ // is written once: villagers keep villAnim, everyone else gets the swing
+ // timeline layered over the walking body.
+ const UA=(t==='villager')?null:unitAnim(u,scu);
+ const P=(t==='villager')?villAnim(u,scu):soldierPose(u,UA);
+ const ap=u.atkT>0?u.atkF:2;
+ const big=(t==='elephant'||t==='cannon'||t==='knight');
+ let recoil=0;
+ if(t==='cannon'&&ap<=1)recoil=(1-ap)*3;
+ const bigLunge=(t==='elephant'||t==='cannon')?0:(t==='knight'&&ap<=1?(kf(ap,ATK_KEYS.thrust).lunge):0);
+ ctx.save();
+ ctx.translate(u.x,u.y);
+ const fSin=Math.max(-1,Math.min(1,Math.sin(u.face)));
+ const isBack=fSin<-0.45;
+ ctx.rotate(fSin*0.13+(P?P.roll||0:0));
+ if(Math.cos(u.face)<0)ctx.scale(-1,1);
+ const bobY=P?P.bobY:(moving?-Math.abs(Math.sin(ph*2))*1.1:Math.sin(frame*0.07+u.id)*0.35);
+ ctx.translate((P?P.lunge+bigLunge:0)-recoil+(P&&P.push?P.push:0),bobY);
+ const flash=u.hurt>0?0.55:0;
+ // Monk special: glow aura, brightest at the release frame of the cast
+ if(t==='monk'){
+  const pulse=Math.max(0.5+0.5*Math.sin(frame*0.08+u.id),P?P.pull||0:0);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.25+pulse*0.15;
+  ctx.fillStyle='#c9a2ff';ctx.beginPath();ctx.arc(0,-15,14+pulse*3,0,7);ctx.fill();ctx.restore();
+ }
+ if(big){
+  if(t==='elephant')drawElephant(u,TC,ph,ap);
+  else if(t==='cannon')drawCannonRig(u,TC,ph,ap);
+  else drawHorse(u,TC,ph,ap,blink);
+  ctx.restore();if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);return;
+ }
+ // P.hit is true on the frame the swing index ticks over. The old guard
+ // (u.vsw!=null) could never be satisfied, so the strike never spawned chips,
+ // dust or sound: villager swings were completely silent.
+if(P&&P.working&&P.hit){
+  u.vsw=P.sw;
   if(isVis(u.x,u.y)){
    if(u.state==='build'){
     const bb=blds.find(x=>x.id===u.bld);
@@ -3308,53 +3530,87 @@ function drawUnit(u){
    addTrauma(0.018);
   }
  }
-  drawLegs(u,VA?VA.wph:ph,TC.p,TC.d,(LK?LK.skin:SKIN),scu,yHip,VA);
-  const swing=moving?Math.sin(ph)*0.55:Math.sin(frame*0.06+u.id)*0.1;
+drawLegs(u,P.wph,TC.p,TC.d,(LK?LK.skin:SKIN),scu,yHip,P);
   const vSkin=LK?LK.skin:SKIN, vSkinD=LK?LK.skinD:SKIN_D;
+  // Cape behind the torso so it never covers the team colour on the chest
+  const cap=(armored&&qIdx>=2)?capeChain(u,UA||{mv:0,lean:0},scu):null;
   const bSh=[-1.2*scu,ySh+0.6*scu];
-  const bA=VA?VA.armB:(swing*0.9+0.35);
-  joint(bSh[0],bSh[1],VA?VA.armB:(-0.5+bA),4.6*scu,1.0,4.4*scu,2.3*scu,vSkinD);
+  joint(bSh[0],bSh[1],P.armB,4.6*scu,1.0,4.4*scu,2.3*scu,vSkinD);
   drawBackGear(u,TC,scu,ySh);
-  drawTorso(u,TC,scu,yHip,ySh,armored,VA?VA.torsoLean:(ap<=1?(t==='archer'?-0.03:0.05):moving?0.06:0),LK);
+  if(cap)drawCape(cap,TC,scu);
+  drawTorso(u,TC,scu,yHip,ySh,armored,P.torsoLean,LK,P.breath);
   if(armored){for(const sx of [-3.6*scu,3.6*scu]){ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(sx,ySh+0.6*scu,2.7*scu,0,7);ctx.fill();ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke()}}
-  const fSh=[1.4*scu+(VA&&VA.armReach?VA.armReach:0),ySh+0.6*scu];
-  let fa,fe;
-  if(VA){fa=VA.armF}
-  else if(working){fa=-0.9-Math.abs(Math.sin(frame/6.5+u.id))*0.95}
-  else if(ap<=1){
-   if(t==='archer')fa=-0.15-(1-ap)*0.15;
-   else if(t==='spear')fa=-0.35-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.35;
-   else if(t==='sword'||t==='hero')fa=-0.5-Math.sin(Math.min(1,ap*1.25)*Math.PI)*1.5;
-   else if(t==='monk')fa=-0.4-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.6;
-   else fa=-0.3-Math.sin(Math.min(1,ap*1.2)*Math.PI)*0.9;
-  }else fa=-0.35-swing*0.75;
-  fe=joint(fSh[0],fSh[1],fa,4.8*scu,1.05,4.6*scu,2.5*scu,vSkin);
- if(u.type==='villager'){
-  const ta=VA?VA.tool:(fa-0.55);
-  if(u.state==='gather'&&gk==='gold')drawPick(fe.fx,fe.fy,VA?ta:fa-0.5);
-  else if(u.state==='gather'&&(gk==='food'||gk==='hunt'))drawSickle(fe.fx,fe.fy,VA?ta:fa-0.35);
-  else if(u.state==='build')drawHammer(fe.fx,fe.fy,VA?ta:fa-0.3);
+  const fSh=[1.4*scu+P.armReach,ySh+0.6*scu];
+  const fa=P.armF;
+  const fe=joint(fSh[0],fSh[1],fa,4.8*scu,1.05,4.6*scu,2.5*scu,vSkin);
+  // Blade angle: driven by the swing when a keyframe owns it, otherwise it just
+  // tracks the hand so the weapon can never come loose from the fist.
+  let wa=P.armF-0.55;
+  if(t==='spear')wa=(P.wAng!=null)?P.wAng:P.armF-1.5;
+  else if(t==='sword'||t==='hero')wa=(P.wAng!=null)?P.wAng:wa;
+  else if(t==='archer')wa=-0.15;
+  if(P.trailLen&&qIdx>=2){
+   const L=P.trailLen,tr=u.tr||(u.tr=[]);
+   tr.push(fe.fx+Math.cos(wa)*L,fe.fy+Math.sin(wa)*L);
+   while(tr.length>10)tr.splice(0,2);
+  }
+  if(u.tr&&u.tr.length>=4&&qIdx>=2){
+   ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+   const n=u.tr.length>>1;
+   for(let i=1;i<n;i++){
+    const a=(i/n)*0.5;
+    ctx.strokeStyle='rgba(206,226,255,'+a.toFixed(3)+')';
+    ctx.lineWidth=0.5+3*a;
+    ctx.beginPath();ctx.moveTo(u.tr[(i-1)*2],u.tr[(i-1)*2+1]);ctx.lineTo(u.tr[i*2],u.tr[i*2+1]);ctx.stroke();
+   }
+   ctx.restore();
+  }
+ if(t==='villager'){
+  const ta=P.tool;
+  if(u.state==='gather'&&gk==='gold')drawPick(fe.fx,fe.fy,ta);
+  else if(u.state==='gather'&&(gk==='food'||gk==='hunt'))drawSickle(fe.fx,fe.fy,ta);
+  else if(u.state==='build')drawHammer(fe.fx,fe.fy,ta);
   else drawAxe(fe.fx,fe.fy,ta);
- }else if(t==='sword'||t==='hero')drawKatana(fe.fx,fe.fy,fa-0.55);
- else if(t==='spear')drawSpear(fe.fx,fe.fy,fa-1.5,ap<=1?Math.sin(Math.min(1,ap)*Math.PI)*7:0);
- else if(t==='archer')drawBow(fe.fx,fe.fy,-0.15,ap<=1?Math.min(6,ap*9):2.5);
-  const hx=VA?VA.headDX:((working?0.2:1.5)*sc+Math.sin(ph*2)*0.4*sc);
-  const hy=(VA?(ySh-4.6*scu+VA.headDY):(ySh-4.6*sc+(working?-0.6:0)));
+ }else if(t==='sword'||t==='hero')drawKatana(fe.fx,fe.fy,wa);
+ else if(t==='spear')drawSpear(fe.fx,fe.fy,wa,P.wExt);
+ else if(t==='archer')drawBow(fe.fx,fe.fy,wa,P.pull);
+  const hx=P.headDX;
+  const hy=ySh-4.6*scu+P.headDY;
   const helmet=u.type==='villager'?0:u.type==='archer'?2:u.type==='spear'?3:u.type==='monk'?3:1;
-  if(VA&&VA.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(VA.headTilt);ctx.translate(-hx,-hy)}
+  if(P.headTilt){ctx.save();ctx.translate(hx,hy);ctx.rotate(P.headTilt);ctx.translate(-hx,-hy)}
   drawHead(u,TC,scu,hx,hy,helmet,blink,isBack);
-  if(VA&&VA.headTilt)ctx.restore();
+  if(P.headTilt)ctx.restore();
  if(flash>0){
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=flash*0.5;
   ctx.fillStyle='#ff5555';ctx.beginPath();ctx.ellipse(0,-16*sc,9*sc,13*sc,0,0,7);ctx.fill();ctx.restore();
  }
   ctx.restore();
-  if(VA&&VA.foot&&u.team==='P1'&&isVis(u.x,u.y)&&qIdx>=1){
+  if(P.foot&&u.team==='P1'&&isVis(u.x,u.y)&&qIdx>=1){
    if(Math.random()<0.5)addFootDust(u,0,0);
   }
   if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('🤴',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.textAlign='left'}}
- if(u.carry>0)drawLoad(u,TC,VA);
+ if(u.carry>0)drawLoad(u,TC,P);
  if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);
+}
+function drawCape(c,TC,sc){
+ const a=c[0],b=c[c.length-1];
+ // Flat fills on purpose: a gradient here would be reallocated per unit per
+ // frame, and with 60 armored units on screen that is the whole frame budget.
+ ctx.fillStyle=TC.d;
+ ctx.beginPath();
+ ctx.moveTo(a.x,a.y-2.6*sc);
+ ctx.quadraticCurveTo(b.x*0.7,a.y+1.5*sc,b.x,b.y+3.2*sc);
+ ctx.quadraticCurveTo(b.x*0.35,b.y-1.2*sc,a.x,a.y+1.4*sc);
+ ctx.closePath();ctx.fill();
+ ctx.fillStyle=TC.p;
+ ctx.beginPath();
+ ctx.moveTo(a.x,a.y-2.2*sc);
+ ctx.quadraticCurveTo(b.x*0.7,a.y+1.0*sc,b.x*0.96,b.y+2.0*sc);
+ ctx.quadraticCurveTo(b.x*0.35,b.y-1.6*sc,a.x,a.y+1.0*sc);
+ ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,0.28)';ctx.lineWidth=0.6*sc;ctx.stroke();
+ ctx.fillStyle=TC.rim;
+ ctx.beginPath();ctx.ellipse(b.x,b.y+3.0*sc,1.3*sc,0.8*sc,0.2,0,7);ctx.fill();
 }
 function drawUnitBar(u,isSel){
  const w=u.type==='elephant'?54:u.type==='knight'?40:30;
@@ -3422,24 +3678,107 @@ function drawLoad(u,TC,VA){
  ctx.restore();
 }
 function drawCorpse(u){
- const t=Math.min(1,1-u.deadT/Math.max(1,u.deadMax||qn(36)));
- ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.face);
- ctx.globalAlpha=Math.max(0.25,1-t*0.55);
- const TC=teamCol(u.team);const sc=1.18;
- ctx.save();ctx.translate(0,-3);ctx.rotate(1.42*easeOut(t));
- ctx.fillStyle=TC.d;ctx.beginPath();ctx.ellipse(0,0,6*sc,4*sc,0,0,7);ctx.fill();
- ctx.fillStyle=SKIN;ctx.beginPath();ctx.arc(9*sc,0,3.2*sc,0,7);ctx.fill();
- ctx.restore();ctx.globalAlpha=1;ctx.restore();
+ const t=Math.max(0,Math.min(1,1-u.deadT/Math.max(1,u.deadMax||qn(48))));
+ const TC=teamCol(u.team);
+ const face=(u.deadFace!=null)?u.deadFace:u.face;
+ const flip=Math.cos(face)<0;
+ // Local +x is the way the unit was facing. Topple direction comes from the
+ // killing blow, mirrored when the sprite is flipped.
+ const dA=((u.deadFall!=null?u.deadFall:face)-face)*(flip?-1:1);
+ const sc=1.45;
+ ctx.save();ctx.translate(u.x,u.y);
+ ctx.rotate(face);
+ if(flip)ctx.scale(-1,1);
+ ctx.globalAlpha=Math.max(0.3,1-t*0.55);
+ if(!u.didLand&&t>0.72&&qIdx>=1){
+  // one puff of dirt when the body actually hits the ground
+  u.didLand=1;
+  dustP(u.x,u.y+1,5,'rgba(180,162,124,0.45)');
+ }
+ // Buckle, then fall, then settle with one small rebound.
+ const buckle=easeOut(Math.max(0,Math.min(1,t/0.34)));
+ const fall=easeOut(Math.max(0,Math.min(1,(t-0.30)/0.48)));
+ const rebound=t>0.78?Math.sin((t-0.78)/0.22*Math.PI*1.6)*0.16*(1-(t-0.78)/0.22):0;
+ ctx.translate(0,buckle*2.4*sc);
+ ctx.save();
+ ctx.rotate((dA+Math.PI/2)*fall+rebound);
+ ctx.scale(1,1-buckle*0.10);
+ if(u.type==='elephant'){
+  const s2=1.5;
+  ctx.strokeStyle='#6e727c';ctx.lineWidth=4.4*s2;ctx.lineCap='round';
+  for(const [ox,off] of [[-9,-0.4],[9,0.4],[-6.5,Math.PI-0.4],[6.5,Math.PI+0.4]]){
+   const k=Math.sin(off+fall*2.2),hip=[ox*s2,-11*s2];
+   const a=0.3*k+1.25*fall;
+   const kx=hip[0]+Math.sin(a)*5.4*s2,ky=hip[1]+Math.cos(a)*5.4*s2;
+   const fa=a-0.9*fall;
+   ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);
+   ctx.lineTo(kx+Math.sin(fa)*5*s2,ky+Math.cos(fa)*5*s2);ctx.stroke();
+  }
+  const g2=ctx.createRadialGradient(-5*s2,-16*s2,2*s2,-3*s2,-11*s2,17*s2);
+  g2.addColorStop(0,'#a7acb6');g2.addColorStop(0.55,'#848992');g2.addColorStop(1,'#585d66');
+  ctx.fillStyle=g2;ctx.beginPath();ctx.ellipse(-3*s2,-16*s2,15.5*s2,10*s2,0,0,7);ctx.fill();
+  ctx.fillStyle=TC.p;ctx.fillRect(-10.4*s2,-27*s2,10*s2,3.4*s2);
+  ctx.strokeStyle='#7d828b';ctx.lineWidth=4.2*s2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(13*s2,-19*s2);
+  ctx.quadraticCurveTo(21*s2,-16*s2,19*s2,-6*s2);ctx.stroke();
+ }else if(u.type==='knight'){
+  const s2=1.3;
+  ctx.strokeStyle='#4a2e12';ctx.lineWidth=3.2*s2;ctx.lineCap='round';
+  for(const [ox,off] of [[-9,0.3],[9,-0.3],[-6,Math.PI+0.3],[6,Math.PI-0.3]]){
+   const hip=[ox*s2,-13*s2],a=1.15*fall+0.2*Math.sin(off);
+   const kx=hip[0]+Math.sin(a)*6*s2,ky=hip[1]+Math.cos(a)*6*s2;
+   const fa=a-0.7*fall;
+   ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);
+   ctx.lineTo(kx+Math.sin(fa)*5.4*s2,ky+Math.cos(fa)*5.4*s2);ctx.stroke();
+  }
+  ctx.fillStyle='#6b4420';ctx.beginPath();ctx.ellipse(-1,-16*s2,13*s2,7*s2,0,0,7);ctx.fill();
+  ctx.strokeStyle='#6b4420';ctx.lineWidth=5.4*s2;
+  ctx.beginPath();ctx.moveTo(8*s2,-18*s2);ctx.quadraticCurveTo(16*s2,-24*s2,21*s2,-27*s2);ctx.stroke();
+  ctx.fillStyle='#5a3418';ctx.beginPath();ctx.ellipse(22*s2,-28*s2,7*s2,3.4*s2,-0.3,0,7);ctx.fill();
+ }else{
+  // Foot unit: knees fold under, limbs splay, the weapon lands beside the body.
+  const LK=(u.type==='villager')?villLook(u):null;
+  const scu=LK?sc*LK.tall:sc;
+  const yHip=-13.4*scu,ySh=-20.5*scu;
+  const armored=u.type!=='villager'&&u.type!=='monk';
+  const splay=(fall*0.9+ (1-buckle)*0.6);
+  // back arm flung out
+  joint(-1.2*scu,ySh+0.6*scu,-0.15-1.5*splay,4.6*scu,0.5,4.0*scu,2.3*scu,SKIN_D);
+  drawBackGear(u,TC,scu,ySh);
+  drawTorso(u,TC,scu,yHip,ySh,armored,0.1+splay*0.35,LK,0.3);
+  const fa=-0.35-1.25*splay;
+  const fe=joint(1.4*scu,ySh+0.6*scu,fa,4.8*scu,0.35,4.4*scu,2.5*scu,SKIN);
+  drawLegs(u,t*3.4,TC.p,TC.d,LK?LK.skin:SKIN,scu,yHip,{strideAmp:splay,stride:0.7,legLen:6.95,crouch:1.6+buckle*1.4,hipShift:0,breath:0.2,wph:t*3.4});
+  drawHead(u,TC,scu,1.2*scu*splay,ySh-4.6*scu,u.type==='villager'?0:1,1,true);
+  // dropped weapon lying on the ground
+  const wg=fall*1.2;
+  if(u.type==='sword'||u.type==='hero')drawKatana(fe.fx,fe.fy,1.35+wg*0.4);
+  else if(u.type==='spear')drawSpear(fe.fx,fe.fy,1.15+wg*0.5,0);
+  else if(u.type==='archer')drawBow(fe.fx,fe.fy,1.5,1);
+  else if(u.type==='villager')drawAxe(fe.fx,fe.fy,1.45+wg*0.4);
+ }
+ ctx.restore();
+ // Blood pool spreading under the body as it settles
+ if(t>0.55){
+  ctx.globalAlpha=Math.max(0.3,1-t*0.55)*0.5*(t-0.55)/0.45;
+  ctx.fillStyle='rgba(96,10,10,0.7)';
+  ctx.beginPath();ctx.ellipse(0,1,7*sc*fall,2.6*sc,0,0,7);ctx.fill();
+ }
+ ctx.globalAlpha=1;ctx.restore();
 }
 function drawHorse(u,TC,ph,ap,blink){
  const sc=1.3;
- const yBody=-16*sc;
+ // Lance charge reuses the foot soldiers' thrust curve, so a mounted charge and
+ // a spear thrust read as the same martial language.
+ const sw=(ap<=1)?kf(ap,ATK_KEYS.thrust):null;
+ const charge=sw?Math.max(0,sw.lunge)/3.4:0;
+ const yBody=-16*sc+(sw?sw.crouch*0.9*sc:0)+Math.sin(ph*2)*(u.mv?1.1:0.3);
  // rear legs
  for(const side of [-1,1]){
   const p=ph+(side>0?0.15:Math.PI-0.15);
   const k=Math.sin(p);
   const hip=[-9*sc+side*3*sc,yBody+3*sc];
-  const thighA=0.55*k, kneeA=-0.45-Math.max(0,Math.cos(p))*0.5;
+  const thighA=0.55*k-charge*0.35, kneeA=-0.45-Math.max(0,Math.cos(p))*0.5;
   const th=6*sc,sh=6*sc;
   const kx=hip[0]+Math.sin(thighA)*th,ky=hip[1]+Math.cos(thighA)*th;
   const fa=thighA+kneeA;
@@ -3453,18 +3792,42 @@ function drawHorse(u,TC,ph,ap,blink){
  ctx.fillStyle=TC.p;ctx.beginPath();ctx.ellipse(-1,yBody-6.4*sc,7*sc,3.2*sc,0,0,7);ctx.fill();
  ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.stroke();
  const nBob=Math.sin(frame*0.09+u.id)*0.6+Math.sin(ph)*1.2;
- ctx.strokeStyle='#6b4420';ctx.lineWidth=6.4*sc;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(8*sc,yBody-2*sc);ctx.quadraticCurveTo(14*sc,yBody-8*sc-nBob,18*sc,yBody-11*sc-nBob);ctx.stroke();
  const hx=21*sc,hy=yBody-12*sc-nBob;
+ // tail: lagged off the hindquarters so a gallop whips it
+ const tp=u.tailP||(u.tailP=[{x:0,y:0},{x:0,y:0}]);
+ const tw2=sway(u.id*2.1,1.5)+(u.mv?Math.sin(ph*2)*1.2:0);
+ tp[0].x=-13*sc;tp[0].y=yBody-1*sc;
+ for(let i=1;i<tp.length;i++){
+  const pp=tp[i-1],qq=tp[i];
+  qq.x+=(pp.x-3.2*sc-qq.x)*0.18;
+  qq.y+=(pp.y+2.4*sc+tw2*i*0.6-qq.y)*0.18;
+ }
+ ctx.strokeStyle='#3a2410';ctx.lineWidth=2.6*sc;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(tp[0].x,tp[0].y);ctx.lineTo(tp[1].x,tp[1].y);ctx.stroke();
+ // mane: overlapping strokes along the crest, flattened while charging
+ ctx.strokeStyle='#2a180c';ctx.lineWidth=1.5*sc;ctx.lineCap='round';
+ for(let i=0;i<3;i++){
+  const tt=i/3,nx=8*sc+(hx-8*sc)*tt,ny=(yBody-2*sc)+(hy+2*sc-nBob)*tt;
+  ctx.beginPath();ctx.moveTo(nx,ny+1.2*sc);ctx.lineTo(nx-2.2*sc,ny+3.4*sc-charge*1.6*sc);ctx.stroke();
+ }
+ ctx.strokeStyle='#6b4420';ctx.lineWidth=6.4*sc;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(8*sc,yBody-2*sc);ctx.quadraticCurveTo(14*sc,yBody-8*sc-nBob,hx,yBody-11*sc-nBob);ctx.stroke();
  ctx.fillStyle='#7a4d22';ctx.beginPath();ctx.ellipse(hx,hy,5*1.6*sc,3.4*sc,-0.24,0,7);ctx.fill();
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(hx+0.6*sc,hy-1.4*sc,0.9*sc,0,7);ctx.fill();
  ctx.fillStyle='#1a1008';ctx.beginPath();ctx.arc(hx+0.9*sc,hy-1.3*sc,0.45*sc,0,7);ctx.fill();
+ // ears pinned flat back while the lance is going out
+ ctx.fillStyle='#5a3418';
+ for(const s2 of [-1,1]){
+  ctx.beginPath();ctx.moveTo(hx-1*sc+s2*1.6*sc,hy-1.6*sc);
+  ctx.lineTo(hx-3.6*sc+s2*2.4*sc,hy-3.2*sc-charge*1.3*sc);
+  ctx.lineTo(hx-2.2*sc+s2*1.2*sc,hy-0.4*sc);ctx.closePath();ctx.fill();
+ }
  // front legs
  for(const side of [-1,1]){
   const p=ph+(side>0?Math.PI:0);
   const k=Math.sin(p);
   const hip=[8*sc+side*2.6*sc,yBody+3*sc];
-  const thighA=0.55*k, kneeA=-0.5-Math.max(0,Math.cos(p))*0.45;
+  const thighA=0.55*k+charge*0.55, kneeA=-0.5-Math.max(0,Math.cos(p))*0.45;
   const th=6*sc,sh=6*sc;
   const kx=hip[0]+Math.sin(thighA)*th,ky=hip[1]+Math.cos(thighA)*th;
   const fa=thighA+kneeA;
@@ -3485,20 +3848,27 @@ function drawHorse(u,TC,ph,ap,blink){
  ctx.moveTo(-4.6,yHip);ctx.quadraticCurveTo(-6,(yHip+ySh)/2,-3.8,ySh-1);
  ctx.quadraticCurveTo(0,ySh+1,3.8,ySh-1);ctx.quadraticCurveTo(6,(yHip+ySh)/2,4.6,yHip);
  ctx.quadraticCurveTo(0,yHip+2.6,-4.6,yHip);ctx.closePath();ctx.fill();
- const faA=ap<=1?(-0.5-Math.sin(Math.min(1,ap*1.25)*Math.PI)*0.8):(-0.5-swing*0.6);
+ const faA=sw?sw.armF:(-0.5-swing*0.6);
  const fe=joint(1.4*sc,ySh+0.4*sc,faA,4.6*sc,0.9,4.4*sc,2.4*sc,SKIN);
- drawLance(fe.fx,fe.fy,faA-0.15);
+ // The lance lifts on the windup and levels out on the strike instead of
+ // hanging at one angle for the whole cycle.
+ drawLance(fe.fx,fe.fy,(sw&&sw.wAng!=null)?sw.wAng:(faA-0.15),sw?sw.ext:0);
  drawHead(u,TC,sc,1.4*sc+Math.sin(ph*2)*0.4,ySh-4.2*sc,1,blink,false);
 }
 function drawElephant(u,TC,ph,ap){
  const sc=1.5;
+ // Trunk attack: coils up and back on the windup, uncurls and slams on the
+ // impact frame. The whole body rears back before the blow lands.
+ const sw=(ap<=1)?kf(ap,ATK_TRUNK):null;
+ const wind=sw?Math.max(0,-sw.lunge)/1.6:0;
+ const slam=sw?Math.max(0,sw.lunge)/3.4:0;
  const yB=-16*sc;
- const bob=u.mv?Math.sin(ph*2)*0.9:Math.sin(frame*0.06+u.id)*0.4;
+ const bob=(u.mv?Math.sin(ph*2)*0.9:Math.sin(frame*0.06+u.id)*0.4)-wind*2.4*sc+slam*1.2*sc;
  const order=[[-9,-0.1],[9,0.1],[-6.5,Math.PI],[6.5,Math.PI+0.1]];
  for(const [ox,off] of order){
   const p=ph+off,k=Math.sin(p);
   const hip=[ox*sc,yB+5*sc+bob];
-  const thA=0.34*k,knA=-0.3-Math.max(0,Math.cos(p))*0.5;
+  const thA=0.34*k+slam*0.30,knA=-0.3-Math.max(0,Math.cos(p))*0.5;
   const th=5.6*sc,sh=5.4*sc;
   const kx=hip[0]+Math.sin(thA)*th,ky=hip[1]+Math.cos(thA)*th;
   const fa=thA+knA;
@@ -3511,10 +3881,25 @@ function drawElephant(u,TC,ph,ap){
  ctx.fillStyle=eg;ctx.beginPath();ctx.ellipse(-3*sc,yB+bob,15.5*sc,10*sc,0,0,7);ctx.fill();
  ctx.fillStyle=TC.p;ctx.fillRect(-10.4*sc,yB-12*sc+bob,10*sc,3.4*sc);
  const tw2=Math.sin(frame/9+u.id)*0.22+(u.mv?Math.sin(ph)*0.2:0);
- const trunk=[[13*sc,yB-4*sc+bob],[17*sc,yB+1*sc+bob],[18.5*sc,yB+6*sc+bob+tw2*2],[17*sc+tw2*3,yB+11*sc+bob+tw2*3]];
+ // curl: the tip swings up and back toward the head, then whips down and out
+ const curl=wind*3.4-slam*1.6;
+ const trunk=[[13*sc,yB-4*sc+bob],
+  [17*sc-curl*1.6*sc,yB+1*sc+bob-curl*1.4*sc],
+  [18.5*sc-curl*3.4*sc,yB+6*sc+bob-curl*3.2*sc+tw2*2],
+  [17*sc-curl*2.2*sc+tw2*3,yB+11*sc+bob-curl*1.2*sc+tw2*3]];
  ctx.strokeStyle='#7d828b';ctx.lineWidth=4.4*sc;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(trunk[0][0],trunk[0][1]);
  for(let i=1;i<trunk.length;i++)ctx.lineTo(trunk[i][0],trunk[i][1]);ctx.stroke();
+ // ears: flap outward on the swing, pinned flat while the trunk is curled
+ ctx.fillStyle='#949aa4';
+ for(const s2 of [-1,1]){
+  ctx.save();ctx.translate(11*sc,yB-6*sc+bob);ctx.scale(1,s2);
+  ctx.rotate(-0.25*curl+slam*0.55);
+  ctx.beginPath();ctx.moveTo(0,-3.4*sc);
+  ctx.quadraticCurveTo(-4.6*sc,1*sc,-1.6*sc,5.2*sc);
+  ctx.quadraticCurveTo(2.4*sc,2*sc,0,-3.4*sc);ctx.fill();
+  ctx.restore();
+ }
  ctx.fillStyle='#f7f3e6';
  for(const s2 of [-1,1]){
   ctx.beginPath();ctx.moveTo(12*sc,yB+2*sc+bob+s2*0.6);
@@ -3524,16 +3909,20 @@ function drawElephant(u,TC,ph,ap){
  ctx.fillStyle='#949aa4';ctx.beginPath();ctx.ellipse(11*sc,yB-6*sc+bob,6.4*sc,6*sc,0,0,7);ctx.fill();
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(11.4*sc,yB-7.4*sc+bob,1.1*sc,0,7);ctx.fill();
  ctx.fillStyle='#151515';ctx.beginPath();ctx.arc(11.7*sc,yB-7.3*sc+bob,0.55*sc,0,7);ctx.fill();
- // mahout
+ // mahout: braces on the saddle when the elephant charges
  const mhY=yB-14*sc+bob;
- joint(1*sc,mhY+4*sc,-0.3+Math.sin(ph)*0.4,3.4*sc,1,3.2*sc,2*sc,SKIN_D);
- ctx.fillStyle=TC.p;ctx.beginPath();ctx.ellipse(0,mhY+6*sc,3.6*sc,3.4*sc,0,0,7);ctx.fill();
+ const mLean=wind*0.22-slam*0.30;
+ joint(1*sc,mhY+4*sc,-0.3+Math.sin(ph)*0.4+mLean,3.4*sc,1,3.2*sc,2*sc,SKIN_D);
+ ctx.fillStyle=TC.p;ctx.beginPath();ctx.ellipse(0,mhY+6*sc,3.6*sc,3.4*sc,mLean,0,7);ctx.fill();
  drawHead(u,TC,0.9,0.6*sc,mhY+1*sc,3,1,false);
 }
 function drawCannonRig(u,TC,ph,ap){
  const sc=1.2;
+ // Barrel kicks back hardest right after the shot, then settles on a spring.
+ const sw=(ap<=1)?kf(ap,ATK_FIRE):null;
+ const settle=(ap>0&&ap<1)?(1-ap)*Math.sin(ap*7)*2.2:0;
  const rec=ap<=1?(1-ap)*ap*16:0;
- const yB=-9*sc;
+ const yB=-9*sc+(sw?sw.lunge*0.35:0);
  for(const ox of [-9*sc,7*sc]){
   const wr=6*sc;
   ctx.fillStyle='#2e1e08';ctx.beginPath();ctx.arc(ox,yB+wr*0.55,wr,0,7);ctx.fill();
@@ -3546,18 +3935,19 @@ function drawCannonRig(u,TC,ph,ap){
  }
  const bg=ctx.createLinearGradient(0,yB-8*sc,0,yB-1*sc);
  bg.addColorStop(0,'#a3a9b3');bg.addColorStop(0.35,'#6b7079');bg.addColorStop(1,'#2b2e34');
- ctx.save();ctx.translate(rec,0);
+ ctx.save();ctx.translate(-rec-settle*0.5,0);
  ctx.strokeStyle=bg;ctx.lineWidth=5.6*sc;ctx.lineCap='butt';
  ctx.beginPath();ctx.moveTo(-3*sc,yB-4.6*sc);ctx.lineTo(15*sc,yB-4.6*sc);ctx.stroke();
  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.ellipse(15*sc,yB-4.6*sc,1.6*sc,3*sc,0,0,7);ctx.fill();
  ctx.restore();
- // crew
+ // crew: the gunner winds the rammer back, drives it home, then rocks back
+ const cP={wph:ph,strideAmp:u.mv?1:0.12,legLen:6.95,crouch:sw?sw.crouch:0.1,hipShift:0,breath:0.5};
  for(const [ox,ph2] of [[-13*sc,0],[4*sc,Math.PI]]){
   ctx.save();ctx.translate(ox,0);
-  drawLegs(u,ph+ph2,TC.p,TC.d,SKIN,0.82,-9);
-  drawTorso(u,TC,0.82,-9*0.82,-17*0.82,false,0.03);
-  const j=joint(1, -16*0.82, ap<=1?-0.9:-0.35, 3.6*0.82, 0.9, 3.4*0.82, 2*0.82, SKIN);
-  if(ox<0)drawHammer(j.fx,j.fy,-0.9);
+  drawLegs(u,ph+ph2,TC.p,TC.d,SKIN,0.82,-9,cP);
+  drawTorso(u,TC,0.82,-9*0.82,-17*0.82,false,sw?0.03+sw.lean:0.03);
+  const j=joint(1, -16*0.82, sw?sw.armF:-0.35, 3.6*0.82, 0.9, 3.4*0.82, 2*0.82, SKIN);
+  if(ox<0)drawHammer(j.fx,j.fy,sw?sw.armF:-0.9);
   drawHead(u,TC,0.82,1.2,-20.4*0.82,ox<0?2:1,1,false);
   ctx.restore();
  }
