@@ -351,19 +351,22 @@ const UNITS={
  hero:{hp:900,dmg:32,range:34,speed:2.9,cost:{f:400,g:250},time:18*60,icon:'🤴',minAge:1,pop:2},
  monk:{hp:70,dmg:4,range:100,speed:2.2,cost:{f:80,g:60},time:15*60,icon:'🧘',minAge:2,healer:true}
 };
+// Build times are frames at 60fps with a single villager, and each extra
+// villager on the job adds one more frame of progress, so these double as the
+// worst-case time to raise the building. Scaled so nothing exceeds 10s.
 const BLD={
  tc:{name:'Town Center',w:124,h:92,hp:1500,icon:'🏰'},
- house:{name:'Ghar',w:58,h:48,hp:350,cost:{w:50},time:12*60,pop:5,icon:'🏠'},
- barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:20*60,minAge:1,icon:'🏟️'},
- market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:15*60,minAge:1,icon:'🛒'},
- tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:18*60,minAge:1,icon:'🗼'},
- farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:12*60,minAge:0,icon:'🌾'},
- khalon:{name:'Khalon',w:86,h:66,hp:600,cost:{w:80},time:14*60,minAge:0,icon:'🌾',store:'f'},
- godown:{name:'Godown',w:94,h:70,hp:700,cost:{w:100},time:16*60,minAge:1,icon:'🪵',store:'w'},
- kotla:{name:'Kotla',w:88,h:68,hp:650,cost:{w:90,g:40},time:15*60,minAge:1,icon:'🪙',store:'g'},
- monastery:{name:'Monastery',w:100,h:76,hp:650,cost:{w:120,g:80},time:20*60,minAge:2,icon:'⛪'},
- wall:{name:'Wall',w:32,h:32,hp:450,cost:{w:8},time:2*60,minAge:1,icon:'🧱',wall:true},
- gate:{name:'Gate',w:32,h:32,hp:600,cost:{w:30},time:8*60,minAge:1,icon:'🚪',wall:true,gate:true}
+ house:{name:'Ghar',w:58,h:48,hp:350,cost:{w:50},time:6*60,pop:5,icon:'🏠'},
+ barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:10*60,minAge:1,icon:'🏟️'},
+ market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:7.5*60,minAge:1,icon:'🛒'},
+ tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:9*60,minAge:1,icon:'🗼'},
+ farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:6*60,minAge:0,icon:'🌾'},
+ khalon:{name:'Khalon',w:86,h:66,hp:600,cost:{w:80},time:7*60,minAge:0,icon:'🌾',store:'f'},
+ godown:{name:'Godown',w:94,h:70,hp:700,cost:{w:100},time:8*60,minAge:1,icon:'🪵',store:'w'},
+ kotla:{name:'Kotla',w:88,h:68,hp:650,cost:{w:90,g:40},time:7.5*60,minAge:1,icon:'🪙',store:'g'},
+ monastery:{name:'Monastery',w:100,h:76,hp:650,cost:{w:120,g:80},time:10*60,minAge:2,icon:'⛪'},
+ wall:{name:'Wall',w:32,h:32,hp:450,cost:{w:8},time:1*60,minAge:1,icon:'🧱',wall:true},
+ gate:{name:'Gate',w:32,h:32,hp:600,cost:{w:30},time:4*60,minAge:1,icon:'🚪',wall:true,gate:true}
 };
 // ============ STORAGE / CAPACITY ============
 const STOR_LV=4,STOR_MAX=3;
