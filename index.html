@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Samrat Yuddh — Asian Dynasty 🏯</title>
+<title>Samrat Yuddh â€” Asian Dynasty ðŸ¯</title>
 <meta name="theme-color" content="#141007">
 <style>
 *{box-sizing:border-box;font-family:'Segoe UI',system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -36,36 +36,78 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 #powers{display:flex;gap:8px;flex-wrap:wrap;background:#1a1408;border:1px solid #8b5a2b;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;margin:0 0 8px;align-items:center}
 #powers button{min-height:40px}
 #powers span{background:#0008;padding:2px 8px;border-radius:6px}
-/* 🏰 NEW: Wall mode indicator */
+/* ðŸ° NEW: Wall mode indicator */
 #wallBar{display:none;background:#4a1818;border:1px solid #f87171;border-radius:8px;padding:6px 10px;margin:4px 0;font-weight:700;color:#fecaca;font-size:13px;align-items:center;gap:10px}
 #wallBar.on{display:flex}
-/* ⚔️ NEW: Formation selector */
+/* âš”ï¸ NEW: Formation selector */
 #formBar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#1a1408;border:1px solid #8b5a2b;border-radius:10px;padding:6px 10px;margin:4px 0;font-size:13px}
 #formBar button{min-height:36px;padding:6px 10px;font-size:12px}
 #formBar button.sel{background:linear-gradient(180deg,#fde047,#b45309);color:#000}
-/* 💾 NEW: Save/Load panel */
+/* ðŸ’¾ NEW: Save/Load panel */
 #savesPanel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:30;align-items:center;justify-content:center;padding:15px}
 #savesPanel.on{display:flex}
 #savesCard{background:#241b0e;border:2px solid #c68a2e;border-radius:14px;padding:22px;max-width:520px;width:100%}
 .saveSlot{display:flex;gap:10px;align-items:center;background:#1a1408;border:1px solid #8b5a2b;border-radius:8px;padding:10px;margin:8px 0}
 .saveSlot b{flex:1;color:#fde68a}
 .saveSlot small{display:block;color:#c8b48c;font-size:11px;font-weight:400;margin-top:2px}
-/* 🏆 NEW: Achievement toast */
+/* ðŸ† NEW: Achievement toast */
 #achToast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120%);background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f;padding:12px 20px;border-radius:12px;font-weight:800;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:90%;text-align:center}
 #achToast.on{transform:translateX(-50%) translateY(0)}
-/* 🏰 Wall build preview bar */
+/* ðŸ° Wall build preview bar */
 #wallBar b{color:#fff}
 #wallBar button{margin-left:auto;background:linear-gradient(180deg,#f87171,#b91c1c);color:#fff;min-height:32px;padding:6px 10px;font-size:12px}
-/* 🗺️ Map selector */
+/* ðŸ—ºï¸ Map selector */
 #mapRow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
 #mapRow .opt{padding:6px 10px;font-size:12px}
-/* ⏱️ Pause overlay */
+/* â±ï¸ Pause overlay */
 #pauseOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:800;text-shadow:2px 2px 0 #000;pointer-events:none}
 #pauseOverlay.on{display:flex}
-/* ⚔️ Formation hotkey hint */
+/* âš”ï¸ Formation hotkey hint */
 .kbd-hint{font-size:11px;color:#c8b48c;margin-left:auto;font-weight:400}
-#wrap:fullscreen{max-width:none;width:100%;height:100%;overflow:auto;background:#141007;padding:8px}
-#wrap:fullscreen canvas#cv{max-height:62vh}
+/* ---- True fullscreen: the canvas owns the screen, the HUD floats on top ----
+   .fs-fake mirrors the same layout for browsers without the Fullscreen API. */
+#hud{display:block}
+#wrap:fullscreen,#wrap:-webkit-full-screen,#wrap.fs-fake{
+ max-width:none;width:100%;height:100%;padding:0;margin:0;overflow:hidden;
+ background:#000;display:block;position:relative}
+/* Without the Fullscreen API the wrapper cannot fill the screen on its own, so
+   the fallback pins it over the viewport and lifts it above everything. */
+#wrap.fs-fake{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60}
+#wrap:fullscreen h1,#wrap:-webkit-full-screen h1,
+#wrap.fs-fake h1,
+#wrap:fullscreen>.guide,#wrap:-webkit-full-screen>.guide,
+#wrap.fs-fake>.guide{display:none}
+#wrap:fullscreen #cvwrap,#wrap:-webkit-full-screen #cvwrap,
+#wrap.fs-fake #cvwrap{position:absolute;inset:0;width:100%;height:100%}
+#wrap:fullscreen canvas#cv,#wrap:-webkit-full-screen canvas#cv,
+#wrap.fs-fake canvas#cv{
+ width:100%;height:100%;display:block;border:0;border-radius:0;background:#000}
+/* The HUD column must not eat clicks meant for the map; only its controls do. */
+#wrap:fullscreen #hud,#wrap:-webkit-full-screen #hud,
+#wrap.fs-fake #hud{position:absolute;left:0;right:0;top:0;z-index:3;pointer-events:none}
+#wrap:fullscreen #hud>*,#wrap:-webkit-full-screen #hud>*,
+#wrap.fs-fake #hud>*{pointer-events:auto}
+#wrap:fullscreen #topbar,#wrap:-webkit-full-screen #topbar,
+#wrap.fs-fake #topbar{position:static;margin:0;border-radius:0;border:0;border-bottom:1px solid #8b5a2b;background:rgba(26,19,8,.82);padding:4px 6px;gap:5px}
+#wrap:fullscreen #powers,#wrap:-webkit-full-screen #powers,
+#wrap.fs-fake #powers{border-radius:0;border-left:0;border-right:0;background:rgba(26,19,8,.78);padding:4px 6px;gap:6px}
+#wrap:fullscreen #formBar,#wrap:-webkit-full-screen #formBar,
+#wrap.fs-fake #formBar{border-radius:0;border-left:0;border-right:0;background:rgba(26,19,8,.74);padding:4px 6px}
+#wrap:fullscreen #msg,#wrap:-webkit-full-screen #msg,
+#wrap.fs-fake #msg{pointer-events:none;background:rgba(0,0,0,.45);margin:0;padding:2px 6px;font-size:13px}
+#wrap:fullscreen #panel,#wrap:-webkit-full-screen #panel,
+#wrap.fs-fake #panel{
+ position:absolute;left:0;right:0;bottom:0;z-index:3;margin:0;border-radius:0;
+ border:0;border-top:1px solid #8b5a2b;background:rgba(26,19,8,.86);
+ max-height:30vh;overflow:auto;padding-right:172px}
+#wrap:fullscreen #mm,#wrap:-webkit-full-screen #mm,
+#wrap.fs-fake #mm{right:10px;bottom:10px;z-index:4}
+@media (max-width:700px){
+ #wrap:fullscreen #panel,#wrap:-webkit-full-screen #panel,
+ #wrap.fs-fake #panel{padding-right:126px}
+ #wrap:fullscreen #mm,#wrap:-webkit-full-screen #mm,
+ #wrap.fs-fake #mm{bottom:10px}
+}
 @media (max-width:700px){
  #bBurger{display:inline-block}
  #topbar:not(.open) button.tbtn{display:none}
@@ -76,137 +118,167 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
  button{min-height:44px;font-size:14px}
  #formBar button{min-height:38px}
 }
-/* 🎨 Feature badges for menu */
+/* ðŸŽ¨ Feature badges for menu */
 .feat{display:inline-block;background:#1a3a1a;color:#4ade80;padding:2px 8px;border-radius:6px;font-size:11px;margin:2px;font-weight:700;border:1px solid #16a34a}
 </style>
 </head>
 <body>
 <div id="wrap">
-<h1>🏯 Samrat Yuddh — Asian Dynasty</h1>
+<h1>ðŸ¯ Samrat Yuddh â€” Asian Dynasty</h1>
+<!-- #hud is a plain block in windowed mode, so the layout is unchanged; in
+     fullscreen it becomes the floating overlay above the canvas. -->
+<div id="hud">
 <div id="topbar">
-<button id="bBurger" onclick="toggleMenu()">☰</button>
-<span>🍖 <b id="resF">0</b></span><span>🪵 <b id="resW">0</b></span><span>🪙 <b id="resG">0</b></span>
-<span>👥 <b id="popT">0/0</b></span><span>🏰 <b id="ageT">-</b></span><span>⏱ <b id="timeT">0:00</b></span>
-<span id="treatyT">🕊 -</span>
-<span>💀 <b id="killT">0</b></span><span>🏆 <b id="scoreT">0</b></span><span id="comboT">🔥 -</span><span id="heroT">🤴 -</span>
-<button id="bPause" class="tbtn" onclick="togglePause()">⏸</button>
-<button id="bSnd" class="tbtn" onclick="toggleSnd()">🔊</button>
-<button id="bMus" class="tbtn" onclick="toggleMusic()" title="Background music">🎵</button>
-<button id="bSpeed" class="tbtn" onclick="toggleSpeed()">🚀 1x</button>
-<button class="tbtn" onclick="zoomBy(1.25)">🔍+</button><button class="tbtn" onclick="zoomBy(0.8)">🔍−</button><span>🔍 <b id="zoomT">85%</b></span>
-<button id="bFol" class="tbtn" onclick="toggleFollow()">📷 Follow: OFF</button>
-<button class="tbtn" onclick="goHome()" title="Camera wapas apne gaon par">⌂ Ghar</button>
-<button class="tbtn" onclick="cycleQuality()">🎨 <b id="gfxLbl">ULTRA</b></button>
-<button id="bAuto" class="tbtn" onclick="toggleAutoQ()">⚡ Auto: ON</button>
-<button id="bFull" class="tbtn" onclick="toggleFull()">⛶ Full</button>
-<button class="tbtn" onclick="selectAllArmy()">⚔️ Fauj</button>
-<button class="tbtn" onclick="selectAllVillagers()">👷 Villager</button>
-<button class="tbtn" onclick="selectAllUnits()">👥 Sab</button>
-<button id="bPan" class="tbtn" onclick="togglePanMode()">🖐️ Pan: OFF</button>
-<button class="tbtn" onclick="openSaves()">💾 Save</button>
-<button class="tbtn" onclick="deselect()">✖</button>
+<button id="bBurger" onclick="toggleMenu()">â˜°</button>
+<span>ðŸ– <b id="resF">0</b></span><span>ðŸªµ <b id="resW">0</b></span><span>ðŸª™ <b id="resG">0</b></span>
+<span>ðŸ‘¥ <b id="popT">0/0</b></span><span>ðŸ° <b id="ageT">-</b></span><span>â± <b id="timeT">0:00</b></span>
+<span id="treatyT">ðŸ•Š -</span>
+<span>ðŸ’€ <b id="killT">0</b></span><span>ðŸ† <b id="scoreT">0</b></span><span id="comboT">ðŸ”¥ -</span><span id="heroT">ðŸ¤´ -</span>
+<button id="bPause" class="tbtn" onclick="togglePause()">â¸</button>
+<button id="bSnd" class="tbtn" onclick="toggleSnd()">ðŸ”Š</button>
+<button id="bMus" class="tbtn" onclick="toggleMusic()" title="Background music">ðŸŽµ</button>
+<button id="bSpeed" class="tbtn" onclick="toggleSpeed()">ðŸš€ 1x</button>
+<button class="tbtn" onclick="zoomBy(1.25)">ðŸ”+</button><button class="tbtn" onclick="zoomBy(0.8)">ðŸ”âˆ’</button><span>ðŸ” <b id="zoomT">85%</b></span>
+<button id="bFol" class="tbtn" onclick="toggleFollow()">ðŸ“· Follow: OFF</button>
+<button class="tbtn" onclick="goHome()" title="Camera wapas apne gaon par">âŒ‚ Ghar</button>
+<button class="tbtn" onclick="cycleQuality()">ðŸŽ¨ <b id="gfxLbl">ULTRA</b></button>
+<button id="bAuto" class="tbtn" onclick="toggleAutoQ()">âš¡ Auto: ON</button>
+<button id="bFull" class="tbtn" onclick="toggleFull()" title="Poori screen pe khelne ke liye">â›¶ Full</button>
+<button class="tbtn" onclick="selectAllArmy()">âš”ï¸ Fauj</button>
+<button class="tbtn" onclick="selectAllVillagers()">ðŸ‘· Villager</button>
+<button class="tbtn" onclick="selectAllUnits()">ðŸ‘¥ Sab</button>
+<button id="bPan" class="tbtn" onclick="togglePanMode()">ðŸ–ï¸ Pan: OFF</button>
+<button class="tbtn" onclick="openSaves()">ðŸ’¾ Save</button>
+<button class="tbtn" onclick="deselect()">âœ–</button>
 </div>
 <div id="powers">
-<button id="pBolt" class="tbtn" onclick="castBolt()">⚡ Bijli</button>
-<button id="pHeal" class="tbtn" onclick="castHeal()">💚 Heal</button>
-<button id="pGift" class="tbtn" onclick="castGift()">🎁 Gift</button>
-<button id="pConvert" class="tbtn" onclick="castConvert()">⛪ Convert</button>
-<span id="crateT">📦 -</span>
+<button id="pBolt" class="tbtn" onclick="castBolt()">âš¡ Bijli</button>
+<button id="pHeal" class="tbtn" onclick="castHeal()">ðŸ’š Heal</button>
+<button id="pGift" class="tbtn" onclick="castGift()">ðŸŽ Gift</button>
+<button id="pConvert" class="tbtn" onclick="castConvert()">â›ª Convert</button>
+<span id="crateT">ðŸ“¦ -</span>
 </div>
 <div id="formBar">
-<span>⚔️ <b>Formation:</b></span>
-<button id="fbLine" onclick="setFormation('line')">➖ Line <span class="kbd-hint">1</span></button>
-<button id="fbWedge" onclick="setFormation('wedge')">🔺 Wedge <span class="kbd-hint">2</span></button>
-<button id="fbBox" onclick="setFormation('box')">⬛ Box <span class="kbd-hint">3</span></button>
-<button id="fbSpread" onclick="setFormation('spread')">✳️ Spread <span class="kbd-hint">4</span></button>
+<span>âš”ï¸ <b>Formation:</b></span>
+<button id="fbLine" onclick="setFormation('line')">âž– Line <span class="kbd-hint">1</span></button>
+<button id="fbWedge" onclick="setFormation('wedge')">ðŸ”º Wedge <span class="kbd-hint">2</span></button>
+<button id="fbBox" onclick="setFormation('box')">â¬› Box <span class="kbd-hint">3</span></button>
+<button id="fbSpread" onclick="setFormation('spread')">âœ³ï¸ Spread <span class="kbd-hint">4</span></button>
 <span class="kbd-hint">Shift+right-click = waypoint queue</span>
 </div>
 <div id="wallBar">
-🏰 <b>Wall Build Mode</b> — click &amp; drag karke wall draw karo · <b id="wallCost">0🪵/segment</b>
-<button onclick="toggleWallMode()">✖ Band</button>
+ðŸ° <b>Wall Build Mode</b> â€” click &amp; drag karke wall draw karo Â· <b id="wallCost">0ðŸªµ/segment</b>
+<button onclick="toggleWallMode()">âœ– Band</button>
 </div>
 <div id="msg"></div>
+</div>
 <div id="cvwrap"><canvas id="cv" width="900" height="500"></canvas><canvas id="mm" width="150" height="94"></canvas></div>
-<div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
+<div id="panel"><div id="panelInfo">Unit/building chuno â€” phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
 <div class="guide">
-<b>🎮 Kaise khelein:</b><br>
-🖱️ <b>PC:</b> Left-click = chuno · Left-drag = box select (max 60) · Right-click = bhejo/katwao/hamla · <b>Shift+right-click = waypoint queue</b> · <b>Shift+click</b> = jodo/hatao · <b>Double-click</b> = same type sab. <kbd>Q</kbd>=Fauj <kbd>E</kbd>=Villager <kbd>R</kbd>=Sab <kbd>F</kbd>=Fullscreen <kbd>H</kbd>=Pan <kbd>W</kbd>=Wall <kbd>1-4</kbd>=Formation <kbd>Space</kbd>=Pause.<br>
-🏰 <b>Walls (NAYA!):</b> Villager select karo → <kbd>W</kbd> (ya wall button) dabao — map par click &amp; drag se wall segments draw karo. Enemy wall ko tod ke hi aage badh sakta hai!<br>
-⚔️ <b>Formations (NAYA!):</b> Fauj chuno → upar wale bar me Line/Wedge/Box/Spread me se ek chuno (ya <kbd>1</kbd>-<kbd>4</kbd> dabao). Ab jab right-click karega to fauj us formation me march karegi.<br>
-🎯 <b>Waypoints (NAYA!):</b> <b>Shift + right-click</b> = order ko queue me add karo (numbered flags dikhenge). Fauj poore route pe chalegi.<br>
-⛪ <b>Monastery &amp; Monk (NAYA!):</b> Yug 3 me Monastery banao → Monk train karo → Monk wounded units ko heal karta hai + enemy unit ko convert kar sakta hai (⛪ Convert button).<br>
-💾 <b>Save/Load:</b> Menu me <b>💾 SAVE / LOAD</b> ya topbar me <b>💾 Save</b> — 3 slots. Bharie slot par 💾 dabao = overwrite. Browser band karke bhi wapas khel sakte ho!<br>
-🏠 Ghar = +5 abaadi · 🏟 Barracks = foj · 🗼 Burj = teer raksha · 🌾 Khet = khana · 🛒 Market = trade · 📦 Khalon/Godown/Kotla = storage Lv1→3 · ⛪ Monastery = monk · 🏰 Wall = defense<br>
-🗺️ 3 Maps: Grassland · Desert · Snow (menu me select karo)<br>
-⚡ <b>Powers:</b> ⚡ Bijli · 💚 Heal · 🎁 Gift · ⛪ Convert
+<b>ðŸŽ® Kaise khelein:</b><br>
+ðŸ–±ï¸ <b>PC:</b> Left-click = chuno Â· Left-drag = box select (max 60) Â· Right-click = bhejo/katwao/hamla Â· <b>Shift+right-click = waypoint queue</b> Â· <b>Shift+click</b> = jodo/hatao Â· <b>Double-click</b> = same type sab. <kbd>Q</kbd>=Fauj <kbd>E</kbd>=Villager <kbd>R</kbd>=Sab <kbd>F</kbd>=Fullscreen <kbd>Esc</kbd>=Fullscreen se bahar <kbd>H</kbd>=Pan <kbd>W</kbd>=Wall <kbd>1-4</kbd>=Formation <kbd>Space</kbd>=Pause.<br>
+ðŸ–¥ï¸ <b>Fullscreen (NAYA!):</b> <kbd>F</kbd> ya â›¶ button â€” canvas poori screen pe native resolution pe render hota hai aur HUD uske upar float karta hai. Window resize ya phone ghumane pe bhi khud adjust ho jaata hai.<br>
+ðŸ° <b>Walls (NAYA!):</b> Villager select karo â†’ <kbd>W</kbd> (ya wall button) dabao â€” map par click &amp; drag se wall segments draw karo. Enemy wall ko tod ke hi aage badh sakta hai!<br>
+âš”ï¸ <b>Formations (NAYA!):</b> Fauj chuno â†’ upar wale bar me Line/Wedge/Box/Spread me se ek chuno (ya <kbd>1</kbd>-<kbd>4</kbd> dabao). Ab jab right-click karega to fauj us formation me march karegi.<br>
+ðŸŽ¯ <b>Waypoints (NAYA!):</b> <b>Shift + right-click</b> = order ko queue me add karo (numbered flags dikhenge). Fauj poore route pe chalegi.<br>
+â›ª <b>Monastery &amp; Monk (NAYA!):</b> Yug 3 me Monastery banao â†’ Monk train karo â†’ Monk wounded units ko heal karta hai + enemy unit ko convert kar sakta hai (â›ª Convert button).<br>
+ðŸ’¾ <b>Save/Load:</b> Menu me <b>ðŸ’¾ SAVE / LOAD</b> ya topbar me <b>ðŸ’¾ Save</b> â€” 3 slots. Bharie slot par ðŸ’¾ dabao = overwrite. Browser band karke bhi wapas khel sakte ho!<br>
+ðŸ  Ghar = +5 abaadi Â· ðŸŸ Barracks = foj Â· ðŸ—¼ Burj = teer raksha Â· ðŸŒ¾ Khet = khana Â· ðŸ›’ Market = trade Â· ðŸ“¦ Khalon/Godown/Kotla = storage Lv1â†’3 Â· â›ª Monastery = monk Â· ðŸ° Wall = defense<br>
+ðŸ—ºï¸ 3 Maps: Grassland Â· Desert Â· Snow (menu me select karo)<br>
+âš¡ <b>Powers:</b> âš¡ Bijli Â· ðŸ’š Heal Â· ðŸŽ Gift Â· â›ª Convert
 </div>
 </div>
 
-<!-- 💾 SAVE/LOAD PANEL -->
+<!-- ðŸ’¾ SAVE/LOAD PANEL -->
 <div id="savesPanel">
 <div id="savesCard">
-<h2>💾 Save / Load Game</h2>
+<h2>ðŸ’¾ Save / Load Game</h2>
 <div id="savesList"></div>
-<button onclick="closeSaves()" style="width:100%;margin-top:12px">✖ Band Karo</button>
+<button onclick="closeSaves()" style="width:100%;margin-top:12px">âœ– Band Karo</button>
 </div>
 </div>
 
-<!-- 🏆 ACHIEVEMENT TOAST -->
+<!-- ðŸ† ACHIEVEMENT TOAST -->
 <div id="achToast"></div>
 
-<!-- ⏸️ PAUSE OVERLAY -->
-<div id="pauseOverlay">⏸ PAUSED</div>
+<!-- â¸ï¸ PAUSE OVERLAY -->
+<div id="pauseOverlay">â¸ PAUSED</div>
 
-<!-- 🏁 MAIN MENU -->
+<!-- ðŸ MAIN MENU -->
 <div id="menu"><div id="menuCard">
-<h2>🏯 Samrat Yuddh — Asian Dynasty</h2>
-<div style="color:#d8c49a">Apni sabhyata chuno, gaon basao, foj banao, Yug badhao — dushman ka Town Center todo!</div>
+<h2>ðŸ¯ Samrat Yuddh â€” Asian Dynasty</h2>
+<div style="color:#d8c49a">Apni sabhyata chuno, gaon basao, foj banao, Yug badhao â€” dushman ka Town Center todo!</div>
 <div style="margin:10px 0;font-size:12px">
-<span class="feat">🏰 Walls &amp; Gates</span>
-<span class="feat">⚔️ Formations</span>
-<span class="feat">💾 Save/Load</span>
-<span class="feat">⛪ Monastery</span>
-<span class="feat">🎯 Waypoints</span>
+<span class="feat">ðŸ° Walls &amp; Gates</span>
+<span class="feat">âš”ï¸ Formations</span>
+<span class="feat">ðŸ’¾ Save/Load</span>
+<span class="feat">â›ª Monastery</span>
+<span class="feat">ðŸŽ¯ Waypoints</span>
 </div>
-<div><b>🏯 Sabhyata:</b><div class="opt-btns" id="civBtns">
-<button class="opt sel" data-c="japan">🇯🇵 Japan (talwar +25%)</button>
-<button class="opt" data-c="china">🇨🇳 China (sasta + tez kaam)</button>
-<button class="opt" data-c="india">🇮🇳 India (mota HP + 1 worker free)</button></div></div>
-<div><b>🗺️ Map:</b><div class="opt-btns" id="mapRow">
-<button class="opt sel" data-m="grass">🌿 Grassland</button>
-<button class="opt" data-m="desert">🏜️ Desert</button>
-<button class="opt" data-m="snow">❄️ Snow</button></div></div>
-<div><b>⚡ Mushkil:</b><div class="opt-btns" id="diffBtns">
-<button class="opt" data-d="easy">😊 Easy</button>
-<button class="opt sel" data-d="normal">😐 Normal</button>
-<button class="opt" data-d="hard">😈 Hard</button></div></div>
-<div><b>🎨 Graphics:</b><div class="opt-btns" id="gfxBtns">
+<div><b>ðŸ¯ Sabhyata:</b><div class="opt-btns" id="civBtns">
+<button class="opt sel" data-c="japan">ðŸ‡¯ðŸ‡µ Japan (talwar +25%)</button>
+<button class="opt" data-c="china">ðŸ‡¨ðŸ‡³ China (sasta + tez kaam)</button>
+<button class="opt" data-c="india">ðŸ‡®ðŸ‡³ India (mota HP + 1 worker free)</button></div></div>
+<div><b>ðŸ—ºï¸ Map:</b><div class="opt-btns" id="mapRow">
+<button class="opt sel" data-m="grass">ðŸŒ¿ Grassland</button>
+<button class="opt" data-m="desert">ðŸœï¸ Desert</button>
+<button class="opt" data-m="snow">â„ï¸ Snow</button></div></div>
+<div><b>âš¡ Mushkil:</b><div class="opt-btns" id="diffBtns">
+<button class="opt" data-d="easy">ðŸ˜Š Easy</button>
+<button class="opt sel" data-d="normal">ðŸ˜ Normal</button>
+<button class="opt" data-d="hard">ðŸ˜ˆ Hard</button></div></div>
+<div><b>ðŸŽ¨ Graphics:</b><div class="opt-btns" id="gfxBtns">
 <button class="opt" data-q="0">LOW</button>
 <button class="opt" data-q="1">MEDIUM</button>
 <button class="opt" data-q="2">HIGH</button>
-<button class="opt sel" data-q="3">✨ ULTRA</button></div>
-<div style="font-size:12px;color:#c8b48c;margin-top:2px">ULTRA = full detail + bloom + day/night + shadows. Kam FPS aaye to <b>⚡ Auto</b> khud adjust kar lega.</div></div>
-<div><b>🎯 Campaign (10 mission — jeeto aur agla kholo):</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;color:#f0e2c0">Free play ya koi level chuno!</div></div>
+<button class="opt sel" data-q="3">âœ¨ ULTRA</button></div>
+<div style="font-size:12px;color:#c8b48c;margin-top:2px">ULTRA = full detail + bloom + day/night + shadows. Kam FPS aaye to <b>âš¡ Auto</b> khud adjust kar lega.</div></div>
+<div><b>ðŸŽ¯ Campaign (10 mission â€” jeeto aur agla kholo):</b><div class="opt-btns" id="lvlBtns"></div><div id="lvlDesc" style="font-size:13px;color:#f0e2c0">Free play ya koi level chuno!</div></div>
 <div id="contWrap"></div>
-<button id="startBtn" onclick="LEVEL=null;startGame()">▶ FREE PLAY ⚔️</button>
-<button id="openSavesBtn" onclick="openSaves()" style="width:100%;margin-top:8px">💾 SAVE / LOAD</button>
+<button id="startBtn" onclick="LEVEL=null;startGame()">â–¶ FREE PLAY âš”ï¸</button>
+<button id="openSavesBtn" onclick="openSaves()" style="width:100%;margin-top:8px">ðŸ’¾ SAVE / LOAD</button>
 </div></div>
 
-<!-- 🏁 END SCREEN -->
-<div id="endScreen"><div id="endCard"><h2 id="endTitle"></h2><div id="endDesc"></div><br><button id="nextLvlBtn" onclick="nextLevel()" style="display:none;background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f">▶ Agla Level</button> <button onclick="location.reload()">↻ Naya Yuddh</button></div></div>
+<!-- ðŸ END SCREEN -->
+<div id="endScreen"><div id="endCard"><h2 id="endTitle"></h2><div id="endDesc"></div><br><button id="nextLvlBtn" onclick="nextLevel()" style="display:none;background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f">â–¶ Agla Level</button> <button onclick="location.reload()">â†» Naya Yuddh</button></div></div>
 
 <script>
 'use strict';// ============ ENGINE CORE ============
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const mm=document.getElementById('mm'),mmc=mm.getContext('2d');
-const VW=900,VH=500;
+// VW/VH are the logical viewport in CSS pixels. They track the canvas's real
+// displayed size, so the backing store matches the screen and fullscreen is
+// native-resolution instead of a 900x500 image stretched across the monitor.
+// vScale keeps "how much world is on screen" independent of that size: the zoom
+// limits were tuned at VW_BASE, so they scale with it and view.z means the same
+// thing on a phone and on a 4K display.
+const VW_BASE=900;
+let VW=900,VH=500,vScale=1;
 const W=2200,H=1400;
 const P1BX=320,P1BY=1120,AIBX=1880,AIBY=280;
 let view={x:370,y:1070,z:0.7};
 let MAPTYPE='grass';
-function clampView(){const hw=VW/2/view.z,hh=VH/2/view.z;view.x=Math.max(hw,Math.min(W-hw,view.x));view.y=Math.max(hh,Math.min(H-hh,view.y));view.z=Math.max(0.32,Math.min(1.8,view.z))}
+function zMin(){return 0.32*vScale}
+function zMax(){return 1.8*vScale}
+function clampView(){const hw=VW/2/view.z,hh=VH/2/view.z;view.x=Math.max(hw,Math.min(W-hw,view.x));view.y=Math.max(hh,Math.min(H-hh,view.y));view.z=Math.max(zMin(),Math.min(zMax(),view.z))}
 function s2w(sx,sy){const r=cv.getBoundingClientRect();const bx=(sx-r.left)*VW/r.width,by=(sy-r.top)*VH/r.height;return {x:view.x+(bx-VW/2)/view.z,y:view.y+(by-VH/2)/view.z}}
-function zoomBy(f){cancelCam();view.z=Math.max(0.32,Math.min(1.8,view.z*f));clampView();if(started)updateHUD()}
+function zoomBy(f){cancelCam();view.z=Math.max(zMin(),Math.min(zMax(),view.z*f));clampView();if(started)updateHUD()}
+// Match the logical viewport to the canvas box the browser actually gave us.
+// Returns true when the size moved, so callers know to re-fit the buffers.
+function syncViewport(){
+ const r=cv.getBoundingClientRect();
+ let w=Math.round(r.width),h=Math.round(r.height);
+ // Before layout settles the box can be 0; fall back to the intrinsic size.
+ if(!(w>0&&h>0)){w=cv.clientWidth||VW;h=cv.clientHeight||VH}
+ if(!(w>0&&h>0))return false;
+ const ns=Math.max(0.25,Math.min(4,w/VW_BASE));
+ if(ns===vScale&&w===VW&&h===VH)return false;
+ const old=vScale;
+ vScale=ns;VW=w;VH=h;
+ view.z*=ns/old;   // same visible world size at the same zoom setting
+ clampView();
+ return true;
+}
 cv.addEventListener('wheel',e=>{e.preventDefault();if(!started||paused)return;const before=s2w(e.clientX,e.clientY);zoomBy(e.deltaY<0?1.15:1/1.15);const after=s2w(e.clientX,e.clientY);view.x+=before.x-after.x;view.y+=before.y-after.y;clampView()},{passive:false});
 
 // ============ AUDIO ============
@@ -216,7 +288,7 @@ function tone(f,d,type,v,pan){try{if(!AC||!soundOn)return;const c=ac();const o=c
 const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))},age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
 let soundOn=true,lastSw=0,lastBow=0;
 function noiseHit(dur,freq,v,pan){try{if(!AC||!soundOn)return;const c=ac();const len=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,len,c.sampleRate),dt=b.getChannelData(0);for(let i=0;i<len;i++)dt[i]=(Math.random()*2-1)*(1-i/len);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=b;f.type='lowpass';f.frequency.value=freq;g.gain.value=v;s.connect(f);f.connect(g);if(pan!==undefined&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,pan));g.connect(p);p.connect(c.destination);}else g.connect(c.destination);s.start()}catch(e){}}
-function toggleSnd(){soundOn=!soundOn;document.getElementById('bSnd').textContent=soundOn?'🔊':'🔇';if(soundOn)S.click();try{if(musBus)musBus.gain.setTargetAtTime(soundOn&&musOn?0.16:0,ac().currentTime,0.4)}catch(_){}}
+function toggleSnd(){soundOn=!soundOn;document.getElementById('bSnd').textContent=soundOn?'ðŸ”Š':'ðŸ”‡';if(soundOn)S.click();try{if(musBus)musBus.gain.setTargetAtTime(soundOn&&musOn?0.16:0,ac().currentTime,0.4)}catch(_){}}
 S.sword=()=>{if(!soundOn)return;const n=performance.now();if(n-lastSw<110)return;lastSw=n;noiseHit(0.09,3000,0.10);tone(700+Math.random()*300,0.05,'square',0.04)};
 S.bow=()=>{if(!soundOn)return;const n=performance.now();if(n-lastBow<140)return;lastBow=n;tone(900,0.09,'square',0.05);setTimeout(()=>tone(350,0.08,'square',0.04),40)};
 S.boom=()=>{if(!soundOn)return;tone(58,0.5,'sine',0.22);noiseHit(0.4,500,0.20)};
@@ -225,7 +297,7 @@ S.horn=()=>{if(!soundOn)return;tone(130,0.5,'sawtooth',0.12);setTimeout(()=>tone
 S.drum=(hi)=>{if(!soundOn)return;tone(hi?82:66,0.13,'sine',0.06)};
 S.repair=()=>{tone(300,0.06,'triangle',0.06)};
 
-// ============ BACKGROUND MUSIC (procedural — koi file nahi) ============
+// ============ BACKGROUND MUSIC (procedural â€” koi file nahi) ============
 // Lookahead scheduler + tanpura drone + raga-flavoured melody + tabla loop.
 // Raat/ladai ke hisaab se mood apne aap badalta hai.
 let musOn=true,musTimer=null,musNext=0,musStep=0,musBus=null,musMode='';
@@ -323,50 +395,50 @@ function musStart(){
 }
 function toggleMusic(){
  musOn=!musOn;
- const b=document.getElementById('bMus');if(b)b.textContent=musOn?'🎵':'🎵';
- if(musOn){musStart();msg('🎵 Music ON')}else{if(musBus){try{musBus.gain.setTargetAtTime(0,ac().currentTime,0.3)}catch(_){}}msg('🔇 Music OFF')}
+ const b=document.getElementById('bMus');if(b)b.textContent=musOn?'ðŸŽµ':'ðŸŽµ';
+ if(musOn){musStart();msg('ðŸŽµ Music ON')}else{if(musBus){try{musBus.gain.setTargetAtTime(0,ac().currentTime,0.3)}catch(_){}}msg('ðŸ”‡ Music OFF')}
 }
 
 // ============ DATA ============
 const CIVS={
- japan:{name:'🇯🇵 Japan',swordDmg:1.25,gather:1,cost:1,desc:'Samurai talwar +25%'},
- china:{name:'🇨🇳 China',swordDmg:1,gather:1.1,cost:0.9,desc:'sab 10% sasta, kaam 10% tez'},
- india:{name:'🇮🇳 India',swordDmg:1,gather:1,cost:1,hp:1.2,extraVill:1,desc:'mota HP + 1 muft worker'}
+ japan:{name:'ðŸ‡¯ðŸ‡µ Japan',swordDmg:1.25,gather:1,cost:1,desc:'Samurai talwar +25%'},
+ china:{name:'ðŸ‡¨ðŸ‡³ China',swordDmg:1,gather:1.1,cost:0.9,desc:'sab 10% sasta, kaam 10% tez'},
+ india:{name:'ðŸ‡®ðŸ‡³ India',swordDmg:1,gather:1,cost:1,hp:1.2,extraVill:1,desc:'mota HP + 1 muft worker'}
 };
 const AGES=[
- {icon:'🔍',name:'Discovery'},
- {icon:'🏰',name:'Colonial',cost:{f:200}},
- {icon:'🏯',name:'Fortress',cost:{f:400,w:200}},
- {icon:'🏭',name:'Industrial',cost:{f:600,w:400,g:200}},
- {icon:'👑',name:'Imperial',cost:{f:1000,w:600,g:400}}
+ {icon:'ðŸ”',name:'Discovery'},
+ {icon:'ðŸ°',name:'Colonial',cost:{f:200}},
+ {icon:'ðŸ¯',name:'Fortress',cost:{f:400,w:200}},
+ {icon:'ðŸ­',name:'Industrial',cost:{f:600,w:400,g:200}},
+ {icon:'ðŸ‘‘',name:'Imperial',cost:{f:1000,w:600,g:400}}
 ];
 const UNITS={
- villager:{hp:40,dmg:3,range:20,speed:2.1,cost:{f:50},time:10*60,icon:'👷'},
- sword:{hp:95,dmg:12,range:26,speed:2.3,cost:{f:60,w:20},time:10*60,icon:'🗡️',minAge:1},
- archer:{hp:65,dmg:9,range:175,speed:2.3,cost:{f:50,w:40},time:12*60,icon:'🏹',minAge:1},
- knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'🐎',minAge:2},
- spear:{hp:85,dmg:8,range:30,speed:2.3,cost:{f:50,w:25},time:10*60,icon:'🔱',minAge:1},
- elephant:{hp:420,dmg:24,range:32,speed:1.7,cost:{f:200,g:100},time:20*60,icon:'🐘',minAge:2,pop:2},
- cannon:{hp:130,dmg:14,range:230,speed:1.6,cost:{f:100,g:150},time:18*60,icon:'💣',minAge:3,pop:2},
- hero:{hp:900,dmg:32,range:34,speed:2.9,cost:{f:400,g:250},time:18*60,icon:'🤴',minAge:1,pop:2},
- monk:{hp:70,dmg:4,range:100,speed:2.2,cost:{f:80,g:60},time:15*60,icon:'🧘',minAge:2,healer:true}
+ villager:{hp:40,dmg:3,range:20,speed:2.1,cost:{f:50},time:10*60,icon:'ðŸ‘·'},
+ sword:{hp:95,dmg:12,range:26,speed:2.3,cost:{f:60,w:20},time:10*60,icon:'ðŸ—¡ï¸',minAge:1},
+ archer:{hp:65,dmg:9,range:175,speed:2.3,cost:{f:50,w:40},time:12*60,icon:'ðŸ¹',minAge:1},
+ knight:{hp:170,dmg:17,range:28,speed:3.1,cost:{f:80,g:60},time:15*60,icon:'ðŸŽ',minAge:2},
+ spear:{hp:85,dmg:8,range:30,speed:2.3,cost:{f:50,w:25},time:10*60,icon:'ðŸ”±',minAge:1},
+ elephant:{hp:420,dmg:24,range:32,speed:1.7,cost:{f:200,g:100},time:20*60,icon:'ðŸ˜',minAge:2,pop:2},
+ cannon:{hp:130,dmg:14,range:230,speed:1.6,cost:{f:100,g:150},time:18*60,icon:'ðŸ’£',minAge:3,pop:2},
+ hero:{hp:900,dmg:32,range:34,speed:2.9,cost:{f:400,g:250},time:18*60,icon:'ðŸ¤´',minAge:1,pop:2},
+ monk:{hp:70,dmg:4,range:100,speed:2.2,cost:{f:80,g:60},time:15*60,icon:'ðŸ§˜',minAge:2,healer:true}
 };
 // Build times are frames at 60fps with a single villager, and each extra
 // villager on the job adds one more frame of progress, so these double as the
 // worst-case time to raise the building. Scaled so nothing exceeds 10s.
 const BLD={
- tc:{name:'Town Center',w:124,h:92,hp:1500,icon:'🏰'},
- house:{name:'Ghar',w:58,h:48,hp:350,cost:{w:50},time:6*60,pop:5,icon:'🏠'},
- barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:10*60,minAge:1,icon:'🏟️'},
- market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:7.5*60,minAge:1,icon:'🛒'},
- tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:9*60,minAge:1,icon:'🗼'},
- farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:6*60,minAge:0,icon:'🌾'},
- khalon:{name:'Khalon',w:86,h:66,hp:600,cost:{w:80},time:7*60,minAge:0,icon:'🌾',store:'f'},
- godown:{name:'Godown',w:94,h:70,hp:700,cost:{w:100},time:8*60,minAge:1,icon:'🪵',store:'w'},
- kotla:{name:'Kotla',w:88,h:68,hp:650,cost:{w:90,g:40},time:7.5*60,minAge:1,icon:'🪙',store:'g'},
- monastery:{name:'Monastery',w:100,h:76,hp:650,cost:{w:120,g:80},time:10*60,minAge:2,icon:'⛪'},
- wall:{name:'Wall',w:32,h:32,hp:450,cost:{w:8},time:1*60,minAge:1,icon:'🧱',wall:true},
- gate:{name:'Gate',w:32,h:32,hp:600,cost:{w:30},time:4*60,minAge:1,icon:'🚪',wall:true,gate:true}
+ tc:{name:'Town Center',w:124,h:92,hp:1500,icon:'ðŸ°'},
+ house:{name:'Ghar',w:58,h:48,hp:350,cost:{w:50},time:6*60,pop:5,icon:'ðŸ '},
+ barracks:{name:'Barracks',w:106,h:80,hp:800,cost:{w:150},time:10*60,minAge:1,icon:'ðŸŸï¸'},
+ market:{name:'Market',w:90,h:66,hp:600,cost:{w:100},time:7.5*60,minAge:1,icon:'ðŸ›’'},
+ tower:{name:'Burj',w:52,h:84,hp:700,cost:{w:100},time:9*60,minAge:1,icon:'ðŸ—¼'},
+ farm:{name:'Khet',w:90,h:66,hp:400,cost:{w:60},time:6*60,minAge:0,icon:'ðŸŒ¾'},
+ khalon:{name:'Khalon',w:86,h:66,hp:600,cost:{w:80},time:7*60,minAge:0,icon:'ðŸŒ¾',store:'f'},
+ godown:{name:'Godown',w:94,h:70,hp:700,cost:{w:100},time:8*60,minAge:1,icon:'ðŸªµ',store:'w'},
+ kotla:{name:'Kotla',w:88,h:68,hp:650,cost:{w:90,g:40},time:7.5*60,minAge:1,icon:'ðŸª™',store:'g'},
+ monastery:{name:'Monastery',w:100,h:76,hp:650,cost:{w:120,g:80},time:10*60,minAge:2,icon:'â›ª'},
+ wall:{name:'Wall',w:32,h:32,hp:450,cost:{w:8},time:1*60,minAge:1,icon:'ðŸ§±',wall:true},
+ gate:{name:'Gate',w:32,h:32,hp:600,cost:{w:30},time:4*60,minAge:1,icon:'ðŸšª',wall:true,gate:true}
 };
 // ============ STORAGE / CAPACITY ============
 const STOR_LV=4,STOR_MAX=3;
@@ -384,7 +456,7 @@ function allCaps(t){return{f:resCap(t,'f'),w:resCap(t,'w'),g:resCap(t,'g')}}
 function isFull(t,kind){return res[t][kind]>=resCap(t,kind)-0.5}
 function anyFull(t){return isFull(t,'f')||isFull(t,'w')||isFull(t,'g')}
 function fullName(t){
- const m={f:'🌾 Khalon',w:'🪵 Godown',g:'🪙 Kotla'};
+ const m={f:'ðŸŒ¾ Khalon',w:'ðŸªµ Godown',g:'ðŸª™ Kotla'};
  if(isFull(t,'f'))return m.f;if(isFull(t,'w'))return m.w;if(isFull(t,'g'))return m.g;return'';
 }
 function addRes(t,kind,amt){
@@ -399,22 +471,20 @@ function storUpCost(b){
 }
 function upgradeStore(b){
  const c=storUpCost(b);
- if(!c){msg('⭐ Max level (3)!');return}
- if(!canAfford('P1',c)){msg('💰 Upgrade ke liye resource kam! '+costStr(c));return}
+ if(!c){msg('â­ Max level (3)!');return}
+ if(!canAfford('P1',c)){msg('ðŸ’° Upgrade ke liye resource kam! '+costStr(c));return}
  pay('P1',c);
  b.lvl=Math.min(STOR_MAX,(b.lvl||1)+1);
  b.maxHp+=250;b.hp=b.maxHp;
- float(b.x,b.y-b.h/2-46,'⭐ '+BLD[b.kind].name+' → Lv'+b.lvl+'! +'+STOR_CAP[b.lvl]+' '+capIcon(storeKind(b)),'#FFD700');
+ float(b.x,b.y-b.h/2-46,'â­ '+BLD[b.kind].name+' â†’ Lv'+b.lvl+'! +'+STOR_CAP[b.lvl]+' '+capIcon(storeKind(b)),'#FFD700');
  for(let i=0;i<qn(14);i++)spark(b.x+rnd(-18,18),b.y-rnd(0,20),6,'#fde047');
  rings.push({x:b.x,y:b.y+6,r:10,life:40,c:'rgba(253,224,71,0.6)',flat:1});
  addTrauma(0.2);zoomPunch(0.4);S.coin();
- let best=null,bd=1e9;
- for(const u of units)if(u.team==='P1'&&u.type==='villager'&&u.hp>0){const d=dist(u,b);if(d<bd){bd=d;best=u}}
- if(best){best.state='build';best.bld=b.id;best.tx=b.x+rnd(-40,40);best.ty=b.y+50}
- msg('⭐ '+BLD[b.kind].name+' Level '+b.lvl+'! Ab capacity '+resCap('P1',storeKind(b))+'!');
+ assignBuilder(b);
+ msg('â­ '+BLD[b.kind].name+' Level '+b.lvl+'! Ab capacity '+resCap('P1',storeKind(b))+'!');
  refreshPanel();
 }
-function capIcon(k){return k==='f'?'🍖':k==='w'?'🪵':'🪙'}
+function capIcon(k){return k==='f'?'ðŸ–':k==='w'?'ðŸªµ':'ðŸª™'}
 const GATHER_T=48,CARRY=15;
 
 // ============ STATE ============
@@ -428,16 +498,16 @@ let treaty=40*60;
 let LEVEL=null,unlocked=0,objT=0,relicsGot=0;
 try{unlocked=Math.min(9,parseInt(localStorage.getItem('syLevel')||'0')||0)}catch(e){}
 const LEVELS=[
- {name:'Pehli Jung',icon:'⚔️',obj:'destroy',diff:'easy',treaty:40,tip:'Dushman kamzor hai. Foj banao aur TC todo!'},
- {name:'Tez Hamla',icon:'🌪️',obj:'destroy',diff:'normal',treaty:25,aggro:6,tip:'Sandhi sirf 25s! Jaldi Barracks banao.'},
- {name:'Khazana',icon:'💎',obj:'relic',diff:'normal',treaty:40,tip:'3 khazane uthao = jeet! Villager ko bhejo.'},
- {name:'Ghera',icon:'🛡️',obj:'survive',diff:'normal',treaty:20,survive:240,aggro:5,atkCd:1500,tip:'4 min tak TC bachao! Burj banao.'},
- {name:'Garibi',icon:'🍂',obj:'destroy',diff:'normal',treaty:40,pRes:{f:120,w:60,g:0},tip:'Kam resource! Har worker keemti hai.'},
- {name:'Yug Daud',icon:'🏯',obj:'destroy',diff:'normal',treaty:30,pAge:1,aiAge:1,tip:'Dono Yug 2 se shuru. Pehle Yug 3 = jeet!'},
- {name:'Hathi Sena',icon:'🐘',obj:'destroy',diff:'normal',treaty:35,aiCiv:'india',aggro:6,tip:'Dushman India — hathi aayenge! Bhala banao.'},
- {name:'Topkhana',icon:'💣',obj:'destroy',diff:'hard',treaty:30,pAge:2,aiAge:2,tip:'Dono ke paas Top! Pehle maaro.'},
- {name:'Maharaja',icon:'👑',obj:'destroy',diff:'hard',treaty:30,aggro:4,atkCd:2000,tip:'Tez aur khatarnak dushman. Khet + Burj + Tech!'},
- {name:'Antim Yuddh',icon:'🔥',obj:'destroy',diff:'hard',treaty:25,aiAge:1,aggro:3,atkCd:1500,tip:'Aakhri jung! Sab kuch jhonk do!'}
+ {name:'Pehli Jung',icon:'âš”ï¸',obj:'destroy',diff:'easy',treaty:40,tip:'Dushman kamzor hai. Foj banao aur TC todo!'},
+ {name:'Tez Hamla',icon:'ðŸŒªï¸',obj:'destroy',diff:'normal',treaty:25,aggro:6,tip:'Sandhi sirf 25s! Jaldi Barracks banao.'},
+ {name:'Khazana',icon:'ðŸ’Ž',obj:'relic',diff:'normal',treaty:40,tip:'3 khazane uthao = jeet! Villager ko bhejo.'},
+ {name:'Ghera',icon:'ðŸ›¡ï¸',obj:'survive',diff:'normal',treaty:20,survive:240,aggro:5,atkCd:1500,tip:'4 min tak TC bachao! Burj banao.'},
+ {name:'Garibi',icon:'ðŸ‚',obj:'destroy',diff:'normal',treaty:40,pRes:{f:120,w:60,g:0},tip:'Kam resource! Har worker keemti hai.'},
+ {name:'Yug Daud',icon:'ðŸ¯',obj:'destroy',diff:'normal',treaty:30,pAge:1,aiAge:1,tip:'Dono Yug 2 se shuru. Pehle Yug 3 = jeet!'},
+ {name:'Hathi Sena',icon:'ðŸ˜',obj:'destroy',diff:'normal',treaty:35,aiCiv:'india',aggro:6,tip:'Dushman India â€” hathi aayenge! Bhala banao.'},
+ {name:'Topkhana',icon:'ðŸ’£',obj:'destroy',diff:'hard',treaty:30,pAge:2,aiAge:2,tip:'Dono ke paas Top! Pehle maaro.'},
+ {name:'Maharaja',icon:'ðŸ‘‘',obj:'destroy',diff:'hard',treaty:30,aggro:4,atkCd:2000,tip:'Tez aur khatarnak dushman. Khet + Burj + Tech!'},
+ {name:'Antim Yuddh',icon:'ðŸ”¥',obj:'destroy',diff:'hard',treaty:25,aiAge:1,aggro:3,atkCd:1500,tip:'Aakhri jung! Sab kuch jhonk do!'}
 ];
 let sel={units:[],bld:null},placing=null,uid=1,bid=1;
 let birds=[],rings=[],relics=[];
@@ -459,7 +529,7 @@ function setFormation(f){
   if(b)b.classList.toggle('sel',x===f);
  });
  S.click();
- msg('⚔️ Formation: '+f.charAt(0).toUpperCase()+f.slice(1));
+ msg('âš”ï¸ Formation: '+f.charAt(0).toUpperCase()+f.slice(1));
 }
 function getFormationOffset(index,total,form){
  if(form==='line'){
@@ -492,15 +562,15 @@ function toggleWallMode(){
  const bar=document.getElementById('wallBar');
  if(wallMode){
   if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){
-   msg('👷 Pehle villager chuno, phir wall mode!');wallMode=false;return;
+   msg('ðŸ‘· Pehle villager chuno, phir wall mode!');wallMode=false;return;
   }
   bar.classList.add('on');
-  document.getElementById('wallCost').textContent=BLD.wall.cost.w+'🪵/segment';
-  msg('🏰 Wall mode ON — map par click & drag karke wall draw karo!');
+  document.getElementById('wallCost').textContent=BLD.wall.cost.w+'ðŸªµ/segment';
+  msg('ðŸ° Wall mode ON â€” map par click & drag karke wall draw karo!');
  }else{
   bar.classList.remove('on');
   wallPreviewSegments=[];wallDragStart=null;wallDragEnd=null;
-  msg('🏰 Wall mode OFF');
+  msg('ðŸ° Wall mode OFF');
  }
  S.click();
 }
@@ -526,23 +596,18 @@ function placeWallSegments(pts){
   // check if wall already exists here
   if(blds.some(b=>BLD[b.kind]&&BLD[b.kind].wall&&Math.abs(b.x-gx)<20&&Math.abs(b.y-gy)<20))continue;
   const cost=BLD.wall.cost;
-  if(!canAfford('P1',cost)){msg('💰 Resource kam! Wall ruk gaya.');break}
+  if(!canAfford('P1',cost)){msg('ðŸ’° Resource kam! Wall ruk gaya.');break}
   if(!validSpot(gx,gy,'wall'))continue;
   pay('P1',cost);
   const b={id:bid++,team:'P1',kind:'wall',x:gx,y:gy,w:32,h:32,hp:1,maxHp:BLD.wall.hp,prog:0,need:BLD.wall.time,done:false,queue:[],rx:gx,ry:gy,cool:0,cloth:null,dying:false,dieT:0};
   blds.push(b);
   placed++;
   // assign villager
-  let best=null,bd=1e9;
-  for(const u of units)if(u.team==='P1'&&u.type==='villager'&&u.hp>0){
-   const d=dist(u,b);
-   if(d<bd){bd=d;best=u}
-  }
-  if(best){best.state='build';best.bld=b.id;best.tx=gx;best.ty=gy+30}
+  assignBuilder(b);
  }
  if(placed>0){
   S.build();
-  msg('🏰 '+placed+' wall segment'+ (placed>1?'s':'') +' shuru!');
+  msg('ðŸ° '+placed+' wall segment'+ (placed>1?'s':'') +' shuru!');
  }
  return placed;
 }
@@ -648,28 +713,28 @@ function pay(t,cost){const r=res[t],m=civOf(t).cost;for(const k in cost)r[k]-=Ma
 function trainUnit(team,bldId,type){
  const b=blds.find(x=>x.id===bldId);if(!b||!b.done)return;
  const U=UNITS[type],C=trueCost(team,type);
- if(type!=='villager'&&age[team]<(U.minAge||0)){if(team==='P1')msg('⬆️ Pehle '+AGES[U.minAge].name+' Yug chahiye!');return}
- if(popUsed(team)+(U.pop||1)>popCap(team)){if(team==='P1')msg('🏠 Abaadi full! Ghar banao!');return}
- if(type==='hero'&&team==='P1'){const nHero=units.filter(u=>u.team==='P1'&&u.type==='hero'&&u.hp>0).length;const qHero=blds.reduce((n,x)=>n+(x.team==='P1'?x.queue.filter(q=>q.type==='hero').length:0),0);if(nHero+qHero>=1){msg('🤴 Sirf 1 Maharaja!');return}}
- if(!canAfford(team,C)){if(team==='P1')msg('💰 Resource kam!');return}
+ if(type!=='villager'&&age[team]<(U.minAge||0)){if(team==='P1')msg('â¬†ï¸ Pehle '+AGES[U.minAge].name+' Yug chahiye!');return}
+ if(popUsed(team)+(U.pop||1)>popCap(team)){if(team==='P1')msg('ðŸ  Abaadi full! Ghar banao!');return}
+ if(type==='hero'&&team==='P1'){const nHero=units.filter(u=>u.team==='P1'&&u.type==='hero'&&u.hp>0).length;const qHero=blds.reduce((n,x)=>n+(x.team==='P1'?x.queue.filter(q=>q.type==='hero').length:0),0);if(nHero+qHero>=1){msg('ðŸ¤´ Sirf 1 Maharaja!');return}}
+ if(!canAfford(team,C)){if(team==='P1')msg('ðŸ’° Resource kam!');return}
  if(b.queue.length>=5)return;
  pay(team,C);b.queue.push({type,t:U.time});if(team==='P1')S.click();
 }
 const TECHCOST={atk:{f:100,g:75},def:{f:75,w:100}};
 function resTech(team,k){
- if(tech[team][k]>=4){if(team==='P1')msg('✅ Max upgrade!');return}
+ if(tech[team][k]>=4){if(team==='P1')msg('âœ… Max upgrade!');return}
  const c={};for(const key in TECHCOST[k])c[key]=TECHCOST[k][key]*(tech[team][k]+1);
- if(!canAfford(team,c)){if(team==='P1')msg('💰 Resource kam!');return}
+ if(!canAfford(team,c)){if(team==='P1')msg('ðŸ’° Resource kam!');return}
  pay(team,c);tech[team][k]++;
- if(team==='P1'){S.age();msg(k==='atk'?'⚔ Hathiyar +15% hamla!':'🛡️ Zirah +15% HP!')}
+ if(team==='P1'){S.age();msg(k==='atk'?'âš” Hathiyar +15% hamla!':'ðŸ›¡ï¸ Zirah +15% HP!')}
 }
 function tryAge(team){
  if(age[team]>=4)return;
- const c=AGES[age[team]+1].cost;if(!canAfford(team,c)){if(team==='P1')msg('⬆️ Yug ke liye resource kam!');return}
+ const c=AGES[age[team]+1].cost;if(!canAfford(team,c)){if(team==='P1')msg('â¬†ï¸ Yug ke liye resource kam!');return}
  pay(team,c);age[team]++;S.age();
  float(team==='P1'?P1BX:AIBX,team==='P1'?P1BY-100:AIBY-50,AGES[age[team]].icon+' '+AGES[age[team]].name+'!','#FFD700');
  const _tc=blds.find(b=>b.team===team&&b.kind==='tc');if(_tc)rings.push({x:_tc.x,y:_tc.y,r:12,life:55});
- msg(civOf(team).name+' → '+AGES[age[team]].icon+' '+AGES[age[team]].name+'!');
+ msg(civOf(team).name+' â†’ '+AGES[age[team]].icon+' '+AGES[age[team]].name+'!');
 }
 function validSpot(x,y,kind){
  const B=BLD[kind];
@@ -694,29 +759,65 @@ function placeBld(team,kind,x,y){
   if(b.done)b.hp=b.maxHp;
   blds.push(b);
   addBldCloth(b);
-  if(team==='P1'){dustP(x,y+BLD[kind].h/2,10);chips(x,y+BLD[kind].h/2,6)}
-  let best=null,bd=1e9;for(const u of units)if(u.team===team&&u.type==='villager'&&u.hp>0){const d=dist(u,b);if(d<bd){bd=d;best=u}}
-  if(best){best.state='build';best.bld=b.id;best.tx=x+rnd(-40,40);best.ty=y+50}
-  return b;
+if(team==='P1'){dustP(x,y+BLD[kind].h/2,10);chips(x,y+BLD[kind].h/2,6)}
+ assignBuilder(b);
+ return b;
+}
+// Pick a villager for a construction site. A villager that is already working on
+// an unfinished site is never stolen: that used to leave the earlier site
+// half-built forever, because placing a second house simply re-tasked the same
+// nearest villager away from the first one.
+function assignBuilder(b){
+ let best=null,bd=1e9;
+ for(const u of units){
+  if(u.team!==b.team||u.type!=='villager'||u.hp<=0)continue;
+  if(u.state==='build'&&u.bld!=null&&u.bld!==b.id){
+   const own=blds.find(x=>x.id===u.bld);
+   // Busy on an unfinished site: leave them on it. If nobody is free the site
+   // simply waits, and nextBuildJob() picks it up when a builder frees up â€”
+   // stealing the villager here is what left earlier sites half-built.
+   if(own&&!own.done)continue;
+  }
+  const d=dist(u,b);
+  if(d<bd){bd=d;best=u}
+ }
+ if(!best)return null;
+ best.state='build';best.bld=b.id;best.tx=b.x+rnd(-40,40);best.ty=b.y+50;
+ return best;
+}
+// When a villager runs out of work, move it to the closest unfinished site.
+// This is what makes a queue of buildings actually drain with fewer villagers
+// than buildings instead of leaving the extras half-built.
+function nextBuildJob(u){
+ let best=null,bd=600;
+ for(const b of blds){
+  if(b.team!==u.team)continue;
+  if(b.done&&b.hp>=b.maxHp)continue;
+  const d=dist(u,b);
+  if(d<bd){bd=d;best=b}
+ }
+ if(!best)return false;
+ u.state='build';u.bld=best.id;u.tx=best.x+rnd(-40,40);u.ty=best.y+50;
+ return true;
 }
 function orderVillagerBuild(u,b){u.state='build';u.bld=b.id;u.tx=b.x+rnd(-40,40);u.ty=b.y+50}
 function trade(t,what){
  const r=res[t];
- if(what==='wf'&&r.w>=50&&!isFull(t,'f')){r.w-=50;addRes(t,'f',35);msg('50🪵 → +35🍖')}
- else if(what==='fw'&&r.f>=60&&!isFull(t,'w')){r.f-=60;addRes(t,'w',35);msg('60🍖 → +35🪵')}
- else if(what==='fg'&&r.f>=100&&r.w>=60&&!isFull(t,'g')){r.f-=100;r.w-=60;addRes(t,'g',45);msg('+45🪙 Sona!')}
- else if((what==='wf'&&isFull(t,'f'))||(what==='fw'&&isFull(t,'w'))||(what==='fg'&&isFull(t,'g')))msg('📦 '+fullName(t)+' bhar gaya!');
- else msg('🛒 Resource kam!');
+ if(what==='wf'&&r.w>=50&&!isFull(t,'f')){r.w-=50;addRes(t,'f',35);msg('50ðŸªµ â†’ +35ðŸ–')}
+ else if(what==='fw'&&r.f>=60&&!isFull(t,'w')){r.f-=60;addRes(t,'w',35);msg('60ðŸ– â†’ +35ðŸªµ')}
+ else if(what==='fg'&&r.f>=100&&r.w>=60&&!isFull(t,'g')){r.f-=100;r.w-=60;addRes(t,'g',45);msg('+45ðŸª™ Sona!')}
+ else if((what==='wf'&&isFull(t,'f'))||(what==='fw'&&isFull(t,'w'))||(what==='fg'&&isFull(t,'g')))msg('ðŸ“¦ '+fullName(t)+' bhar gaya!');
+ else msg('ðŸ›’ Resource kam!');
 }
 
 // ============ NEW: MONK / CONVERT ============
 function castConvert(){
  if(!started||paused||gameOver)return;
  const monks=units.filter(u=>u.team==='P1'&&u.type==='monk'&&u.hp>0);
- if(!monks.length){msg('🧘 Koi Monk nahi! Monastery banao aur Monk train karo.');return}
- if(treaty>0){msg('🕊 Sandhi me convert nahi!');return}
+ if(!monks.length){msg('ðŸ§˜ Koi Monk nahi! Monastery banao aur Monk train karo.');return}
+ if(treaty>0){msg('ðŸ•Š Sandhi me convert nahi!');return}
  placingPower='convert';
- msg('⛪ Convert: dushman unit par tap karo! (Esc = cancel)');
+ msg('â›ª Convert: dushman unit par tap karo! (Esc = cancel)');
  refreshPanel();
 }
 function doConvert(wx,wy){
@@ -727,21 +828,21 @@ function doConvert(wx,wy){
   const d=Math.hypot(u.x-wx,u.y-wy);
   if(d<bd){bd=d;tgt=u}
  }
- if(!tgt){msg('⛪ Koi enemy unit paas nahi!');return}
+ if(!tgt){msg('â›ª Koi enemy unit paas nahi!');return}
  const nearestMonk=monks.reduce((a,b)=>Math.hypot(a.x-tgt.x,a.y-tgt.y)<Math.hypot(b.x-tgt.x,b.y-tgt.y)?a:b);
  if(Math.hypot(nearestMonk.x-tgt.x,nearestMonk.y-tgt.y)>120){
-  msg('⛪ Monk bahut door hai! Pehle paas bhejo.');return;
+  msg('â›ª Monk bahut door hai! Pehle paas bhejo.');return;
  }
  // convert success chance based on unit hp
  const chance=0.5+0.4*(1-tgt.hp/tgt.maxHp);
  if(Math.random()<chance){
   tgt.team='P1';tgt.state='idle';tgt.target=null;tgt.tgtB=null;tgt.node=null;
-  float(tgt.x,tgt.y-30,'⛪ Converted!','#4ade80');
+  float(tgt.x,tgt.y-30,'â›ª Converted!','#4ade80');
   spark(tgt.x,tgt.y-10,14,'#4ade80');
-  S.age();msg('⛪ Unit converted!');
+  S.age();msg('â›ª Unit converted!');
  }else{
-  float(tgt.x,tgt.y-30,'⛪ Fail!','#f87171');
-  msg('⛪ Convert fail! Dobara try karo.');
+  float(tgt.x,tgt.y-30,'â›ª Fail!','#f87171');
+  msg('â›ª Convert fail! Dobara try karo.');
  }
  // set monk cooldown
  nearestMonk.convertT=15*60;
@@ -752,9 +853,9 @@ function doConvert(wx,wy){
 let pDown=null,pDrag=null,pMoved=false;
 let pinchPts=new Map(),pinchD=0,pinchAnchor=null,pinchMx=0,pinchMy=0;
 let mouseSX=0,mouseSY=0,mouseIn=false,isTouch=false,mPan=null,followOn=false,panMode=false;
-function togglePanMode(){panMode=!panMode;const b=document.getElementById('bPan');if(b){b.textContent=panMode?'🖐️ Pan: ON':'🖐️ Pan: OFF';b.classList.toggle('sel',panMode)}if(panMode){mPan=null;pDown=null;pDrag=null;panVX=panVY=0;deselect();cv.style.cursor='grab'}else cv.style.cursor='default';S.click();msg(panMode?'🖐️ Pan mode ON — left-click hold karke map ghisao!':'⬛ Box-select mode')}
-function toggleFollow(){followOn=!followOn;const b=document.getElementById('bFol');if(b)b.textContent=followOn?'📷 Follow: ON':'📷 Follow: OFF';S.click()}
-function goHome(){if(!started)return;cancelCam();const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0);const hx=tc?tc.x:P1BX,hy=tc?tc.y:P1BY;view.x=hx;view.y=hy;clampView();if(followOn)toggleFollow();S.click();msg('⌂ Ghar wapas!')}
+function togglePanMode(){panMode=!panMode;const b=document.getElementById('bPan');if(b){b.textContent=panMode?'ðŸ–ï¸ Pan: ON':'ðŸ–ï¸ Pan: OFF';b.classList.toggle('sel',panMode)}if(panMode){mPan=null;pDown=null;pDrag=null;panVX=panVY=0;deselect();cv.style.cursor='grab'}else cv.style.cursor='default';S.click();msg(panMode?'ðŸ–ï¸ Pan mode ON â€” left-click hold karke map ghisao!':'â¬› Box-select mode')}
+function toggleFollow(){followOn=!followOn;const b=document.getElementById('bFol');if(b)b.textContent=followOn?'ðŸ“· Follow: ON':'ðŸ“· Follow: OFF';S.click()}
+function goHome(){if(!started)return;cancelCam();const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0);const hx=tc?tc.x:P1BX,hy=tc?tc.y:P1BY;view.x=hx;view.y=hy;clampView();if(followOn)toggleFollow();S.click();msg('âŒ‚ Ghar wapas!')}
 function worldHit(wx,wy){
  let bu=null,bd=1e9;
  for(const u of units){if(u.hp<=0)continue;const d=Math.hypot(u.x-wx,u.y-wy);if(d<27&&d<bd){bd=d;bu=u}}
@@ -764,10 +865,10 @@ function worldHit(wx,wy){
 }
 function deselect(){sel={units:[],bld:null};placing=null;placingPower=null;if(followOn)toggleFollow();refreshPanel()}
 function selectUnits(list,label){sel={units:list.filter(u=>u.hp>0).slice(0,60),bld:null};placing=null;S.click();refreshPanel();if(label)msg(label)}
-function selectAllArmy(){selectUnits(units.filter(u=>u.team==='P1'&&u.type!=='villager'),'⚔️ Saari fauj chuni! ('+sel.units.length+')')}
-function selectAllVillagers(){selectUnits(units.filter(u=>u.team==='P1'&&u.type==='villager'),'👷 Saare villager chune! ('+sel.units.length+')')}
-function selectAllUnits(){selectUnits(units.filter(u=>u.team==='P1'),'👥 Sab units chune! ('+sel.units.length+')')}
-function selectSameTypeOnScreen(type){const hw=VW/2/view.z,hh=VH/2/view.z;const x0=view.x-hw,x1=view.x+hw,y0=view.y-hh,y1=view.y+hh;selectUnits(units.filter(u=>u.team==='P1'&&u.type===type&&u.x>x0&&u.x<x1&&u.y>y0&&u.y<y1),'Double-click: '+type+' ×'+sel.units.length)}
+function selectAllArmy(){selectUnits(units.filter(u=>u.team==='P1'&&u.type!=='villager'),'âš”ï¸ Saari fauj chuni! ('+sel.units.length+')')}
+function selectAllVillagers(){selectUnits(units.filter(u=>u.team==='P1'&&u.type==='villager'),'ðŸ‘· Saare villager chune! ('+sel.units.length+')')}
+function selectAllUnits(){selectUnits(units.filter(u=>u.team==='P1'),'ðŸ‘¥ Sab units chune! ('+sel.units.length+')')}
+function selectSameTypeOnScreen(type){const hw=VW/2/view.z,hh=VH/2/view.z;const x0=view.x-hw,x1=view.x+hw,y0=view.y-hh,y1=view.y+hh;selectUnits(units.filter(u=>u.team==='P1'&&u.type===type&&u.x>x0&&u.x<x1&&u.y>y0&&u.y<y1),'Double-click: '+type+' Ã—'+sel.units.length)}
 
 // ============ POWERS / SCORE / HERO ============
 let kills=0,score=0,combo=0,comboT=0,highScore=0;
@@ -776,25 +877,25 @@ let crates=[],crateT=40*60,placingPower=null;
 let powers={bolt:{cd:0,max:75},heal:{cd:0,max:110},gift:{cd:0,max:150}};
 function heroAlive(){return units.find(u=>u.team==='P1'&&u.type==='hero'&&u.hp>0)}
 function addScore(base){if(comboT>0)combo=Math.min(20,combo+1);else combo=1;comboT=5*60;const mult=1+Math.min(10,combo)*0.2;score+=Math.round(base*mult);if(score>highScore){highScore=score;try{localStorage.setItem('syHigh',String(highScore))}catch(e){}}}
-function heroGainXp(n){const h=heroAlive();if(!h)return;h.xp=(h.xp||0)+n;const need=(h.lvl||1)*100;if(h.xp>=need){h.xp-=need;h.lvl=(h.lvl||1)+1;h.maxHp+=150;h.hp=h.maxHp;h.dmg=Math.round(h.dmg*1.15);float(h.x,h.y-44,'⬆️ HERO Lv'+h.lvl+'! 🤴','#FFD700');spark(h.x,h.y-10,14,'#FFD700');
+function heroGainXp(n){const h=heroAlive();if(!h)return;h.xp=(h.xp||0)+n;const need=(h.lvl||1)*100;if(h.xp>=need){h.xp-=need;h.lvl=(h.lvl||1)+1;h.maxHp+=150;h.hp=h.maxHp;h.dmg=Math.round(h.dmg*1.15);float(h.x,h.y-44,'â¬†ï¸ HERO Lv'+h.lvl+'! ðŸ¤´','#FFD700');spark(h.x,h.y-10,14,'#FFD700');
   for(let i=0;i<qn(3);i++)rings.push({x:h.x,y:h.y+4,r:10+i*8,life:44+i*10,max:44+i*10,c:'rgba(255,215,0,0.6)',flat:1});
  for(let i=0;i<qn(20);i++)emit('ember',h.x+rnd(-16,16),h.y+rnd(-10,6),rnd(-.9,.9),rnd(-2.4,-.8),qn(46+rnd(0,30)),{r:rnd(1.2,2.6),c:'#ffd76a',g:0.01,add:true});
  addTrauma(0.35);zoomPunch(0.7);cinematicBars(34);focusOn(h.x,h.y,null,40);
- S.age();msg('🤴 Maharaja Level '+h.lvl+'! +HP +hamla!')}}
+ S.age();msg('ðŸ¤´ Maharaja Level '+h.lvl+'! +HP +hamla!')}}
 function onEnemyKilled(v){if(gameOver||!started)return;kills++;const base=!v.type?150:v.type==='elephant'?80:v.type==='cannon'?60:v.type==='knight'?40:v.type==='hero'?200:25;addScore(base);heroGainXp(!v.type?100:20)}
-function castBolt(){if(!started||paused||gameOver)return;if(powers.bolt.cd>0){msg('⚡ Bijli '+Math.ceil(powers.bolt.cd)+'s me taiyaar!');return}if(treaty>0){msg('🕊 Sandhi me Bijli nahi!');return}placingPower='bolt';placing=null;msg('⚡ Bijli: dushman par tap karo! (Esc = cancel)');S.click();refreshPanel()}
+function castBolt(){if(!started||paused||gameOver)return;if(powers.bolt.cd>0){msg('âš¡ Bijli '+Math.ceil(powers.bolt.cd)+'s me taiyaar!');return}if(treaty>0){msg('ðŸ•Š Sandhi me Bijli nahi!');return}placingPower='bolt';placing=null;msg('âš¡ Bijli: dushman par tap karo! (Esc = cancel)');S.click();refreshPanel()}
 function strikeBolt(wx,wy){let hits=0;for(const e of units){if(e.team!=='AI'||e.hp<=0)continue;if(Math.hypot(e.x-wx,e.y-wy)<150){dealDmg('P1',e,350);hits++}}for(const b of blds){if(b.team!=='AI'||b.hp<=0)continue;if(Math.hypot(b.x-wx,b.y-wy)<150){dealDmg('P1',b,500);hits++}}for(let i=0;i<16;i++)spark(wx+rnd(-60,60),wy+rnd(-40,20),8,'#fef08a');for(let i=0;i<8;i++)flame(wx+rnd(-50,50),wy+rnd(-30,10),rnd(3,6));rings.push({x:wx,y:wy,r:14,life:45,max:45,flat:1,c:'rgba(190,220,255,0.75)'});rings.push({x:wx,y:wy,r:8,life:70,max:70,flat:1,c:'rgba(120,180,255,0.45)'});
-for(let i=0;i<qn(10);i++)smoke(wx+rnd(-40,40),wy+rnd(-20,10),rnd(10,20),0,'rgba(90,100,120,0.5)');shake=Math.max(shake,14);addTrauma(1);zoomPunch(1.4);hitStopT(9);cinematicBars(50);focusOn(wx,wy,null,55);S.boom();float(wx,wy-40,'⚡ BIJLI! ('+hits+' hits)','#fef08a');powers.bolt.cd=powers.bolt.max;placingPower=null;msg(hits?'⚡ Bijli giri! '+hits+' nishane!':'⚡ Bijli khaali gayi!');refreshPanel()}
-function castHeal(){if(!started||paused||gameOver)return;if(powers.heal.cd>0){msg('💚 Heal '+Math.ceil(powers.heal.cd)+'s me taiyaar!');return}let n=0;for(const u of units){if(u.team==='P1'&&u.hp>0&&u.hp<u.maxHp){u.hp=Math.min(u.maxHp,u.hp+300);n++;float(u.x,u.y-30,'+💚','#4ade80')}}S.age();powers.heal.cd=powers.heal.max;msg(n?n+' units heal! 💚':'💚 Sab full HP hain!')}
-function castGift(){if(!started||paused||gameOver)return;if(powers.gift.cd>0){msg('🎁 Gift '+Math.ceil(powers.gift.cd)+'s me taiyaar!');return}const a=addRes('P1','f',500),b2=addRes('P1','w',400),c2=addRes('P1','g',300);S.coin();float(P1BX,P1BY-80,'🎁 +500🍖 +400🪵 +300🪙','#FFD700');powers.gift.cd=powers.gift.max;const lost=(500-a)+(400-b2)+(300-c2);msg(lost>0?('🎁 +'+(a)+'🍖 +'+(b2)+'🪵 +'+(c2)+'🪙 (kuch storage full thi!)'):'🎁 Tohfa mila! +500🍖 +400🪵 +300🪙');updateHUD()}
-function spawnCrate(){for(let t=0;t<20;t++){const x=rnd(400,1800),y=rnd(250,1150);if(!farFromBases(x,y))continue;const r=Math.random();const kind=r<0.45?'res':r<0.7?'gold':r<0.85?'heal':'army';crates.push({x,y,kind,ph:rnd(0,6.28)});float(x,y-30,'📦 Bonus!','#fde047');msg('📦 Bonus crate aaya! Unit bhejkar uthao!');return}}
-function crateReward(c){const done=()=>{spark(c.x,c.y-6,14,'#fde047');S.coin()};if(c.kind==='res'){addRes('P1','f',300);addRes('P1','w',200);addRes('P1','g',100);float(c.x,c.y-30,'📦 +300🍖 +200🪵 +100🪙','#fde047');msg('📦 Crate: resource bonus!')}else if(c.kind==='gold'){addRes('P1','g',300);float(c.x,c.y-30,'📦 +300🪙 SONA!','#FFD700');msg('📦 Crate: +300 sona!')}else if(c.kind==='heal'){for(const u of units)if(u.team==='P1'&&u.hp>0){u.hp=Math.min(u.maxHp,u.hp+250);float(u.x,u.y-30,'+💚','#4ade80')}msg('📦 Crate: poori sena heal! 💚')}else{const opts=['sword','spear','archer'];const tp=opts[Math.floor(Math.random()*opts.length)];if(popUsed('P1')+1<=popCap('P1')){const u=mkUnit('P1',tp,c.x+rnd(-20,20),c.y+rnd(-20,20));u.state='idle';float(c.x,c.y-30,'📦 Muft '+UNITS[tp].icon+' '+tp+'!','#4ade80');msg('📦 Crate: muft '+tp+' mila!')}else{addRes('P1','f',200);addRes('P1','g',100);float(c.x,c.y-30,'📦 +resource (pop full)','#fde047');msg('📦 Crate: abaadi full, resource mila!')}}done();updateHUD()}
+for(let i=0;i<qn(10);i++)smoke(wx+rnd(-40,40),wy+rnd(-20,10),rnd(10,20),0,'rgba(90,100,120,0.5)');shake=Math.max(shake,14);addTrauma(1);zoomPunch(1.4);hitStopT(9);cinematicBars(50);focusOn(wx,wy,null,55);S.boom();float(wx,wy-40,'âš¡ BIJLI! ('+hits+' hits)','#fef08a');powers.bolt.cd=powers.bolt.max;placingPower=null;msg(hits?'âš¡ Bijli giri! '+hits+' nishane!':'âš¡ Bijli khaali gayi!');refreshPanel()}
+function castHeal(){if(!started||paused||gameOver)return;if(powers.heal.cd>0){msg('ðŸ’š Heal '+Math.ceil(powers.heal.cd)+'s me taiyaar!');return}let n=0;for(const u of units){if(u.team==='P1'&&u.hp>0&&u.hp<u.maxHp){u.hp=Math.min(u.maxHp,u.hp+300);n++;float(u.x,u.y-30,'+ðŸ’š','#4ade80')}}S.age();powers.heal.cd=powers.heal.max;msg(n?n+' units heal! ðŸ’š':'ðŸ’š Sab full HP hain!')}
+function castGift(){if(!started||paused||gameOver)return;if(powers.gift.cd>0){msg('ðŸŽ Gift '+Math.ceil(powers.gift.cd)+'s me taiyaar!');return}const a=addRes('P1','f',500),b2=addRes('P1','w',400),c2=addRes('P1','g',300);S.coin();float(P1BX,P1BY-80,'ðŸŽ +500ðŸ– +400ðŸªµ +300ðŸª™','#FFD700');powers.gift.cd=powers.gift.max;const lost=(500-a)+(400-b2)+(300-c2);msg(lost>0?('ðŸŽ +'+(a)+'ðŸ– +'+(b2)+'ðŸªµ +'+(c2)+'ðŸª™ (kuch storage full thi!)'):'ðŸŽ Tohfa mila! +500ðŸ– +400ðŸªµ +300ðŸª™');updateHUD()}
+function spawnCrate(){for(let t=0;t<20;t++){const x=rnd(400,1800),y=rnd(250,1150);if(!farFromBases(x,y))continue;const r=Math.random();const kind=r<0.45?'res':r<0.7?'gold':r<0.85?'heal':'army';crates.push({x,y,kind,ph:rnd(0,6.28)});float(x,y-30,'ðŸ“¦ Bonus!','#fde047');msg('ðŸ“¦ Bonus crate aaya! Unit bhejkar uthao!');return}}
+function crateReward(c){const done=()=>{spark(c.x,c.y-6,14,'#fde047');S.coin()};if(c.kind==='res'){addRes('P1','f',300);addRes('P1','w',200);addRes('P1','g',100);float(c.x,c.y-30,'ðŸ“¦ +300ðŸ– +200ðŸªµ +100ðŸª™','#fde047');msg('ðŸ“¦ Crate: resource bonus!')}else if(c.kind==='gold'){addRes('P1','g',300);float(c.x,c.y-30,'ðŸ“¦ +300ðŸª™ SONA!','#FFD700');msg('ðŸ“¦ Crate: +300 sona!')}else if(c.kind==='heal'){for(const u of units)if(u.team==='P1'&&u.hp>0){u.hp=Math.min(u.maxHp,u.hp+250);float(u.x,u.y-30,'+ðŸ’š','#4ade80')}msg('ðŸ“¦ Crate: poori sena heal! ðŸ’š')}else{const opts=['sword','spear','archer'];const tp=opts[Math.floor(Math.random()*opts.length)];if(popUsed('P1')+1<=popCap('P1')){const u=mkUnit('P1',tp,c.x+rnd(-20,20),c.y+rnd(-20,20));u.state='idle';float(c.x,c.y-30,'ðŸ“¦ Muft '+UNITS[tp].icon+' '+tp+'!','#4ade80');msg('ðŸ“¦ Crate: muft '+tp+' mila!')}else{addRes('P1','f',200);addRes('P1','g',100);float(c.x,c.y-30,'ðŸ“¦ +resource (pop full)','#fde047');msg('ðŸ“¦ Crate: abaadi full, resource mila!')}}done();updateHUD()}
 
 // ============ ISSUE ORDER (with waypoints + formations) ============
 function issueOrder(wx,wy,hit,shiftQueue){
  const myU=sel.units.filter(u=>u.hp>0);
  if(!myU.length){
-  if(sel.bld&&!myU.length){const b=blds.find(x=>x.id===sel.bld);if(b){b.rx=wx;b.ry=wy;float(wx,wy-14,'🚩','#fff')}S.order();return}
+  if(sel.bld&&!myU.length){const b=blds.find(x=>x.id===sel.bld);if(b){b.rx=wx;b.ry=wy;float(wx,wy-14,'ðŸš©','#fff')}S.order();return}
   if(!hit.u&&!hit.b)deselect();
   return;
  }
@@ -844,11 +945,11 @@ function issueOrder(wx,wy,hit,shiftQueue){
 
 // ============ CLICK HANDLERS ============
 cv.addEventListener('contextmenu',e=>{e.preventDefault();if(!started||paused||gameOver)return;
- if(placingPower){placingPower=null;msg('❌ Power cancel');return}
+ if(placingPower){placingPower=null;msg('âŒ Power cancel');return}
  if(placing){placing=null;refreshPanel();return}
  const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
  issueOrder(p.x,p.y,hit,e.shiftKey);
- if(e.shiftKey)msg('🎯 Waypoint queue me add hua!');
+ if(e.shiftKey)msg('ðŸŽ¯ Waypoint queue me add hua!');
 });
 cv.addEventListener('pointerdown',e=>{ac();if(!started||paused||gameOver)return;
  if(e.button===1){mPan={x:e.clientX,y:e.clientY};pDown=null;pDrag=null;e.preventDefault();return}
@@ -894,21 +995,21 @@ cv.addEventListener('pointerup',e=>{
  if(pDrag&&!wasTouch){
    const a=s2w(Math.min(pDrag.x0,pDrag.x1),Math.min(pDrag.y0,pDrag.y1)),b=s2w(Math.max(pDrag.x0,pDrag.x1),Math.max(pDrag.y0,pDrag.y1));
    const boxed=units.filter(u=>u.team==='P1'&&u.hp>0&&u.x>a.x&&u.x<b.x&&u.y>a.y&&u.y<b.y);
-   if(e.shiftKey){const ids=new Set(sel.units.map(u=>u.id));for(const u of boxed)if(!ids.has(u.id)){sel.units.push(u);ids.add(u.id)}sel.units=sel.units.filter(u=>u.hp>0).slice(0,60);sel.bld=null;msg('➕ Box + Shift: '+sel.units.length+' units!')}
-   else{sel={units:boxed.slice(0,60),bld:null};msg('⬛ Box select: '+sel.units.length+' units!')}
+   if(e.shiftKey){const ids=new Set(sel.units.map(u=>u.id));for(const u of boxed)if(!ids.has(u.id)){sel.units.push(u);ids.add(u.id)}sel.units=sel.units.filter(u=>u.hp>0).slice(0,60);sel.bld=null;msg('âž• Box + Shift: '+sel.units.length+' units!')}
+   else{sel={units:boxed.slice(0,60),bld:null};msg('â¬› Box select: '+sel.units.length+' units!')}
    placing=null;S.click();refreshPanel();
   }else if(!pMoved){const p=s2w(e.clientX,e.clientY);const hit=worldHit(p.x,p.y);
    if(placingPower==='bolt'){strikeBolt(p.x,p.y);pDown=null;pDrag=null;return}
    if(placingPower==='convert'){doConvert(p.x,p.y);pDown=null;pDrag=null;return}
     if(placing){
     const k=placing;
-    if(placeBld('P1',k,p.x,p.y)){S.build();placing=null;msg('✅ '+BLD[k].name+' shuru!')}
-    else msg('⛔ Yahan nahi! Jagah saaf chahiye.');
+    if(placeBld('P1',k,p.x,p.y)){S.build();placing=null;msg('âœ… '+BLD[k].name+' shuru!')}
+    else msg('â›” Yahan nahi! Jagah saaf chahiye.');
     refreshPanel();return;
    }
   if(e.button===2){issueOrder(p.x,p.y,hit,e.shiftKey);return}
    if(hit.u&&hit.u.team==='P1'){
-    if(e.shiftKey){const i=sel.units.indexOf(hit.u);if(i>=0){sel.units.splice(i,1);msg('➖ 1 hataya')}else{if(sel.units.length<60){sel.units.push(hit.u);sel.bld=null;msg('➕ 1 joda')}else msg('⚠️ Max 60 units!')}S.click()}
+    if(e.shiftKey){const i=sel.units.indexOf(hit.u);if(i>=0){sel.units.splice(i,1);msg('âž– 1 hataya')}else{if(sel.units.length<60){sel.units.push(hit.u);sel.bld=null;msg('âž• 1 joda')}else msg('âš ï¸ Max 60 units!')}S.click()}
     else{sel={units:[hit.u],bld:null};S.click()}
    }
   else if(hit.b&&hit.b.team==='P1'){sel={units:[],bld:hit.b.id};S.click()}
@@ -921,7 +1022,7 @@ cv.addEventListener('dblclick',e=>{if(!started||paused||gameOver)return;const p=
 cv.addEventListener('pointerleave',()=>{mouseIn=false});
 
 document.addEventListener('keydown',e=>{
- if(e.code==='Escape'){if(placingPower){placingPower=null;msg('❌ Power cancel');return}if(placing){placing=null;refreshPanel();return}if(wallMode){toggleWallMode();return}deselect();return}
+ if(e.code==='Escape'){if(placingPower){placingPower=null;msg('âŒ Power cancel');return}if(placing){placing=null;refreshPanel();return}if(wallMode){toggleWallMode();return}if(isFullscreen()){exitFullscreen();return}deselect();return}
  if(!started||gameOver)return;
  if(e.code==='Home'||e.code==='KeyG'){goHome();return}
  if(e.code==='KeyQ'){selectAllArmy();return}
@@ -1073,7 +1174,7 @@ function updateUnit(u){
      for(const c2 of nodes){if(c2.amt<=0||nodeKind(c2)===nodeKind(n))continue;
       const d=Math.hypot(c2.x-u.x,c2.y-u.y);if(d<bd){bd=d;alt=c2}}
      if(alt&&bd<520){n=alt;u.node=alt;u.carry=0;u.gatherT=0;
-      if(u.warnedT<=0){u.warnedT=200;msg('📦 '+fullName('P1')+' full — doosra resource katwa raha hai')}}
+      if(u.warnedT<=0){u.warnedT=200;msg('ðŸ“¦ '+fullName('P1')+' full â€” doosra resource katwa raha hai')}}
     }
     if(!n||n.amt<=0){n=nearestNode(u.x,u.y,null,250);u.node=n;if(!n){u.state='idle';return}}
     if(Math.hypot(u.x-n.x,u.y-n.y)>26){moveTo(u,n.x,n.y)}
@@ -1097,14 +1198,22 @@ function updateUnit(u){
    if(dist(u,tc)>70){moveTo(u,tc.x,tc.y)}
     else{const m=civOf(u.team).gather;const kinds={};kinds[u.carryKind||'f']=Math.round(u.carry*m);
      let got=0;for(const k in kinds)got+=addRes(u.team,k,kinds[k]);
-     if(got<kinds[u.carryKind||'f']&&u.team==='P1'&&u.warnedT<=0){u.warnedT=200;msg('📦 '+fullName('P1')+' bhar gaya! Storage banao ya upgrade karo');S.click()}
+     if(got<kinds[u.carryKind||'f']&&u.team==='P1'&&u.warnedT<=0){u.warnedT=200;msg('ðŸ“¦ '+fullName('P1')+' bhar gaya! Storage banao ya upgrade karo');S.click()}
      u.carry=0;u.state='gather';if(!u.node||u.node.amt<=0)u.node=nearestNode(u.x,u.y,null,250)}
    return;
   }
-  if(u.state==='build'){
-   const b=blds.find(x=>x.id===u.bld);
-   if(!b){u.state='idle';return}
-   if(dist(u,b)>80){moveTo(u,b.x,b.y+50);return}
+if(u.state==='build'){
+    const b=blds.find(x=>x.id===u.bld);
+    if(!b){u.state='idle';return}
+    if(dist(u,b)>80){
+     // Steer at the site and stop at the build radius rather than walking to
+     // the exact centre: the centre, and b.y+50, can sit inside a neighbouring
+     // building, and a unit that keeps pressing into a wall never "arrives".
+     const a=Math.atan2(b.y-u.y,b.x-u.x);
+     u.x+=Math.cos(a)*u.speed;u.y+=Math.sin(a)*u.speed;
+     turnTo(u,a,u.type==='elephant'?5:9);
+     return;
+    }
     if(!b.done){b.prog++;if(Math.random()<0.05&&u.team==='P1')S.build();
      if(b.prog>=b.need){
       b.done=true;b.hp=b.maxHp;addBldCloth(b);
@@ -1112,8 +1221,8 @@ function updateUnit(u){
       dustP(b.x,b.y+b.h/2,12,'rgba(200,184,142,0.6)');chips(b.x,b.y,6);
       rings.push({x:b.x,y:b.y,r:10,life:40});
       if(b.kind==='farm')nodes.push({id:uid++,kind:'food',x:b.x,y:b.y+48,amt:999999,tag:0,farm:b.id,cutT:0,vr:makeVr(b.x|0,b.y|0)})}}
-    else if(b.hp<b.maxHp){b.hp=Math.min(b.maxHp,b.hp+0.15);if(b.hp>=b.maxHp)u.state='idle';if(Math.random()<0.12)spark(b.x+rnd(-b.w/3,b.w/3),b.y+rnd(-b.h/3,b.h/3),1,'#ffe9a8')}
-   else u.state='idle';
+else if(b.hp<b.maxHp){b.hp=Math.min(b.maxHp,b.hp+0.15);if(b.hp>=b.maxHp&&!nextBuildJob(u))u.state='idle';if(Math.random()<0.12)spark(b.x+rnd(-b.w/3,b.w/3),b.y+rnd(-b.h/3,b.h/3),1,'#ffe9a8')}
+    else if(!nextBuildJob(u))u.state='idle';
    return;
   }
   if(u.state==='move'){if(moveTo(u,u.tx,u.ty)){u.state='idle';if(u.waypoints&&u.waypoints.length)executeNextWaypoint(u)}return}
@@ -1127,7 +1236,7 @@ function updateUnit(u){
     if(leash>0){tgt=enemyUnitNear(u,leash);if(!tgt&&u.state==='attack')tgtB=enemyBldNear(u,220)}
    }
    // Swing timeline. The unit commits to a target, winds up, and the blow
-   // lands on the impact frame — the leftover of the old cooldown becomes the
+   // lands on the impact frame â€” the leftover of the old cooldown becomes the
    // recovery, so the attack rate is identical to before.
    if(u.atkT>0){
     u.atkT--;
@@ -1243,14 +1352,14 @@ function aiTick(){
   const ptc=blds.find(b=>b.team==='P1'&&b.kind==='tc');
   const T=ptc?{x:ptc.x,y:ptc.y}:{x:250,y:800};
   for(const u of units)if(u.team===A&&u.type!=='villager'&&u.type!=='monk'&&u.hp>0){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null;u.waypoints=[]}
-  float(tc.x,tc.y-80,'⚔ Dushman hamla!','red');S.horn();
+  float(tc.x,tc.y-80,'âš” Dushman hamla!','red');S.horn();
  }
 }
 
 // ============ SAVE / LOAD ============
 const SAVE_VER=2;
 function saveGame(slot){
- if(!started){msg('⚠️ Pehle game start karo, phir save karo!');return false}
+ if(!started){msg('âš ï¸ Pehle game start karo, phir save karo!');return false}
  try{
   const data={
    v:SAVE_VER,
@@ -1292,7 +1401,7 @@ function saveGame(slot){
   };
   localStorage.setItem('sySave'+slot,JSON.stringify(data));
   return true;
- }catch(e){msg('❌ Save fail: '+e.message);return false}
+ }catch(e){msg('âŒ Save fail: '+e.message);return false}
 }
 function listSaves(){
  const out=[];
@@ -1324,11 +1433,11 @@ function newestSaveSlot(){
 function loadGame(slot){
  try{
   const raw=localStorage.getItem('sySave'+slot);
-  if(!raw){msg('❌ Slot '+slot+' khaali hai!');return false}
+  if(!raw){msg('âŒ Slot '+slot+' khaali hai!');return false}
   let d;
-  try{d=JSON.parse(raw)}catch(e){msg('❌ Slot '+slot+' ka save corrupt hai (valid JSON nahi). Delete karke naya banao.');return false}
-  if(!d||!Array.isArray(d.units)||!Array.isArray(d.blds)||!d.res){msg('❌ Slot '+slot+' ka save corrupt hai!');return false}
-  // Settings first — startGame() reads them to build the world.
+  try{d=JSON.parse(raw)}catch(e){msg('âŒ Slot '+slot+' ka save corrupt hai (valid JSON nahi). Delete karke naya banao.');return false}
+  if(!d||!Array.isArray(d.units)||!Array.isArray(d.blds)||!d.res){msg('âŒ Slot '+slot+' ka save corrupt hai!');return false}
+  // Settings first â€” startGame() reads them to build the world.
   // Validate before use: a bad civ id would make civOf() return undefined
   // and take startGame() down with it.
   if(CIVS[d.myCiv])myCiv=d.myCiv;
@@ -1400,11 +1509,11 @@ function loadGame(slot){
   document.getElementById('endScreen').style.display='none';
   sel={units:[],bld:null};placing=null;placingPower=null;
   const pc=document.getElementById('bPause');
-  if(pc)pc.textContent='⏸';
-  msg('💾 Save loaded! Slot '+slot);
+  if(pc)pc.textContent='â¸';
+  msg('ðŸ’¾ Save loaded! Slot '+slot);
   updateHUD();refreshPanel();
   return true;
- }catch(e){msg('❌ Load fail: '+e.message);return false}
+ }catch(e){msg('âŒ Load fail: '+e.message);return false}
 }
 function openSaves(){
  const p=document.getElementById('savesPanel');
@@ -1419,22 +1528,22 @@ function openSaves(){
    const age=Math.max(1,Math.round((Date.now()-d.savedAt)/60000));
    const ago=age<1?'abhi':(age<60?age+' min':Math.round(age/60)+' ghante');
    const nU=(d.units||[]).length,nB=(d.blds||[]).length;
-   html+='<div class="saveSlot"><b>Slot '+s.slot+'<small>'+d.civName+' · '+d.ageName+' · '+nU+' units, '+nB+' buildings · '+ago+' pehle</small></b>'
-    +'<button onclick="if(confirm(\'Slot '+s.slot+' load karein?\')){loadGame('+s.slot+');closeSaves()}">📂 Load</button>'
-    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'💾 Slot '+s.slot+' overwrite ho gaya!\')}" '+(canSave?'':'disabled')+'>💾</button>'
-    +'<button onclick="if(confirm(\'Slot '+s.slot+' delete karein?\')){try{localStorage.removeItem(\'sySave'+s.slot+'\')}catch(_){}openSaves()}">🗑️</button></div>';
+   html+='<div class="saveSlot"><b>Slot '+s.slot+'<small>'+d.civName+' Â· '+d.ageName+' Â· '+nU+' units, '+nB+' buildings Â· '+ago+' pehle</small></b>'
+    +'<button onclick="if(confirm(\'Slot '+s.slot+' load karein?\')){loadGame('+s.slot+');closeSaves()}">ðŸ“‚ Load</button>'
+    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'ðŸ’¾ Slot '+s.slot+' overwrite ho gaya!\')}" '+(canSave?'':'disabled')+'>ðŸ’¾</button>'
+    +'<button onclick="if(confirm(\'Slot '+s.slot+' delete karein?\')){try{localStorage.removeItem(\'sySave'+s.slot+'\')}catch(_){}openSaves()}">ðŸ—‘ï¸</button></div>';
   }else{
    html+='<div class="saveSlot"><b>Slot '+s.slot+'<small style="color:#777">(khaali)</small></b>'
-    +'<button disabled>📂 Load</button>'
-    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'💾 Save ho gaya!\')}" '+(canSave?'':'disabled')+'>💾 Save</button></div>';
+    +'<button disabled>ðŸ“‚ Load</button>'
+    +'<button onclick="if(saveGame('+s.slot+')){openSaves();msg(\'ðŸ’¾ Save ho gaya!\')}" '+(canSave?'':'disabled')+'>ðŸ’¾ Save</button></div>';
   }
  }
-  if(!canSave)html+='<div style="font-size:12px;color:#c8b48c;margin-top:6px">⚠️ Slot me save karne ke liye pehle ek game start karo. Load bina start kiye bhi ho sakta hai.</div>';
+  if(!canSave)html+='<div style="font-size:12px;color:#c8b48c;margin-top:6px">âš ï¸ Slot me save karne ke liye pehle ek game start karo. Load bina start kiye bhi ho sakta hai.</div>';
   document.getElementById('savesList').innerHTML=html;
   p.classList.add('on');
 }
 function closeSaves(){document.getElementById('savesPanel').classList.remove('on')}// ============================================================
-//  GFX ENGINE v2 — noise, wind, cloth, sun, light, post
+//  GFX ENGINE v2 â€” noise, wind, cloth, sun, light, post
 // ============================================================
 const QNAMES=['LOW','MEDIUM','HIGH','ULTRA'];
 let qIdx=3,DPR=1,fpsAvg=60,adaptT=0,autoQ=true,gfLock=false;
@@ -1485,6 +1594,9 @@ const vigGrad=(()=>{const c=document.createElement('canvas');c.width=c.height=2;
 let bgC=null,decalC=null,dctx=null,lightC=null,lctx=null,grainC=null;
 const MOTES=[];
 function fitCanvas(){
+ // Re-read the box first: fullscreen, window resize and orientation change all
+ // change it, and the buffers below must match whatever the browser handed us.
+ syncViewport();
  DPR=Math.min(window.devicePixelRatio||1,G.dprCap);
  cv.width=Math.round(VW*DPR);cv.height=Math.round(VH*DPR);
  if(!lightC){lightC=document.createElement('canvas');lctx=lightC.getContext('2d')}
@@ -1503,7 +1615,7 @@ function initMotes(){
 }
 function setQuality(i,fromAuto){
  qIdx=Math.max(0,Math.min(3,i));
- if(!fromAuto){autoQ=false;const a=document.getElementById('bAuto');if(a)a.textContent='⚡ Auto: OFF';}
+ if(!fromAuto){autoQ=false;const a=document.getElementById('bAuto');if(a)a.textContent='âš¡ Auto: OFF';}
  G.dprCap=[1,1,1.5,2][qIdx];
  G.fx=[0.35,0.6,0.85,1][qIdx];G.grass=[0.25,0.5,0.8,1][qIdx];
  G.shadow=qIdx>=1;G.bloom=qIdx>=1;G.grade=qIdx>=1;G.grain=qIdx>=2;G.vig=qIdx>=1;
@@ -1515,7 +1627,16 @@ function setQuality(i,fromAuto){
 }
 function cycleQuality(){setQuality((qIdx+1)%4);msg('\u{1F3A8} Graphics: '+QNAMES[qIdx]);S.click()}
 function toggleAutoQ(){autoQ=!autoQ;const b=document.getElementById('bAuto');if(b)b.textContent='\u26A1 Auto: '+(autoQ?'ON':'OFF');S.click()}
-window.addEventListener('resize',()=>{if(started)fitCanvas()});
+// Re-fitting on every resize event would thrash, and a drag fires dozens per
+// second. Coalesce to one refit per frame burst instead.
+let resizeT=0;
+function onResize(){
+ if(resizeT)return;
+ resizeT=setTimeout(()=>{resizeT=0;fitCanvas();clampView();if(started)updateHUD()},80);
+}
+window.addEventListener('resize',onResize);
+window.addEventListener('orientationchange',onResize);
+if(window.screen&&screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',onResize);
 
 // ---- wind ----
 let wind=0.22,windPh=0;
@@ -2727,12 +2848,12 @@ function drawBldBody(b,TC,dmg,broken){
  if(BLD[k].store){
   const sk=BLD[k].store;
   ctx.font='bold 15px sans-serif';ctx.textAlign='center';
-  ctx.fillText(sk==='f'?'🌾':sk==='w'?'🪵':'🪙',0,-halfH*0.16+4);ctx.textAlign='left';
+  ctx.fillText(sk==='f'?'ðŸŒ¾':sk==='w'?'ðŸªµ':'ðŸª™',0,-halfH*0.16+4);ctx.textAlign='left';
   const lv=Math.min(STOR_MAX,b.lvl||1);
   for(let i=0;i<STOR_MAX;i++){
    ctx.font=(i<lv?'bold 13px':'11px')+' sans-serif';
    ctx.fillStyle=i<lv?'#FFD700':'rgba(0,0,0,0.45)';
-   ctx.fillText(i<lv?'★':'☆',(i-(STOR_MAX-1)/2)*15,eaveY-tall-9);
+   ctx.fillText(i<lv?'â˜…':'â˜†',(i-(STOR_MAX-1)/2)*15,eaveY-tall-9);
   }
   ctx.font='bold 10px sans-serif';ctx.fillStyle='#FFD700';ctx.textAlign='center';
   ctx.fillText('L'+lv,0,eaveY-tall-22);ctx.textAlign='left';
@@ -3006,7 +3127,7 @@ function bldSolid(b){
  return{x:b.x,y:b.y,hw:b.w/2+2,hh:b.h/2+2};
 }
 function collideBuildings(){
- for(const u of units){
+for(const u of units){
   if(u.hp<=0)continue;
   for(const b of blds){
    if(b.hp<=0)continue;
@@ -3015,9 +3136,27 @@ function collideBuildings(){
    const s=bldSolid(b);
    const dx=u.x-s.x,dy=u.y-s.y;
    if(Math.abs(dx)<s.hw&&Math.abs(dy)<s.hh){
+    u.pushT=(u.pushT||0)+1;
     const px=s.hw-Math.abs(dx),py=s.hh-Math.abs(dy);
-    if(px<py)u.x+=dx<0?-px:px;
+    // Push out on the axis of least penetration. A push of nearly zero (the unit
+    // is exactly on the edge) cannot free it, so fall through to the other axis.
+    if(px<py&&px>0.5)u.x+=dx<0?-px:px;
     else u.y+=dy<0?-py:py;
+    // Pure minimum-push deadlocks: walk straight into a flat wall and you are
+    // pushed back exactly as far as you moved, forever, so a villager ordered
+    // to a site on the far side of a building can never arrive. Nudge along the
+    // wall toward whichever end is on the way to the goal, and the unit slides
+    // around instead of grinding against the corner. Face is the freshest
+    // statement of intent (turnTo aims it at the current destination). The
+    // nudge grows the longer it stays pinned so a tight corner still breaks.
+    const boost=Math.min(9,2+u.pushT);
+    if(px<py&&px>0.5){
+     const sgn=Math.sin(u.face);
+     u.y+=(sgn<-0.15?-1:(sgn>0.15?1:((Math.abs(dy+s.hh)<Math.abs(dy-s.hh))?-1:1)))*Math.min(boost,py+1);
+    }else{
+     const sgn=Math.cos(u.face);
+u.x+=(sgn<-0.15?-1:(sgn>0.15?1:((Math.abs(dx+s.hw)<Math.abs(dx-s.hw))?-1:1)))*Math.min(boost,px+1);
+    }
    }
   }
  }
@@ -3034,7 +3173,7 @@ const VCLOTH=['#c9b89a','#b8a888','#a8b8a0','#c0a8b0','#a8b0c8','#c8b090'];
 function villLook(u){
  const civ=u.team==='P1'?myCiv:aiCiv;
  // Bitwise ops yield a signed int32 in JS, so re-apply >>>0 after each
- // step — otherwise s can go negative and index the colour arrays with -1.
+ // step â€” otherwise s can go negative and index the colour arrays with -1.
  let s=Math.imul(u.id,2654435761)>>>0;
  s=Math.imul(s^(s>>>15),2246822519)>>>0;
  s=Math.imul(s^(s>>>13),3266489917)>>>0;
@@ -3060,16 +3199,16 @@ function villLook(u){
 // Returns tool angle, torso twist, and how deep into the strike we are.
 function villSwingPose(f){
  let a,tw,tl,strike;
- if(f<0.26){        // anticipation — pull back and coil
+ if(f<0.26){        // anticipation â€” pull back and coil
   const k=easeOut(f/0.26);
   a=-0.85-1.45*k;tw=-0.10*k;tl=-1.80+0.80*k;strike=0;
- }else if(f<0.42){  // strike — fast swing through
+ }else if(f<0.42){  // strike â€” fast swing through
   const k=Math.pow((f-0.26)/0.16,0.55);
   a=-2.30+3.30*k;tw=-0.10+0.32*k;tl=-1.00+2.55*k;strike=k;
- }else if(f<0.52){  // impact — brief hold at contact
+ }else if(f<0.52){  // impact â€” brief hold at contact
   const k=(f-0.42)/0.10;
   a=1.00-0.10*Math.sin(k*Math.PI);tw=0.22-0.06*k;tl=1.55-0.10*k;strike=1;
- }else{             // recovery — ease back to guard
+ }else{             // recovery â€” ease back to guard
   const k=easeOut((f-0.52)/0.48);
   a=0.90-1.75*k;tw=0.16*(1-k);tl=1.45-2.45*k;strike=0;
  }
@@ -3261,7 +3400,7 @@ function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK,br){
   ctx.fillStyle='#4c5568';
   for(const s2 of [-1,1]){ctx.beginPath();ctx.ellipse(s2*w1*0.95,ySh-1.5,3.1*sc,2.3*sc,s2*0.3,0,7);ctx.fill()}
  }
- // Skirt / dhoti — team coloured so ownership still reads from the lower body
+ // Skirt / dhoti â€” team coloured so ownership still reads from the lower body
  ctx.fillStyle=armored?TC.d:TC.d;
  const sk0=armored?1:0.55;
  ctx.beginPath();ctx.moveTo(-w1,yHip+1);ctx.quadraticCurveTo(-w1*1.5,yHip+6*sc*sk0,-w1*1.1,yHip+7.5*sc*sk0);
@@ -3295,7 +3434,7 @@ function drawHead(u,TC,sc,x,y,helmet,blink,bk){
    ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x+2.15*sc,y-0.75*sc,0.3*sc,0,7);ctx.fill()}
   else if(qIdx>=2){ctx.fillStyle='rgba(255,255,255,0.16)';ctx.beginPath();ctx.ellipse(x+1.6*sc,y-1.0*sc,0.9*sc,0.5*sc,-0.4,0,7);ctx.fill()}
  }
- // Nose — only when facing us, sells the head direction
+ // Nose â€” only when facing us, sells the head direction
  if(!bk&&qIdx>=2){ctx.strokeStyle=skinD;ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+2.7*sc,y+0.1*sc);ctx.lineTo(x+3.3*sc,y+0.7*sc);ctx.stroke()}
  // Moustache / beard
  if(LK&&LK.beard){ctx.fillStyle=civH==='india'?'#2a2018':'#241c16';
@@ -3591,7 +3730,7 @@ drawLegs(u,P.wph,TC.p,TC.d,(LK?LK.skin:SKIN),scu,yHip,P);
   if(P.foot&&u.team==='P1'&&isVis(u.x,u.y)&&qIdx>=1){
    if(Math.random()<0.5)addFootDust(u,0,0);
   }
-  if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('🤴',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.textAlign='left'}}
+  if(u.type==='hero'&&u.hp>0){ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('ðŸ¤´',u.x,u.y-48);if(u.lvl>1){ctx.font='bold 12px sans-serif';ctx.fillStyle='#FFD700';ctx.fillText('Lv'+u.lvl,u.x,u.y-60);ctx.textAlign='left'}}
  if(u.carry>0)drawLoad(u,TC,P);
  if(u.hp<u.maxHp||isSel)drawUnitBar(u,isSel);
 }
@@ -4133,13 +4272,13 @@ function draw(){
   const gl3=ctx.createRadialGradient(gx2,gy2,2,gx2,gy2,30);
   gl3.addColorStop(0,'rgba(255,215,0,0.55)');gl3.addColorStop(1,'rgba(255,215,0,0)');
   ctx.fillStyle=gl3;ctx.beginPath();ctx.arc(gx2,gy2,30,0,7);ctx.fill();
-  ctx.fillStyle='#FFD700';ctx.font='bold 17px sans-serif';ctx.fillText('💎',gx2-8,gy2+6);
+  ctx.fillStyle='#FFD700';ctx.font='bold 17px sans-serif';ctx.fillText('ðŸ’Ž',gx2-8,gy2+6);
  }
  for(const c of crates){
   if(c.taken||!isSeen(c.x,c.y))continue;
   const bob=Math.sin(frame/24+c.ph)*3;
   ctx.fillStyle='#8b5a2b';ctx.fillRect(c.x-13,c.y-10+bob,26,20);
-  ctx.font='bold 15px sans-serif';ctx.fillText(c.kind==='gold'?'🪙':c.kind==='heal'?'💚':c.kind==='army'?'⚔️':'📦',c.x-8,c.y-14+bob);
+  ctx.font='bold 15px sans-serif';ctx.fillText(c.kind==='gold'?'ðŸª™':c.kind==='heal'?'ðŸ’š':c.kind==='army'?'âš”ï¸':'ðŸ“¦',c.x-8,c.y-14+bob);
  }
  for(const c of corpses){
   if(!isSeen(c.x,c.y)&&c.team==='AI')continue;
@@ -4262,20 +4401,20 @@ function draw(){
   ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,52,VW,34);
   ctx.fillStyle='#fde68a';ctx.font='bold 17px sans-serif';ctx.textAlign='center';
-  ctx.fillText('🕊 SANDHI '+Math.ceil(treaty/60)+'s — koi ladai nahi, gaon basao!',VW/2,74);
+  ctx.fillText('ðŸ•Š SANDHI '+Math.ceil(treaty/60)+'s â€” koi ladai nahi, gaon basao!',VW/2,74);
   ctx.restore();
  }
  ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
  ctx.font='11px monospace';ctx.textAlign='right';
  ctx.fillStyle='rgba(255,255,255,0.35)';
- ctx.fillText(Math.round(fpsAvg)+' fps · '+QNAMES[qIdx]+' · '+DPR.toFixed(1)+'x',VW-8,14);
+ ctx.fillText(Math.round(fpsAvg)+' fps Â· '+QNAMES[qIdx]+' Â· '+DPR.toFixed(1)+'x',VW-8,14);
  ctx.restore();
  drawMM();
  drawTcPointer();
  drawDebugHud();
  drawErrBanner();
 }
-// 🧭 Town Center kabhi "gayab" nahi hoga — screen se bahar ho to edge par arrow + distance
+// ðŸ§­ Town Center kabhi "gayab" nahi hoga â€” screen se bahar ho to edge par arrow + distance
 function drawTcPointer(){
  if(!started||gameOver)return;
  const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&(b.hp>0||b.dying));
@@ -4295,7 +4434,7 @@ function drawTcPointer(){
  ctx.strokeStyle='#052e16';ctx.lineWidth=1.5;ctx.stroke();
  ctx.rotate(-a);
  ctx.fillStyle='#dcfce7';ctx.font='bold 10px monospace';ctx.textAlign='center';
- ctx.fillText('🏰 TC '+dist+'m',0,34);
+ ctx.fillText('ðŸ° TC '+dist+'m',0,34);
  ctx.restore();
 }
 function drawDebugHud(){
@@ -4318,7 +4457,7 @@ function drawErrBanner(){
  ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);
  ctx.fillStyle='rgba(140,10,10,0.92)';ctx.fillRect(0,VH-64,VW,64);
  ctx.fillStyle='#fff';ctx.font='bold 15px monospace';ctx.textAlign='left';
- ctx.fillText('⚠ RENDER ERROR (game yahin ruk gaya)',10,VH-44);
+ ctx.fillText('âš  RENDER ERROR (game yahin ruk gaya)',10,VH-44);
  ctx.font='12px monospace';
  ctx.fillText(String(txt).slice(0,120),10,VH-24);
  ctx.restore();
@@ -4340,13 +4479,13 @@ function drawMM(){
 }
 
 // ============ HUD + PANEL ============
-function costStr(c){const m=civOf('P1').cost;const p=[];if(c.f)p.push(Math.ceil(c.f*m)+'🍖');if(c.w)p.push(Math.ceil(c.w*m)+'🪵');if(c.g)p.push(Math.ceil(c.g*m)+'🪙');return p.join(' ')}
+function costStr(c){const m=civOf('P1').cost;const p=[];if(c.f)p.push(Math.ceil(c.f*m)+'ðŸ–');if(c.w)p.push(Math.ceil(c.w*m)+'ðŸªµ');if(c.g)p.push(Math.ceil(c.g*m)+'ðŸª™');return p.join(' ')}
 function ageLocked(minAge){return age.P1<(minAge||0)}
-function lockTag(minAge){return ageLocked(minAge)?'<br>🔒 '+AGES[minAge].icon+' '+AGES[minAge].name+' chahiye':''}
+function lockTag(minAge){return ageLocked(minAge)?'<br>ðŸ”’ '+AGES[minAge].icon+' '+AGES[minAge].name+' chahiye':''}
 function explainLocked(kind){
  const B=BLD[kind],need=B.minAge||0;
  const nx=AGES[age.P1+1];
- msg('⬆️ '+B.name+' ke liye '+AGES[need].icon+' '+AGES[need].name+' Yug chahiye! → Town Center chuna gaya, ⬆️ button dabao');
+ msg('â¬†ï¸ '+B.name+' ke liye '+AGES[need].icon+' '+AGES[need].name+' Yug chahiye! â†’ Town Center chuna gaya, â¬†ï¸ button dabao');
  const tc=blds.find(b=>b.team==='P1'&&b.kind==='tc'&&b.hp>0);
  if(tc){sel={units:[],bld:tc.id};placing=null;placingPower=null;refreshPanel();addTrauma(0.12)}
  S.click();
@@ -4354,63 +4493,63 @@ function explainLocked(kind){
 function startPlace(kind){
  const B=BLD[kind];
  if(ageLocked(B.minAge)){explainLocked(kind);return}
- if(!canAfford('P1',B.cost||{})){msg('💰 Resource kam! Chahiye: '+costStr(B.cost||{}));return}
- if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){msg('👷 Pehle VILLAGER chuno!');return}
- placing=kind;msg('📍 '+B.name+' lagane ke liye jagah tap karo (Esc = cancel)');refreshPanel();
+ if(!canAfford('P1',B.cost||{})){msg('ðŸ’° Resource kam! Chahiye: '+costStr(B.cost||{}));return}
+ if(!sel.units.some(u=>u.type==='villager'&&u.hp>0)){msg('ðŸ‘· Pehle VILLAGER chuno!');return}
+ placing=kind;msg('ðŸ“ '+B.name+' lagane ke liye jagah tap karo (Esc = cancel)');refreshPanel();
 }
 function orderAttack(){
  const mil=sel.units.filter(u=>u.hp>0&&u.type!=='villager');
- if(!mil.length){msg('🗡️ Pehle foji chuno!');return}
+ if(!mil.length){msg('ðŸ—¡ï¸ Pehle foji chuno!');return}
  const tc=blds.find(b=>b.team==='AI'&&b.kind==='tc');
  const T=tc?{x:tc.x,y:tc.y}:{x:AIBX,y:AIBY};
  for(const u of mil){u.state='attack';u.tx=T.x+rnd(-60,60);u.ty=T.y+rnd(-60,60);u.target=null;u.tgtB=null;u.waypoints=[]}
- S.order();msg('⚔ HAMLA! Dushman ke adde ki taraf!');S.horn();
+ S.order();msg('âš” HAMLA! Dushman ke adde ki taraf!');S.horn();
 }
 function refreshPanel(){
  const info=document.getElementById('panelInfo'),btns=document.getElementById('panelBtns');
  btns.innerHTML='';
  const btn=(t,fn,dis,hl)=>{const b=document.createElement('button');b.innerHTML=t;if(dis)b.disabled=true;if(hl){b.style.background='linear-gradient(180deg,#fde047,#b45309)';b.style.color='#000';b.style.boxShadow='0 0 0 3px #22c55e'}b.onclick=fn;btns.appendChild(b);return b};
- if(placingPower==='bolt'){info.innerHTML='⚡ <b>Bijli Hamla</b> — dushman par tap karo! <b>Esc</b> = cancel';return}
- if(placingPower==='convert'){info.innerHTML='⛪ <b>Convert</b> — dushman unit par tap karo! <b>Esc</b> = cancel';return}
- if(placing){info.innerHTML='📍 <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') — jagah tap karo. <b>Esc</b> = cancel';return}
+ if(placingPower==='bolt'){info.innerHTML='âš¡ <b>Bijli Hamla</b> â€” dushman par tap karo! <b>Esc</b> = cancel';return}
+ if(placingPower==='convert'){info.innerHTML='â›ª <b>Convert</b> â€” dushman unit par tap karo! <b>Esc</b> = cancel';return}
+ if(placing){info.innerHTML='ðŸ“ <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') â€” jagah tap karo. <b>Esc</b> = cancel';return}
  const b=sel.bld!=null?blds.find(x=>x.id===sel.bld):null;
  if(b){
-  info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' — 🏗️ '+Math.floor(b.prog/b.need*100)+'%');
+  info.innerHTML=BLD[b.kind].icon+' <b>'+BLD[b.kind].name+'</b> ('+Math.max(0,Math.round(b.hp))+'/'+b.maxHp+')'+(b.done?'':' â€” ðŸ—ï¸ '+Math.floor(b.prog/b.need*100)+'%');
   if(b.kind==='tc'&&b.done){
-   btn('👷 Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
-   if(age.P1<4)btn('⬆️ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()},false,true);
-   if(!heroAlive()&&age.P1>=1)btn('🤴 Maharaja<br>'+costStr(UNITS.hero.cost),()=>{trainUnit('P1',b.id,'hero');refreshPanel()});
+   btn('ðŸ‘· Villager<br>'+costStr(UNITS.villager.cost),()=>{trainUnit('P1',b.id,'villager');refreshPanel()});
+   if(age.P1<4)btn('â¬†ï¸ '+AGES[age.P1+1].icon+' '+AGES[age.P1+1].name+'<br>'+costStr(AGES[age.P1+1].cost||{}),()=>{tryAge('P1');refreshPanel()},false,true);
+   if(!heroAlive()&&age.P1>=1)btn('ðŸ¤´ Maharaja<br>'+costStr(UNITS.hero.cost),()=>{trainUnit('P1',b.id,'hero');refreshPanel()});
   }
   if(b.kind==='barracks'&&b.done){
    for(const t of ['sword','spear','archer','knight','elephant','cannon']){const U=UNITS[t];
     btn(U.icon+' '+t+'<br>'+costStr(trueCost('P1',t)),()=>{trainUnit('P1',b.id,t);refreshPanel()},age.P1<(U.minAge||0))}
-   btn('⚔ Atk Lv'+tech.P1.atk+'<br>'+costStr({f:100*(tech.P1.atk+1),g:75*(tech.P1.atk+1)}),()=>{resTech('P1','atk');refreshPanel()},tech.P1.atk>=4);
-   btn('🛡️ Def Lv'+tech.P1.def+'<br>'+costStr({f:75*(tech.P1.def+1),w:100*(tech.P1.def+1)}),()=>{resTech('P1','def');refreshPanel()},tech.P1.def>=4);
+   btn('âš” Atk Lv'+tech.P1.atk+'<br>'+costStr({f:100*(tech.P1.atk+1),g:75*(tech.P1.atk+1)}),()=>{resTech('P1','atk');refreshPanel()},tech.P1.atk>=4);
+   btn('ðŸ›¡ï¸ Def Lv'+tech.P1.def+'<br>'+costStr({f:75*(tech.P1.def+1),w:100*(tech.P1.def+1)}),()=>{resTech('P1','def');refreshPanel()},tech.P1.def>=4);
   }
   if(b.kind==='monastery'&&b.done){
-   btn('🧘 Monk<br>'+costStr(trueCost('P1','monk')),()=>{trainUnit('P1',b.id,'monk');refreshPanel()},age.P1<2);
+   btn('ðŸ§˜ Monk<br>'+costStr(trueCost('P1','monk')),()=>{trainUnit('P1',b.id,'monk');refreshPanel()},age.P1<2);
   }
   if(b.kind==='market'&&b.done){
-   btn('50🪵→35🍖',()=>{trade('P1','wf');refreshPanel()});
-   btn('60🍖→35🪵',()=>{trade('P1','fw');refreshPanel()});
-   btn('100🍖+60🪵→45🪙',()=>{trade('P1','fg');refreshPanel()});
+   btn('50ðŸªµâ†’35ðŸ–',()=>{trade('P1','wf');refreshPanel()});
+   btn('60ðŸ–â†’35ðŸªµ',()=>{trade('P1','fw');refreshPanel()});
+   btn('100ðŸ–+60ðŸªµâ†’45ðŸª™',()=>{trade('P1','fg');refreshPanel()});
   }
   if(isStore(b)&&b.done){
    const sk=storeKind(b),lv=Math.min(STOR_MAX,b.lvl||1),nx=resCap('P1',sk);
-   info.innerHTML+='<br>📦 Capacity: <b>'+nx+'</b> '+capIcon(sk)+' ⭐ Lv '+lv+'/'+STOR_MAX;
-   if(lv>=STOR_MAX)btn('⭐ MAX',null,true);
+   info.innerHTML+='<br>ðŸ“¦ Capacity: <b>'+nx+'</b> '+capIcon(sk)+' â­ Lv '+lv+'/'+STOR_MAX;
+   if(lv>=STOR_MAX)btn('â­ MAX',null,true);
    else{
     const c=storUpCost(b);
-    btn('⭐ Lv'+(lv+1)+' (+'+STOR_CAP[lv+1]+')<br>'+costStr(c),()=>{upgradeStore(b);refreshPanel()},!canAfford('P1',c));
+    btn('â­ Lv'+(lv+1)+' (+'+STOR_CAP[lv+1]+')<br>'+costStr(c),()=>{upgradeStore(b);refreshPanel()},!canAfford('P1',c));
    }
   }
   return;
  }
  const alive=sel.units.filter(u=>u.hp>0);
- if(!alive.length){info.innerHTML='Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.';return}
+ if(!alive.length){info.innerHTML='Unit/building chuno â€” phir zameen, ped, sona ya dushman par click karo.';return}
  const c={};for(const u of alive)c[u.type]=(c[u.type]||0)+1;
- info.innerHTML=Object.keys(c).map(t=>UNITS[t].icon+' '+t+' ×'+c[t]).join(' &nbsp; ');
- const _h=alive.find(u=>u.type==='hero');if(_h)info.innerHTML+=' ⭐ Lv'+(_h.lvl||1);
+ info.innerHTML=Object.keys(c).map(t=>UNITS[t].icon+' '+t+' Ã—'+c[t]).join(' &nbsp; ');
+ const _h=alive.find(u=>u.type==='hero');if(_h)info.innerHTML+=' â­ Lv'+(_h.lvl||1);
  if(alive.some(u=>u.type==='villager')){
   for(const k of ['house','khalon','barracks','market','tower','farm','godown','kotla','monastery','wall','gate']){
    const B=BLD[k];
@@ -4418,7 +4557,7 @@ function refreshPanel(){
    btn(B.icon+' '+B.name+lockTag(B.minAge)+'<br>'+costStr(B.cost),()=>startPlace(k));
   }
  }
- if(alive.some(u=>u.type!=='villager'))btn('⚔ HAMLA!',orderAttack);
+ if(alive.some(u=>u.type!=='villager'))btn('âš” HAMLA!',orderAttack);
 }
 function updateHUD(){
  const cf=resCap('P1','f'),cw=resCap('P1','w'),cg=resCap('P1','g');
@@ -4430,19 +4569,21 @@ function updateHUD(){
  document.getElementById('ageT').textContent=AGES[age.P1].icon+' '+AGES[age.P1].name;
  const tt=Math.floor(elapsed);
  document.getElementById('timeT').textContent=Math.floor(tt/60)+':'+String(tt%60).padStart(2,'0');
- document.getElementById('treatyT').textContent=treaty>0?('🕊 Sandhi '+Math.ceil(treaty/60)+'s'):(civOf('P1').name+' ⚔ '+civOf('AI').name);
- document.getElementById('zoomT').textContent=Math.round(view.z*100)+'%';
+ document.getElementById('treatyT').textContent=treaty>0?('ðŸ•Š Sandhi '+Math.ceil(treaty/60)+'s'):(civOf('P1').name+' âš” '+civOf('AI').name);
+ // Reported against the base viewport, so the number means the same thing on
+// any screen instead of doubling when the window gets bigger.
+document.getElementById('zoomT').textContent=Math.round(view.z/vScale*100)+'%';
  try{
   document.getElementById('killT').textContent=kills;
   document.getElementById('scoreT').textContent=score;
-  document.getElementById('comboT').textContent=combo>1?('🔥 x'+combo):'🔥 -';
-  const h=heroAlive();document.getElementById('heroT').textContent=h?('🤴 Lv'+(h.lvl||1)):'🤴 -';
+  document.getElementById('comboT').textContent=combo>1?('ðŸ”¥ x'+combo):'ðŸ”¥ -';
+  const h=heroAlive();document.getElementById('heroT').textContent=h?('ðŸ¤´ Lv'+(h.lvl||1)):'ðŸ¤´ -';
   const pb=document.getElementById('pBolt'),ph=document.getElementById('pHeal'),pg=document.getElementById('pGift'),pc=document.getElementById('pConvert');
-  if(pb){pb.textContent=powers.bolt.cd>0?('⚡ '+Math.ceil(powers.bolt.cd)+'s'):'⚡ Bijli';pb.disabled=powers.bolt.cd>0}
-  if(ph){ph.textContent=powers.heal.cd>0?('💚 '+Math.ceil(powers.heal.cd)+'s'):'💚 Heal';ph.disabled=powers.heal.cd>0}
-  if(pg){pg.textContent=powers.gift.cd>0?('🎁 '+Math.ceil(powers.gift.cd)+'s'):'🎁 Gift';pg.disabled=powers.gift.cd>0}
+  if(pb){pb.textContent=powers.bolt.cd>0?('âš¡ '+Math.ceil(powers.bolt.cd)+'s'):'âš¡ Bijli';pb.disabled=powers.bolt.cd>0}
+  if(ph){ph.textContent=powers.heal.cd>0?('ðŸ’š '+Math.ceil(powers.heal.cd)+'s'):'ðŸ’š Heal';ph.disabled=powers.heal.cd>0}
+  if(pg){pg.textContent=powers.gift.cd>0?('ðŸŽ '+Math.ceil(powers.gift.cd)+'s'):'ðŸŽ Gift';pg.disabled=powers.gift.cd>0}
   if(pc){const monks=units.filter(u=>u.team==='P1'&&u.type==='monk'&&u.hp>0).length;pc.disabled=monks===0}
-  const ct=document.getElementById('crateT');if(ct)ct.textContent=crates.length?('📦 x'+crates.length):('📦 '+Math.ceil(crateT/60)+'s');
+  const ct=document.getElementById('crateT');if(ct)ct.textContent=crates.length?('ðŸ“¦ x'+crates.length):('ðŸ“¦ '+Math.ceil(crateT/60)+'s');
  }catch(_){}
 }
 
@@ -4454,7 +4595,7 @@ function step(){
  for(let s=0;s<speed;s++){
   frame++;
   updateSun();updateWind();simCloth();
-  if(treaty>0){treaty--;if(treaty===0){msg('⚔ SANDHI KHATM!');S.age()}}
+  if(treaty>0){treaty--;if(treaty===0){msg('âš” SANDHI KHATM!');S.age()}}
   else elapsed+=1/60;
   if(frame%150===0)aiTick();
   if(frame%6===0)updateFog();
@@ -4509,7 +4650,7 @@ function step(){
   if(LEVEL&&LEVEL.obj==='survive'&&treaty<=0){objT--;if(objT<=0){endGame(true,'survive');break}}
   if(LEVEL&&LEVEL.obj==='relic'&&relicsGot>=3){endGame(true,'relic');break}
  }
- for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&u.team==='P1'&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;addRes('P1','g',150);S.coin();relicsGot++;msg('💎 Khazana! ('+relicsGot+'/3)');break}}}
+ for(const rl of relics){if(rl.taken)continue;for(const u of units){if(u.hp>0&&u.team==='P1'&&Math.hypot(u.x-rl.x,u.y-rl.y)<28){rl.taken=true;addRes('P1','g',150);S.coin();relicsGot++;msg('ðŸ’Ž Khazana! ('+relicsGot+'/3)');break}}}
  if(mouseIn&&!isTouch){const cr=cv.getBoundingClientRect(),mg=26,sp=14/view.z;let moved=false;
   if(mouseSX-cr.left<mg){view.x-=sp;moved=true}else if(cr.right-mouseSX<mg){view.x+=sp;moved=true}
   if(mouseSY-cr.top<mg){view.y-=sp;moved=true}else if(cr.bottom-mouseSY<mg){view.y+=sp;moved=true}
@@ -4532,8 +4673,8 @@ function endGame(win,reason){
  else if(win){lastLevelIdx=-1}
  if(win)desc='Dushman ka Town Center toot gaya! '+civOf('P1').name+' amar rahe!';
  else desc='Tumhara Town Center toot gaya.';
- document.getElementById('endTitle').textContent=win?'🎉 FATEH!':'💔 SHIKAST!';
- document.getElementById('endDesc').textContent=desc+'  💀 '+kills+' kills | 🏆 '+score;
+ document.getElementById('endTitle').textContent=win?'ðŸŽ‰ FATEH!':'ðŸ’” SHIKAST!';
+ document.getElementById('endDesc').textContent=desc+'  ðŸ’€ '+kills+' kills | ðŸ† '+score;
  const nb=document.getElementById('nextLvlBtn');
  if(nb)nb.style.display=(win&&lastLevelIdx>=0&&lastLevelIdx<9)?'inline-block':'none';
  document.getElementById('endScreen').style.display='flex';
@@ -4543,11 +4684,50 @@ function nextLevel(){
  if(lastLevelIdx>=0&&lastLevelIdx<9){document.getElementById('endScreen').style.display='none';playLevel(Math.min(9,lastLevelIdx+1))}
  else location.reload();
 }
-function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('bPause').textContent=paused?'▶':'⏸';document.getElementById('pauseOverlay').classList.toggle('on',paused)}
-function toggleSpeed(){speed=speed===1?2:1;document.getElementById('bSpeed').textContent='🚀 '+speed+'x'}
-function toggleMenu(){const t=document.getElementById('topbar');t.classList.toggle('open');const b=document.getElementById('bBurger');if(b)b.textContent=t.classList.contains('open')?'✖':'☰';S.click()}
-function toggleFull(){try{if(document.fullscreenElement){document.exitFullscreen()}else{const w=document.getElementById('wrap');if(w&&w.requestFullscreen)w.requestFullscreen()}}catch(e){}}
-document.addEventListener('fullscreenchange',()=>{const b=document.getElementById('bFull');if(b)b.textContent=document.fullscreenElement?'🗗 Exit':'⛶ Full';if(started)fitCanvas()});
+function togglePause(){if(gameOver||!started)return;paused=!paused;document.getElementById('bPause').textContent=paused?'â–¶':'â¸';document.getElementById('pauseOverlay').classList.toggle('on',paused)}
+function toggleSpeed(){speed=speed===1?2:1;document.getElementById('bSpeed').textContent='ðŸš€ '+speed+'x'}
+function toggleMenu(){const t=document.getElementById('topbar');t.classList.toggle('open');const b=document.getElementById('bBurger');if(b)b.textContent=t.classList.contains('open')?'âœ–':'â˜°';S.click()}
+// ---- Fullscreen ------------------------------------------------------------
+// The canvas owns the whole screen and the HUD floats on top of it, instead of
+// the old version that only removed the page margins and capped the canvas at
+// 62vh. WebKit prefixes are kept for older Safari, and where the Fullscreen API
+// does not exist at all (iOS Safari on a non-video element) we fall back to a
+// fixed-position "fake" fullscreen so the button is never dead.
+const wrapEl=document.getElementById('wrap');
+function fsElement(){return document.fullscreenElement||document.webkitFullscreenElement||document.getElementsByClassName('fs-fake')[0]||null}
+function isFullscreen(){return !!fsElement()}
+function syncFullUI(){
+ const on=isFullscreen();
+ const b=document.getElementById('bFull');
+ if(b)b.textContent=on?'ðŸ—— Exit Full':'â›¶ Full';
+ // The box only reaches its final size after the transition, so measure on the
+ // next frame; the second pass catches the late resize some browsers fire.
+ requestAnimationFrame(()=>{fitCanvas();requestAnimationFrame(()=>{fitCanvas();clampView();if(started)updateHUD()})});
+}
+function fakeFull(on){
+ if(wrapEl)wrapEl.classList.toggle('fs-fake',on);
+ syncFullUI();
+}
+function toggleFull(){
+ if(isFullscreen()){exitFullscreen();return}
+ if(!wrapEl)return;
+ const req=wrapEl.requestFullscreen||wrapEl.webkitRequestFullscreen;
+ if(!req){fakeFull(true);return}
+ try{
+  const p=req.call(wrapEl);
+  // Chrome returns a promise that rejects if the call is not user-initiated.
+  if(p&&p.catch)p.catch(()=>fakeFull(true));
+ }catch(e){fakeFull(true)}
+}
+function exitFullscreen(){
+ if(document.fullscreenElement&&document.exitFullscreen){try{document.exitFullscreen()}catch(e){fakeFull(false)}}
+ else if(document.webkitFullscreenElement&&document.webkitExitFullscreen){try{document.webkitExitFullscreen()}catch(e){fakeFull(false)}}
+ else fakeFull(false);
+}
+document.addEventListener('fullscreenchange',syncFullUI);
+document.addEventListener('webkitfullscreenchange',syncFullUI);
+document.addEventListener('fullscreenerror',()=>{fakeFull(true)});
+document.addEventListener('webkitfullscreenerror',()=>{fakeFull(true)});
  let lastFrameT=0;
  let errBannerT=0,errBannerTxt='';
 function loop(){const t0=performance.now();
@@ -4568,9 +4748,9 @@ function refreshLevels(){
  LEVELS.forEach((L,i)=>{
   const b=document.createElement('button');b.className='opt';
   b.style.opacity=i<=unlocked?1:0.45;
-  b.textContent=(i<=unlocked?(i+1)+L.icon+' '+L.name:'🔒 '+(i+1));
-  b.onclick=()=>{S.click();if(i>unlocked){msg('🔒 Pehle Level '+(unlocked+1)+' jeeto!');return}
-   document.getElementById('lvlDesc').innerHTML='<b>'+(i+1)+'. '+L.icon+' '+L.name+'</b> — '+L.tip;
+  b.textContent=(i<=unlocked?(i+1)+L.icon+' '+L.name:'ðŸ”’ '+(i+1));
+  b.onclick=()=>{S.click();if(i>unlocked){msg('ðŸ”’ Pehle Level '+(unlocked+1)+' jeeto!');return}
+   document.getElementById('lvlDesc').innerHTML='<b>'+(i+1)+'. '+L.icon+' '+L.name+'</b> â€” '+L.tip;
    playLevel(i)};
   box.appendChild(b);
  });
@@ -4585,9 +4765,9 @@ function refreshContinue(){
  try{const d=JSON.parse(localStorage.getItem('sySave'+s));
   const mt=Math.max(1,Math.round((Date.now()-(d.savedAt||0))/60000));
   const ago=mt<1?'abhi':(mt<60?mt+' min':Math.round(mt/60)+' ghante');
-  info=(d.civName||'')+' · '+(d.ageName||'')+' · '+((d.units||[]).length)+' units · '+ago+' pehle';
+  info=(d.civName||'')+' Â· '+(d.ageName||'')+' Â· '+((d.units||[]).length)+' units Â· '+ago+' pehle';
  }catch(e){}
- box.innerHTML='<button onclick="if(confirm(\'Slot '+s+' load karein?\')){closeSaves();loadGame('+s+')}" style="width:100%;margin-top:8px;background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f">▶ CONTINUE — Slot '+s+'<span style="display:block;font-size:11px;font-weight:400">'+info+'</span></button>';
+ box.innerHTML='<button onclick="if(confirm(\'Slot '+s+' load karein?\')){closeSaves();loadGame('+s+')}" style="width:100%;margin-top:8px;background:linear-gradient(180deg,#4ade80,#16a34a);color:#06240f">â–¶ CONTINUE â€” Slot '+s+'<span style="display:block;font-size:11px;font-weight:400">'+info+'</span></button>';
 }
 refreshLevels();refreshContinue();
 function startGame(){
@@ -4628,8 +4808,8 @@ function startGame(){
   document.getElementById('menu').style.display='none';
   document.getElementById('endScreen').style.display='none';
   document.getElementById('pauseOverlay').classList.remove('on');
-  document.getElementById('bPause').textContent='⏸';
- msg(LEVEL?('🎯 Lv'+(LEVELS.indexOf(LEVEL)+1)+' '+LEVEL.icon+' '+LEVEL.name):'🕊 40s Sandhi! Villager se resource jama karo!');
+  document.getElementById('bPause').textContent='â¸';
+ msg(LEVEL?('ðŸŽ¯ Lv'+(LEVELS.indexOf(LEVEL)+1)+' '+LEVEL.icon+' '+LEVEL.name):'ðŸ•Š 40s Sandhi! Villager se resource jama karo!');
  updateHUD();refreshPanel();
 }
 fitCanvas();
