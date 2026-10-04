@@ -2691,6 +2691,36 @@ function drawTownHall(b,TC,dmg,broken){
  ctx.fillStyle='#e8c34a';ctx.beginPath();ctx.arc(0,spY-31.5,2.8,0,7);ctx.fill();
  tcLantern(-halfW-7,gTop-28,1.15,TC.p);
  tcLantern(halfW+7,gTop-28,1.15,TC.p);
+ // Enhanced Town Hall: hanging eave lanterns, gold roof chibi, corner posts, base band
+ // 1. Hanging eave lanterns under the first roof, swaying gently
+ for(const Lx of [-halfW*0.72,halfW*0.72]){
+  const sway=Math.sin(frame*0.05+Lx)*0.5;
+  const ly=gTop+5;
+  ctx.strokeStyle='#3a2a14';ctx.lineWidth=0.6;ctx.beginPath();ctx.moveTo(Lx,gTop-2);ctx.lineTo(Lx+sway*0.4,ly-4);ctx.stroke();
+  const lg=ctx.createRadialGradient(Lx+sway*0.4,ly,0.4,Lx+sway*0.4,ly,4);
+  lg.addColorStop(0,'#fff0c0');lg.addColorStop(0.4,'#ff8a3a');lg.addColorStop(1,'rgba(220,60,20,0.15)');
+  ctx.fillStyle=lg;ctx.beginPath();ctx.ellipse(Lx+sway*0.4,ly,2.5,3.2,0,0,7);ctx.fill();
+  ctx.fillStyle='#5a1a10';ctx.fillRect(Lx+sway*0.4-1.4,ly-3.6,2.8,1.1);ctx.fillRect(Lx+sway*0.4-1.4,ly+2.5,2.8,1.1);
+  addGlow(Lx+sway*0.4,ly,6,'rgba(255,168,60,'+(0.22*lit)+')');
+ }
+ // 2. Gold roof ridge ornaments (chibi) at the top corners of each roof
+ for(const ry of [r1t,r2t,r3t]){
+  for(const rx of [-halfW*0.34,halfW*0.34]){
+   ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(rx,ry-1.4,1.0,0,7);ctx.fill();
+   ctx.fillStyle='#ffe08a';ctx.beginPath();ctx.arc(rx-0.3,ry-1.7,0.5,0,7);ctx.fill();
+  }
+ }
+ // 3. Corner support posts on the ground floor
+ for(const px of [-halfW+3.5,halfW-6.5]){
+  ctx.fillStyle='#5b3a1a';ctx.fillRect(px,gTop+1,3,gBot-gTop-2);
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillRect(px+1.8,gTop+1,1.2,gBot-gTop-2);
+  ctx.fillStyle='#c9a227';ctx.fillRect(px-0.4,gTop+1,3.8,1.2);ctx.fillRect(px-0.4,gBot-2.2,3.8,1.2);
+ }
+ // 4. Decorative base band across the foundation
+ ctx.fillStyle='rgba(0,0,0,0.20)';ctx.fillRect(-halfW-8,halfH-1,w+16,3);
+ ctx.strokeStyle='#8a6a3a';ctx.lineWidth=0.8;
+ for(let bx=-halfW-8;bx<halfW+8;bx+=8){ctx.beginPath();ctx.moveTo(bx,halfH-1);ctx.lineTo(bx+8,halfH-1);ctx.stroke()}
+
  if(broken){ctx.fillStyle='rgba(30,20,14,'+(0.30-dmg*0.3)+')';rr(-halfW+6,gTop,w-12,gH,3);ctx.fill()}
 }
 // Wall renderer
