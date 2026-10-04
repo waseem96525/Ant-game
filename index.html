@@ -449,7 +449,9 @@ cv.addEventListener('wheel',e=>{e.preventDefault();if(!started||paused)return;co
 // ============ AUDIO ============
 let AC=null;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
-function tone(f,d,type,v,pan){try{if(!AC||!soundOn)return;const c=ac();const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);let node=o;if(pan!==undefined&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,pan));o.connect(g);g.connect(p);p.connect(c.destination);}else{o.connect(g);g.connect(c.destination);}o.start();o.stop(c.currentTime+d)}catch(e){}}
+function tone(f,d,type,v,pan){try{if(!AC||!soundOn)return;const c=ac();
+let deferredPrompt;
+const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);let node=o;if(pan!==undefined&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,pan));o.connect(g);g.connect(p);p.connect(c.destination);}else{o.connect(g);g.connect(c.destination);}o.start();o.stop(c.currentTime+d)}catch(e){}}
 const S={click(){tone(600,0.07)},order(){tone(440,0.09,'square',0.07)},chop(){tone(220,0.06,'triangle',0.07)},hit(){tone(180,0.07,'sawtooth',0.07)},die(){tone(300,0.15,'sawtooth',0.08)},build(){tone(520,0.1,'triangle',0.08)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'square',0.1),i*150))},lose(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.3,'sawtooth',0.1),i*180))},age(){tone(500,0.12,'square',0.1);setTimeout(()=>tone(750,0.15,'square',0.1),120)}};
 let soundOn=true,lastSw=0,lastBow=0;
 function noiseHit(dur,freq,v,pan){try{if(!AC||!soundOn)return;const c=ac();const len=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,len,c.sampleRate),dt=b.getChannelData(0);for(let i=0;i<len;i++)dt[i]=(Math.random()*2-1)*(1-i/len);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=b;f.type='lowpass';f.frequency.value=freq;g.gain.value=v;s.connect(f);f.connect(g);if(pan!==undefined&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,pan));g.connect(p);p.connect(c.destination);}else g.connect(c.destination);s.start()}catch(e){}}
@@ -5195,7 +5197,17 @@ function refreshPanel(){
  btns.innerHTML='';
  const btn=(t,fn,dis,hl)=>{const b=document.createElement('button');b.innerHTML=t;if(dis)b.disabled=true;if(hl){b.style.background='linear-gradient(180deg,#fde047,#b45309)';b.style.color='#000';b.style.boxShadow='0 0 0 3px #22c55e'}b.onclick=fn;btns.appendChild(b);return b};
  if(placingPower==='bolt'){info.innerHTML='⚡ <b>Bijli Hamla</b> — dushman par tap karo! <b>Esc</b> = cancel';return}
- if(placingPower==='convert'){info.innerHTML='⛪ <b>Convert</b> — dushman unit par tap karo! <b>Esc</b> = cancel';return}
+ if(placingPower==='convert'){info.innerHTML='⛪ <b>Convert</b> — dushman unit par tap karo! <b>Esc</b> = cancel';re
+  // Install button (PWA)
+  if(deferredPrompt){
+    const ib=document.createElement('button');
+    ib.id='installBtn';
+    ib.innerHTML='📱 Install';
+    ib.style='font-size:12px;padding:4px 10px;margin-left:8px';
+    ib.onclick=installPWA;
+    btns.appendChild(ib);
+  }
+turn}
  if(placing){info.innerHTML='📍 <b>'+BLD[placing].name+'</b> ('+costStr(BLD[placing].cost||{})+') — jagah tap karo. <b>Esc</b> = cancel';return}
  const b=sel.bld!=null?blds.find(x=>x.id===sel.bld):null;
  if(b){
@@ -5412,7 +5424,28 @@ function exitFullscreen(){
 }
 document.addEventListener('fullscreenchange',syncFullUI);
 document.addEventListener('webkitfullscreenchange',syncFullUI);
-document.addEventListener('fullscreenerror',()=>{fakeFull(true)});
+document.addEventListener('fullscreenerror',()=>{fakeFull(true)})
+// --- PWA Install ---
+window.addEventListener('beforeinstallprompt',(e)=>{
+  deferredPrompt=e;
+  e.preventDefault();
+  // Show install button
+  const installBtn=document.getElementById('installBtn');
+  if(installBtn){installBtn.style.display='block';}
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  const btn=document.getElementById('installBtn');
+  if(btn){btn.style.display='none';}
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((resp)=>{
+    if(resp.outcome==='accepted'){msg('📱 Game saved to home screen!')}
+    deferredPrompt=null;
+  });
+  // Reset for next cycle
+  deferredPrompt=null;
+}
+// --- End PWA ---;
 document.addEventListener('webkitfullscreenerror',()=>{fakeFull(true)});
  let lastFrameT=0;
  let errBannerT=0,errBannerTxt='';
