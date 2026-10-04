@@ -173,8 +173,8 @@ kbd{background:#000;border:1px solid #777;border-radius:4px;padding:1px 6px;font
 <div id="msg"></div>
 </div>
 <div id="cvwrap"><canvas id="cv" width="900" height="500"></canvas><canvas id="mm" width="150" height="94"></canvas></div>
-<div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns"></div></div>
-<div class="guide">
+<div id="panel"><div id="panelInfo">Unit/building chuno — phir zameen, ped, sona ya dushman par click karo.</div><div class="row" id="panelBtns" <button class="opt" id="helpBtn" style="font-size:13px;padding:4px 10px" title="Help toggle">ℹ️</button></div>
+<script>document.getElementById('helpBtn').onclick=function(){var g=document.querySelector('.guide');g.style.display=(g.style.display==='none'?'':'none')};</script><div class="guide" style="display:none">
 <b>🎮 Kaise khelein:</b><br>
 🖱️ <b>PC:</b> Left-click = chuno · Left-drag = box select (max 60) · Right-click = bhejo/katwao/hamla · <b>Shift+right-click = waypoint queue</b> · <b>Shift+click</b> = jodo/hatao · <b>Double-click</b> = same type sab. <kbd>Q</kbd>=Fauj <kbd>E</kbd>=Villager <kbd>R</kbd>=Sab <kbd>F</kbd>=Fullscreen <kbd>Esc</kbd>=Fullscreen se bahar <kbd>H</kbd>=Pan <kbd>W</kbd>=Wall <kbd>1-4</kbd>=Formation <kbd>Space</kbd>=Pause.<br>
 🖥️ <b>Fullscreen (NAYA!):</b> <kbd>F</kbd> ya ⛶ button — canvas poori screen pe native resolution pe render hota hai aur HUD uske upar float karta hai. Window resize ya phone ghumane pe bhi khud adjust ho jaata hai.<br>
@@ -2641,12 +2641,13 @@ function noren(x,y,w,h,col){
  ctx.fillStyle='#3a2a10';ctx.fillRect(x-w/2-1,y-1.6,w+2,2.4);
 }
 function drawTorch(x,y,s,col){
+ // Lower the lamp so it is not a blinding white hole on the map.
  const fl2=s*(0.85+Math.sin(frame/5+x)*0.16+Math.random()*0.14);
- const g=ctx.createRadialGradient(x,y-fl2*0.5,0.5,x,y-fl2*0.6,fl2*3.4);
- g.addColorStop(0,'#fffbe0');g.addColorStop(0.25,'#ffd24a');g.addColorStop(0.55,'#ff7a1a');g.addColorStop(1,'rgba(200,40,0,0)');
- ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y-fl2*0.6,fl2*3.4,0,7);ctx.fill();
- ctx.fillStyle='#fff3b0';ctx.beginPath();ctx.ellipse(x,y-fl2*0.5,fl2*0.42,fl2*0.9,0,0,7);ctx.fill();
- addGlow(x,y-fl2*0.6,fl2*7,'rgba(255,168,60,0.34)');
+ const g=ctx.createRadialGradient(x,y-fl2*0.5,0.5,x,y-fl2*0.6,fl2*2.4);
+ g.addColorStop(0,'#fff3b0');g.addColorStop(0.25,'#ffb83a');g.addColorStop(0.55,'#ff6a1a');g.addColorStop(1,'rgba(200,40,0,0)');
+ ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y-fl2*0.6,fl2*2.4,0,7);ctx.fill();
+ ctx.fillStyle='#ffe9a8';ctx.beginPath();ctx.ellipse(x,y-fl2*0.5,fl2*0.42,fl2*0.9,0,0,7);ctx.fill();
+ addGlow(x,y-fl2*0.6,fl2*4.6,'rgba(255,168,60,0.20)');
 }
 function drawTownHall(b,TC,dmg,broken){
  const w=b.w,h=b.h,halfW=w/2,halfH=h/2;
@@ -3650,8 +3651,28 @@ function villLook(u){
   tall:0.94+((s>>>21)%5)*0.13,       // height variation
   headR:0.92+((s>>>11)%4)*0.17,     // head size variation
   sash:(s>>>2)%2===0,                // waist sash detail
-  bald:(s>>>6)%6===0
- };
+   bald:(s>>>6)%6===0
+  };
+}
+// Per-soldier kit: seeded from the unit id so every soldier gets his own steel
+// tone, plume colour and chest boss instead of one cloned outfit.
+const STEEL_TONES=[
+ ['#48536b','#3a4356','#4c5568'],
+ ['#41506a','#35415a','#47587a'],
+ ['#4d5563','#3f4756','#565f6e'],
+ ['#454f63','#38435c','#4e5a74']];
+const SPLUME_COLORS=['#e8c46a','#d94a4a','#4a9ed9','#9a5ad9','#d97a3a','#4ac9a8'];
+function soldierLook(u){
+  let s=Math.imul(u.id,2654435761)>>>0;
+  s=Math.imul(s^(s>>>15),2246822519)>>>0;
+  s=Math.imul(s^(s>>>13),3266489917)>>>0;
+  s=(s^(s>>>16))>>>0;
+  const r=n=>s%n;
+  return{
+   steel:r(STEEL_TONES.length),
+   plume:r(SPLUME_COLORS.length),
+   boss:((s>>>3)&1)===1
+  };
 }
 
 // Tool swing curve for a villager at work: anticipation (wind up), a fast
@@ -3793,7 +3814,7 @@ function addFootDust(u,lx,ly){
  const c=Math.cos(u.face),sn=Math.sin(u.face);
  emit('dust',u.x+c*lx-sn*ly,u.y+sn*lx+c*ly,rnd(-.2,.2),rnd(-.35,-.1),qn(15),{r:rnd(1.6,3.2),c:'rgba(178,160,120,0.4)',g:0.01});
 }
-function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK,br){
+function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK,br,SLK){
  let w1=5.6*sc,w2=7.2*sc;
  // Chest expands a touch on the breath so an idle unit is never a frozen slab
  const bch=1+(br||0)*0.045;
@@ -3849,17 +3870,25 @@ function drawTorso(u,TC,sc,yHip,ySh,armored,lean,LK,br){
   ctx.fillStyle=armored?'#c9b98a':'#e8c46a';
   ctx.fillRect(-w1*1.05,yHip-1.6,w1*2.1,0.9*sc);
  }
- if(armored){
-  ctx.strokeStyle=TC.d;ctx.lineWidth=0.8;
-  for(let r=0;r<3;r++){const yy=ySh-2.5*sc-r*2.6*sc;ctx.beginPath();ctx.moveTo(-w2*0.8,yy);ctx.lineTo(w2*0.8,yy);ctx.stroke()}
-  for(let r=0;r<3;r++)for(let c=0;c<4;c++){
-   const xx=-w2*0.72+c*(w2*1.44/3.6),yy=ySh-3.6*sc-r*2.6*sc;
-   ctx.fillStyle=(r+c)%2?'#3a4356':'#48536b';
-   ctx.beginPath();ctx.ellipse(xx,yy,1.5*sc,1.05*sc,0,0,7);ctx.fill();
-   ctx.fillStyle='rgba(255,255,255,0.18)';ctx.beginPath();ctx.ellipse(xx-0.3,yy-0.35,0.9*sc,0.55*sc,0,0,7);ctx.fill()}
-  ctx.fillStyle='#4c5568';
-  for(const s2 of [-1,1]){ctx.beginPath();ctx.ellipse(s2*w1*0.95,ySh-1.5,3.1*sc,2.3*sc,s2*0.3,0,7);ctx.fill()}
- }
+  if(armored){
+   const st=SLK?STEEL_TONES[SLK.steel]:['#3a4356','#48536b','#4c5568'];
+   ctx.strokeStyle=TC.d;ctx.lineWidth=0.8;
+   for(let r=0;r<3;r++){const yy=ySh-2.5*sc-r*2.6*sc;ctx.beginPath();ctx.moveTo(-w2*0.8,yy);ctx.lineTo(w2*0.8,yy);ctx.stroke()}
+   for(let r=0;r<3;r++)for(let c=0;c<4;c++){
+    const xx=-w2*0.72+c*(w2*1.44/3.6),yy=ySh-3.6*sc-r*2.6*sc;
+    ctx.fillStyle=(r+c)%2?st[0]:st[1];
+    ctx.beginPath();ctx.ellipse(xx,yy,1.5*sc,1.05*sc,0,0,7);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.18)';ctx.beginPath();ctx.ellipse(xx-0.3,yy-0.35,0.9*sc,0.55*sc,0,0,7);ctx.fill()}
+   ctx.fillStyle=st[2];
+   for(const s2 of [-1,1]){ctx.beginPath();ctx.ellipse(s2*w1*0.95,ySh-1.5,3.1*sc,2.3*sc,s2*0.3,0,7);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.14)';ctx.beginPath();ctx.ellipse(s2*w1*0.95,ySh-2.4,1.7*sc,0.9*sc,s2*0.3,0,7);ctx.fill();ctx.fillStyle=st[2]}
+   // Gold boss on the chest, only on some soldiers, so the ranks are not clones
+   if(SLK&&SLK.boss){
+    ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(0,ySh-1.2*sc,1.5*sc,0,7);ctx.fill();
+    ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(0,ySh-1.2*sc,0.8*sc,0,7);ctx.fill();
+    ctx.strokeStyle='#ffd94d';ctx.lineWidth=0.5;ctx.beginPath();ctx.arc(0,ySh-1.2*sc,1.5*sc,0,7);ctx.stroke();
+   }
+  }
  // Skirt / dhoti — team coloured so ownership still reads from the lower body
  ctx.fillStyle=armored?TC.d:TC.d;
  const sk0=armored?1:0.55;
@@ -3880,27 +3909,82 @@ function drawHead(u,TC,sc,x,y,helmet,blink,bk){
  const hr=LK?LK.headR:1;
  // Neck
  ctx.strokeStyle=skinD;ctx.lineWidth=2.6*sc;ctx.beginPath();ctx.moveTo(x-1.2*sc,y+3*sc);ctx.lineTo(x-0.6*sc,y+0.6*sc);ctx.stroke();
- // Back of the head, then face over it, so turning shows a bit of profile
- const hg=ctx.createLinearGradient(x-3*sc,y-3*sc,x+3*sc,y+3*sc);
- hg.addColorStop(0,skin);hg.addColorStop(1,skinD);
- ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x,y,3.5*sc*hr,3.9*sc*hr,0,0,7);ctx.fill();
- ctx.fillStyle=civH==='india'?'#241a12':'#1c1512';
- ctx.beginPath();ctx.ellipse(x-1.6*sc,y-0.4*sc,3.2*sc*hr,3.6*sc*hr,0,0,7);ctx.fill();
- ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(x+0.5*sc,y,3.1*sc*hr,3.5*sc*hr,0,0,7);ctx.fill();
- // Ear
- if(qIdx>=2){ctx.fillStyle=skinD;ctx.beginPath();ctx.ellipse(x-1.5*sc,y+0.7*sc,0.85*sc,1.1*sc,-0.2,0,7);ctx.fill()}
+ // Human head: a shaded skull under an egg-shaped face that narrows to a jaw,
+ // with two eyes, a nose and a mouth so it reads as a person, not a cartoon blob.
+ const hr2=hr;
+ const hg=ctx.createLinearGradient(x-3*sc,y-3.5*sc,x+3*sc,y+3.5*sc);
+ hg.addColorStop(0,skin);hg.addColorStop(0.55,skin);hg.addColorStop(1,skinD);
+ // back of the skull sits slightly behind/left so a turn reads with depth
+ ctx.fillStyle=skinD;ctx.beginPath();ctx.ellipse(x-0.5*sc,y-0.5*sc,3.5*sc*hr2,3.9*sc*hr2,0,0,7);ctx.fill();
+ // face: egg that tapers down to a chin
+ ctx.fillStyle=hg;ctx.beginPath();
+ ctx.moveTo(x-3.0*sc*hr2,y-1.0*sc*hr2);
+ ctx.bezierCurveTo(x-3.5*sc*hr2,y+2.1*sc*hr2,x-1.7*sc*hr2,y+3.9*sc*hr2,x+0.1*sc*hr2,y+4.1*sc*hr2);
+ ctx.bezierCurveTo(x+1.8*sc*hr2,y+3.9*sc*hr2,x+3.5*sc*hr2,y+2.1*sc*hr2,x+3.0*sc*hr2,y-1.0*sc*hr2);
+ ctx.bezierCurveTo(x+3.1*sc*hr2,y-3.6*sc*hr2,x-3.1*sc*hr2,y-3.6*sc*hr2,x-3.0*sc*hr2,y-1.0*sc*hr2);
+ ctx.closePath();ctx.fill();
+ // gentle shade on the back side of the face
+ ctx.fillStyle='rgba(0,0,0,0.09)';ctx.beginPath();
+ ctx.ellipse(x-1.8*sc*hr2,y+0.4*sc*hr2,1.3*sc*hr2,2.5*sc*hr2,0,0,7);ctx.fill();
+ // Ears on both sides
+ ctx.fillStyle=skinD;
+ ctx.beginPath();ctx.ellipse(x-3.05*sc*hr2,y+0.35*sc*hr2,0.65*sc,0.95*sc,-0.15,0,7);ctx.fill();
+ ctx.beginPath();ctx.ellipse(x+3.05*sc*hr2,y+0.35*sc*hr2,0.65*sc,0.95*sc,0.15,0,7);ctx.fill();
  if(!bk){
-  if(blink>0.3){ctx.fillStyle='#1a1410';ctx.beginPath();ctx.ellipse(x+1.9*sc,y-0.4*sc,0.75*sc,1.0*sc*blink,0,0,7);ctx.fill();
-   ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x+2.15*sc,y-0.75*sc,0.3*sc,0,7);ctx.fill()}
-  else if(qIdx>=2){ctx.fillStyle='rgba(255,255,255,0.16)';ctx.beginPath();ctx.ellipse(x+1.6*sc,y-1.0*sc,0.9*sc,0.5*sc,-0.4,0,7);ctx.fill()}
+  const ex=1.15*sc*hr2,ey=y-0.55*sc*hr2,ew=0.7*sc;
+  const eh=blink>0.3?0.16*sc:1.05*sc;
+  // whites
+  ctx.fillStyle='#f3eee3';
+  ctx.beginPath();ctx.ellipse(x-ex,ey,ew,eh,0,0,7);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x+ex,ey,ew,eh,0,0,7);ctx.fill();
+  // iris + pupil
+  ctx.fillStyle='#241a12';
+  const irY=blink>0.3?0:0.08*sc;
+  ctx.beginPath();ctx.ellipse(x-ex+0.15*sc,ey+irY,0.4*sc,blink>0.3?0.12*sc:0.5*sc,0,0,7);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x+ex+0.15*sc,ey+irY,0.4*sc,blink>0.3?0.12*sc:0.5*sc,0,0,7);ctx.fill();
+  if(blink<=0.3){ctx.fillStyle='rgba(255,255,255,0.85)';
+   ctx.beginPath();ctx.arc(x-ex+0.28*sc,ey-0.2*sc,0.16*sc,0,7);ctx.fill();
+   ctx.beginPath();ctx.arc(x+ex+0.28*sc,ey-0.2*sc,0.16*sc,0,7);ctx.fill()}
+  // brows
+  if(qIdx>=2){ctx.strokeStyle='rgba(40,28,18,0.5)';ctx.lineWidth=0.5*sc;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(x-ex-0.55*sc,ey-0.72*sc);ctx.lineTo(x-ex+0.5*sc,ey-0.8*sc);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x+ex-0.5*sc,ey-0.8*sc);ctx.lineTo(x+ex+0.55*sc,ey-0.72*sc);ctx.stroke()}
+  // nose
+  if(qIdx>=1){ctx.strokeStyle=skinD;ctx.lineWidth=0.6*sc;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(x+0.05*sc,ey+0.25*sc);ctx.lineTo(x+0.55*sc,ey+1.2*sc);ctx.stroke();
+   ctx.fillStyle='rgba(0,0,0,0.10)';ctx.beginPath();ctx.ellipse(x+0.5*sc,ey+1.3*sc,0.5*sc,0.26*sc,0.12,0,7);ctx.fill()}
+  // mouth
+  ctx.strokeStyle='#6b3a2a';ctx.lineWidth=0.55*sc;ctx.lineCap='round';ctx.beginPath();
+  ctx.moveTo(x-0.75*sc,y+1.9*sc*hr2);ctx.quadraticCurveTo(x+0.15*sc,y+2.3*sc*hr2,x+0.95*sc,y+1.85*sc*hr2);ctx.stroke();
  }
- // Nose — only when facing us, sells the head direction
- if(!bk&&qIdx>=2){ctx.strokeStyle=skinD;ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+2.7*sc,y+0.1*sc);ctx.lineTo(x+3.3*sc,y+0.7*sc);ctx.stroke()}
+ // Nose baseline kept for direction cue when the head turns far
+ if(bk&&qIdx>=2){ctx.strokeStyle=skinD;ctx.lineWidth=0.6*sc;ctx.beginPath();ctx.moveTo(x+2.7*sc,y+0.1*sc);ctx.lineTo(x+3.3*sc,y+0.7*sc);ctx.stroke()}
  // Moustache / beard
  if(LK&&LK.beard){ctx.fillStyle=civH==='india'?'#2a2018':'#241c16';
   ctx.beginPath();ctx.ellipse(x+2.0*sc,y+1.5*sc,1.5*sc,0.85*sc,0,0,7);ctx.fill();
   if(qIdx>=2){ctx.beginPath();ctx.ellipse(x+1.5*sc,y+2.2*sc,1.1*sc,1.3*sc,0,0,7);ctx.fill()}}
- if(helmet===1){ // Kabuto
+  if((helmet===1||helmet===2)&&u.type!=='villager'&&qIdx>=1){
+   // Feather plume in the soldier's own colour; it lags behind the head so a
+   // pivot or lunge whips it around instead of being welded to the helmet.
+   const SLK=soldierLook(u);
+   const pc=SPLUME_COLORS[SLK.plume];
+   const fl=Math.sin(frame*0.06+u.id*1.3)*1.7*wind;
+   ctx.fillStyle=pc;
+   ctx.beginPath();
+   ctx.moveTo(x-0.8*sc,y-4.2*sc);
+   ctx.quadraticCurveTo(x-3.2*sc+fl*0.3,y-7.0*sc,x-4.6*sc+fl,y-3.8*sc);
+   ctx.lineTo(x-3.5*sc+fl*0.7,y-3.0*sc);
+   ctx.quadraticCurveTo(x-2.1*sc,y-5.0*sc,x+0.1*sc,y-3.8*sc);
+   ctx.closePath();ctx.fill();
+   if(qIdx>=2){
+    ctx.strokeStyle='rgba(0,0,0,0.28)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(x-1.3*sc,y-4.0*sc);
+    ctx.quadraticCurveTo(x-2.9*sc+fl*0.2,y-5.4*sc,x-3.9*sc+fl*0.4,y-3.5*sc);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.22)';
+    ctx.beginPath();ctx.ellipse(x-2.4*sc+fl*0.15,y-5.1*sc,0.9*sc,0.4*sc,-0.5,0,7);ctx.fill();
+   }
+  }
+  if(helmet===1){ // Kabuto
   ctx.fillStyle=civH==='china'?'#5a6a7a':civH==='india'?'#7d7468':'#2b2e36';
   ctx.beginPath();ctx.arc(x-0.2*sc,y-0.6*sc,4.1*sc,Math.PI*0.98,Math.PI*2.06);ctx.fill();
   ctx.fillStyle='#c9a227';
@@ -3936,38 +4020,77 @@ function drawHead(u,TC,sc,x,y,helmet,blink,bk){
  }
 }
 function drawKatana(hx,hy,ang){
- ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
- ctx.fillStyle='#c8d2e0';
- ctx.beginPath();ctx.moveTo(2,0);ctx.quadraticCurveTo(12,-2.6,22,-3.4);
- ctx.quadraticCurveTo(23.4,-1.6,23,0);ctx.quadraticCurveTo(14,2.2,2,1.2);ctx.closePath();ctx.fill();
- ctx.fillStyle='#1a1a1a';ctx.fillRect(0,-1.1,4,2.2);
- ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(1,0,1.5,0,7);ctx.fill();
- ctx.restore();
+  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
+  ctx.fillStyle='#c8d2e0';
+  ctx.beginPath();ctx.moveTo(2,0);ctx.quadraticCurveTo(12,-2.6,22,-3.4);
+  ctx.quadraticCurveTo(23.4,-1.6,23,0);ctx.quadraticCurveTo(14,2.2,2,1.2);ctx.closePath();ctx.fill();
+  // Ground-steel shimmer and hamon line so the blade reads as forged, not flat
+  if(qIdx>=2){
+   ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.lineWidth=0.6;
+   ctx.beginPath();ctx.moveTo(4,-0.4);ctx.quadraticCurveTo(13,-1.9,21.5,-2.7);ctx.stroke();
+   ctx.strokeStyle='rgba(180,200,225,0.5)';ctx.lineWidth=0.5;
+   ctx.beginPath();ctx.moveTo(3,0.6);ctx.quadraticCurveTo(13,0.2,22,-0.8);ctx.stroke();
+  }
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(0,-1.1,4,2.2);
+  ctx.fillStyle='#2a2a30';ctx.fillRect(4,-1.6,1.6,3.2);
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(1,0,1.5,0,7);ctx.fill();
+  ctx.strokeStyle='#ffd94d';ctx.lineWidth=0.5;ctx.beginPath();ctx.arc(1,0,1.5,0,7);ctx.stroke();
+  ctx.restore();
 }
 function drawSpear(hx,hy,ang,ext){
- ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
- const L=ext||0;
- ctx.strokeStyle='#6b4a22';ctx.lineWidth=1.9;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(19+L,0);ctx.stroke();
- ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(19+L,-2.4);ctx.lineTo(27+L,0);ctx.lineTo(19+L,2.4);ctx.closePath();ctx.fill();
- ctx.fillStyle='#8a2b2b';ctx.fillRect(15+L,-1.4,2.4,2.8);
- ctx.restore();
+  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
+  const L=ext||0;
+  ctx.strokeStyle='#6b4a22';ctx.lineWidth=1.9;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(19+L,0);ctx.stroke();
+  if(qIdx>=2){ctx.strokeStyle='rgba(120,86,44,0.6)';ctx.lineWidth=0.5;
+   ctx.beginPath();ctx.moveTo(-12,0.6);ctx.lineTo(19+L,0.6);ctx.stroke()}
+  ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(19+L,-2.4);ctx.lineTo(27+L,0);ctx.lineTo(19+L,2.4);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(120,140,170,0.5)';ctx.beginPath();ctx.moveTo(19+L,0);ctx.lineTo(27+L,0);ctx.lineTo(19+L,2.4);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#8a2b2b';ctx.fillRect(15+L,-1.4,2.4,2.8);
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(15+L,0,1.2,0,7);ctx.fill();
+  // Red silk tassel fluttering from the spearhead, flaps with the wind
+  const fl=Math.sin(frame*0.07+hx*0.1)*1.6*wind+Math.sin(frame*0.13)*0.4;
+  ctx.strokeStyle='#c03030';ctx.lineWidth=1.1;
+  ctx.beginPath();ctx.moveTo(15+L,0.6);ctx.quadraticCurveTo(13+L,2.2+fl*0.4,11.5+L,3.6+fl);ctx.stroke();
+  ctx.fillStyle='#d84040';ctx.beginPath();ctx.arc(11.5+L,3.8+fl,1.3,0,7);ctx.fill();
+  ctx.restore();
 }
 function drawBow(hx,hy,ang,pull){
- ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
- ctx.strokeStyle='#6b4a22';ctx.lineWidth=1.9;
- ctx.beginPath();ctx.arc(0,0,8.5,-1.42,1.42);ctx.stroke();
- const sy=-8.5*Math.sin(1.42),sy2=8.5*Math.sin(1.42);
- ctx.strokeStyle='rgba(245,240,225,0.9)';ctx.lineWidth=0.65;
- ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(-pull,0);ctx.lineTo(0,sy2);ctx.stroke();
- ctx.restore();
+  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
+  // Lacquered limb with a light spine highlight
+  ctx.strokeStyle='#6b4a22';ctx.lineWidth=1.9;
+  ctx.beginPath();ctx.arc(0,0,8.5,-1.42,1.42);ctx.stroke();
+  if(qIdx>=2){ctx.strokeStyle='rgba(150,110,60,0.55)';ctx.lineWidth=0.7;
+   ctx.beginPath();ctx.arc(0,0,7.4,-1.3,1.3);ctx.stroke()}
+  // Noched arrow waits on the drawn string, tip leading ahead
+  if(pull>0.6){
+   ctx.strokeStyle='#d8c9a0';ctx.lineWidth=1;
+   ctx.beginPath();ctx.moveTo(-pull,0);ctx.lineTo(11,0);ctx.stroke();
+   ctx.fillStyle='#e8eef6';
+   ctx.beginPath();ctx.moveTo(11,-1.6);ctx.lineTo(14.5,0);ctx.lineTo(11,1.6);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='#c03030';ctx.lineWidth=0.9;
+   ctx.beginPath();ctx.moveTo(-pull,-1.4);ctx.lineTo(-pull+2.4,0);ctx.lineTo(-pull,1.4);ctx.stroke();
+  }
+  const sy0=-8.5*Math.sin(1.42),sy1=8.5*Math.sin(1.42);
+  ctx.strokeStyle='rgba(245,240,225,0.9)';ctx.lineWidth=0.65;
+  ctx.beginPath();ctx.moveTo(0,sy0);ctx.lineTo(-pull,0);ctx.lineTo(0,sy1);ctx.stroke();
+  ctx.restore();
 }
 function drawLance(hx,hy,ang,ext){
- ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
- const L=(ext||0)*0.42;
- ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(17+L,0);ctx.stroke();
- ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(17+L,-2.6);ctx.lineTo(25+L,0);ctx.lineTo(17+L,2.6);ctx.closePath();ctx.fill();
- ctx.restore();
+  ctx.save();ctx.translate(hx,hy);ctx.rotate(ang);
+  const L=(ext||0)*0.42;
+  ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(17+L,0);ctx.stroke();
+  if(qIdx>=2){ctx.strokeStyle='rgba(120,80,30,0.6)';ctx.lineWidth=0.6;
+   ctx.beginPath();ctx.moveTo(-3,0.6);ctx.lineTo(17+L,0.6);ctx.stroke()}
+  ctx.fillStyle='#e8eef6';ctx.beginPath();ctx.moveTo(17+L,-2.6);ctx.lineTo(25+L,0);ctx.lineTo(17+L,2.6);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(120,140,170,0.5)';ctx.beginPath();ctx.moveTo(17+L,0);ctx.lineTo(25+L,0);ctx.lineTo(17+L,2.6);ctx.closePath();ctx.fill();
+  // Pennon flutters back from the lance collar, reads the charge speed
+  const fl=Math.sin(frame*0.1+hx*0.1)*1.8*wind;
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(18.5+L,0,1.4,0,7);ctx.fill();
+  ctx.fillStyle='#d94a4a';
+  ctx.beginPath();ctx.moveTo(19.5+L,-1.2);ctx.quadraticCurveTo(23.5+L,-3.4-fl,27+L,-1.2-fl*1.2);
+  ctx.lineTo(26.4+L,-0.2-fl*0.6);ctx.quadraticCurveTo(23+L,-1.4,19.5+L,0.4);ctx.closePath();ctx.fill();
+  ctx.restore();
 }
 function toolHandle(x0,y0,x1,y1,w){
  ctx.strokeStyle='#6b4a22';ctx.lineWidth=w;ctx.lineCap='round';
@@ -4032,11 +4155,26 @@ function drawBackGear(u,TC,sc,ySh){
   ctx.strokeStyle='#3a2a10';ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(-3.4*sc,ySh-2);ctx.lineTo(-4.4*sc+fl*0.3,ySh-15*sc);ctx.stroke();
   const bx=-4.4*sc+fl*0.3,by=ySh-15*sc;
-  ctx.fillStyle=TC.p;ctx.beginPath();
-  ctx.moveTo(bx,by);ctx.quadraticCurveTo(bx+9*sc+fl*0.5,by+1,bx+11*sc+fl,by+2.5);
-  ctx.lineTo(bx+11*sc+fl,by+9);ctx.quadraticCurveTo(bx+6*sc+fl*0.6,by+7.5,bx,by+6);ctx.closePath();ctx.fill();
-  ctx.restore();
- }
+   ctx.fillStyle=TC.p;ctx.beginPath();
+   ctx.moveTo(bx,by);ctx.quadraticCurveTo(bx+9*sc+fl*0.5,by+1,bx+11*sc+fl,by+2.5);
+   ctx.lineTo(bx+11*sc+fl,by+9);ctx.quadraticCurveTo(bx+6*sc+fl*0.6,by+7.5,bx,by+6);ctx.closePath();ctx.fill();
+   ctx.restore();
+  }
+  if(u.type==='archer'){
+   // Quiver of spare arrows slung across the back, fletching up top
+   ctx.save();
+   ctx.translate(-6.5*sc,ySh+2);ctx.rotate(0.5);
+   ctx.fillStyle='#5a3c18';ctx.fillRect(-1.8,-11,3.6,12);
+   ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(-1.8,-11,1.2,12);
+   for(const ax of [-1,0.2,1.2]){
+    ctx.strokeStyle='#d8c9a0';ctx.lineWidth=0.7;
+    ctx.beginPath();ctx.moveTo(ax,-11.5);ctx.lineTo(ax,-14.5);ctx.stroke();
+    ctx.fillStyle='#c03030';
+    ctx.beginPath();ctx.moveTo(ax,-14.5);ctx.lineTo(ax-0.7,-15.9);ctx.lineTo(ax+0.7,-15.9);ctx.closePath();ctx.fill();
+   }
+   ctx.fillStyle='#c9a227';ctx.fillRect(-1.8,-6.5,3.6,1.4);
+   ctx.restore();
+  }
 }
 function drawUnit(u){
  if(u.hp<=0&&!u.deadT)return;
@@ -4074,8 +4212,9 @@ if(u.hp<=0){drawCorpse(u);return}
  const moving=u.mv?1:0;
  const ph=(u.mv?frame*0.42:frame*0.09+u.id)+u.id*0.7;
  const sc=1.45;
- const LK=(t==='villager')?villLook(u):null;
- const scu=LK?sc*LK.tall:sc;
+  const LK=(t==='villager')?villLook(u):null;
+  const SLK=(t!=='villager'&&t!=='monk')?soldierLook(u):null;
+  const scu=LK?sc*LK.tall:sc;
  const yHip=(t==='villager')?-13.4*scu:-11*sc, ySh=-20.5*scu;
  const armored=t!=='villager'&&t!=='monk';
  const gk=u.node?u.node.kind:(u.carryKind==='w'?'wood':u.carryKind==='g'?'gold':'food');
@@ -4140,7 +4279,7 @@ drawLegs(u,P.wph,TC.p,TC.d,(LK?LK.skin:SKIN),scu,yHip,P);
   joint(bSh[0],bSh[1],P.armB,4.6*scu,1.0,4.4*scu,2.3*scu,vSkinD);
   drawBackGear(u,TC,scu,ySh);
   if(cap)drawCape(cap,TC,scu);
-  drawTorso(u,TC,scu,yHip,ySh,armored,P.torsoLean,LK,P.breath);
+  drawTorso(u,TC,scu,yHip,ySh,armored,P.torsoLean,LK,P.breath,SLK);
   if(armored){for(const sx of [-3.6*scu,3.6*scu]){ctx.fillStyle=TC.p;ctx.beginPath();ctx.arc(sx,ySh+0.6*scu,2.7*scu,0,7);ctx.fill();ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.stroke()}}
   const fSh=[1.4*scu+P.armReach,ySh+0.6*scu];
   const fa=P.armF;
@@ -4385,14 +4524,22 @@ function drawHorse(u,TC,ph,ap,blink){
   const kx=hip[0]+Math.sin(thighA)*th,ky=hip[1]+Math.cos(thighA)*th;
   const fa=thighA+kneeA;
   const fx=kx+Math.sin(fa)*sh,fy=ky+Math.cos(fa)*sh;
-  ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.8*sc;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
- }
- const bg=ctx.createLinearGradient(0,yBody-7*sc,0,yBody+7*sc);
+   ctx.strokeStyle='#4a2e12';ctx.lineWidth=2.8*sc;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
+   ctx.fillStyle='#1c120a';ctx.beginPath();ctx.ellipse(fx,fy,1.3*sc,0.9*sc,0,0,7);ctx.fill();
+  }
+  const bg=ctx.createLinearGradient(0,yBody-7*sc,0,yBody+7*sc);
  bg.addColorStop(0,'#8a5a2b');bg.addColorStop(0.45,'#6b4420');bg.addColorStop(1,'#3a2410');
  ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(-1,yBody,13*sc,7*sc,0,0,7);ctx.fill();
- ctx.fillStyle=TC.p;ctx.beginPath();ctx.ellipse(-1,yBody-6.4*sc,7*sc,3.2*sc,0,0,7);ctx.fill();
- ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle=TC.p;ctx.beginPath();ctx.ellipse(-1,yBody-6.4*sc,7*sc,3.2*sc,0,0,7);ctx.fill();
+  ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.stroke();
+  if(qIdx>=2){
+   // Braided trim along the blanket edge and a grommet
+   ctx.strokeStyle='rgba(0,0,0,0.32)';ctx.lineWidth=0.6;
+   ctx.beginPath();ctx.ellipse(-1,yBody-5.6*sc,6.2*sc,2.3*sc,0,0,7);ctx.stroke();
+   ctx.fillStyle='#c9a227';ctx.beginPath();ctx.arc(-6.4*sc,yBody-4.9*sc,0.8*sc,0,7);ctx.fill();
+   ctx.fillStyle='#ffd94d';ctx.beginPath();ctx.arc(4.6*sc,yBody-4.9*sc,0.8*sc,0,7);ctx.fill();
+  }
  const nBob=Math.sin(frame*0.09+u.id)*0.6+Math.sin(ph)*1.2;
  const hx=21*sc,hy=yBody-12*sc-nBob;
  // tail: lagged off the hindquarters so a gallop whips it
@@ -4434,10 +4581,11 @@ function drawHorse(u,TC,ph,ap,blink){
   const kx=hip[0]+Math.sin(thighA)*th,ky=hip[1]+Math.cos(thighA)*th;
   const fa=thighA+kneeA;
   const fx=kx+Math.sin(fa)*sh,fy=ky+Math.cos(fa)*sh;
-  ctx.strokeStyle='#6b4420';ctx.lineWidth=3*sc;
-  ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
- }
- // rider
+   ctx.strokeStyle='#6b4420';ctx.lineWidth=3*sc;
+   ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(kx,ky);ctx.lineTo(fx,fy);ctx.stroke();
+   ctx.fillStyle='#1c120a';ctx.beginPath();ctx.ellipse(fx,fy,1.3*sc,0.9*sc,0,0,7);ctx.fill();
+  }
+  // rider
  const rBob=Math.sin(ph*2)*0.9;
  const ySh=yBody-9*sc+rBob;
  const yHip=yBody-1.5*sc+rBob;
@@ -4454,8 +4602,12 @@ function drawHorse(u,TC,ph,ap,blink){
  const fe=joint(1.4*sc,ySh+0.4*sc,faA,4.6*sc,0.9,4.4*sc,2.4*sc,SKIN);
  // The lance lifts on the windup and levels out on the strike instead of
  // hanging at one angle for the whole cycle.
- drawLance(fe.fx,fe.fy,(sw&&sw.wAng!=null)?sw.wAng:(faA-0.15),sw?sw.ext:0);
- drawHead(u,TC,sc,1.4*sc+Math.sin(ph*2)*0.4,ySh-4.2*sc,1,blink,false);
+  drawLance(fe.fx,fe.fy,(sw&&sw.wAng!=null)?sw.wAng:(faA-0.15),sw?sw.ext:0);
+  // Bridle and reins run from the bit back to the rider's hand
+  ctx.strokeStyle='#3a2a10';ctx.lineWidth=0.9;
+  ctx.beginPath();ctx.moveTo(hx+2.4*sc,hy+0.8*sc);
+  ctx.quadraticCurveTo((hx+fe.fx)/2,(hy+fe.fy)/2+1.5*sc,fe.fx,fe.fy);ctx.stroke();
+  drawHead(u,TC,sc,1.4*sc+Math.sin(ph*2)*0.4,ySh-4.2*sc,1,blink,false);
 }
 function drawElephant(u,TC,ph,ap){
  const sc=1.5;
@@ -4481,17 +4633,45 @@ function drawElephant(u,TC,ph,ap){
  const eg=ctx.createRadialGradient(-5*sc,yB-6*sc,2*sc,-3*sc,yB,17*sc);
  eg.addColorStop(0,'#b0b5bf');eg.addColorStop(0.5,'#8b9099');eg.addColorStop(1,'#5f646d');
  ctx.fillStyle=eg;ctx.beginPath();ctx.ellipse(-3*sc,yB+bob,15.5*sc,10*sc,0,0,7);ctx.fill();
- ctx.fillStyle=TC.p;ctx.fillRect(-10.4*sc,yB-12*sc+bob,10*sc,3.4*sc);
- const tw2=Math.sin(frame/9+u.id)*0.22+(u.mv?Math.sin(ph)*0.2:0);
+  ctx.fillStyle=TC.p;ctx.fillRect(-10.4*sc,yB-12*sc+bob,10*sc,3.4*sc);
+  if(qIdx>=2){
+   // Gold saddle clasp
+   ctx.fillStyle='#c9a227';ctx.fillRect(-8.4*sc,yB-11.8*sc+bob,3*sc,3*sc);
+   ctx.fillStyle='#8a6a10';ctx.fillRect(-7.7*sc,yB-11.1*sc+bob,1.6*sc,1.6*sc);
+   // Mail skirt: studded plates along the flank so the beast reads as armoured
+   ctx.fillStyle='#5f6774';
+   for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse((-13+i*5.5)*sc,yB+1.5*sc+bob,2.4*sc,7.4*sc,0,0,7);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.10)';
+    ctx.beginPath();ctx.ellipse((-13+i*5.5)*sc-0.5*sc,yB-0.5*sc+bob,1.1*sc,4.6*sc,0,0,7);ctx.fill();
+    ctx.fillStyle='#5f6774';}
+   ctx.fillStyle='#3d4148';
+   for(let i=0;i<3;i++)for(let j=0;j<4;j++){
+    const px=(-13+i*5.5)*sc-1.4*sc+j*0.95*sc,py=(yB+1.5*sc+bob)-5.4*sc+j*3.2*sc;
+    ctx.beginPath();ctx.arc(px,py,0.55*sc,0,7);ctx.fill();}
+  }
+  // Tail: short and bristled, flicking when the beast moves
+  const tsw=Math.sin(frame*0.045+u.id)*1.6*wind+(u.mv?Math.sin(ph)*0.6:0);
+  ctx.strokeStyle='#6e727c';ctx.lineWidth=1.5*sc;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-18*sc,yB-3*sc+bob);
+  ctx.quadraticCurveTo(-21.5*sc,yB+2*sc+bob,-20*sc+tsw*2,yB+6.5*sc+bob);ctx.stroke();
+  ctx.fillStyle='#4c5058';ctx.beginPath();ctx.ellipse(-20*sc+tsw*2,yB+7*sc+bob,1*sc,1.8*sc,0,0,7);ctx.fill();
+  const tw2=Math.sin(frame/9+u.id)*0.22+(u.mv?Math.sin(ph)*0.2:0);
  // curl: the tip swings up and back toward the head, then whips down and out
  const curl=wind*3.4-slam*1.6;
  const trunk=[[13*sc,yB-4*sc+bob],
   [17*sc-curl*1.6*sc,yB+1*sc+bob-curl*1.4*sc],
   [18.5*sc-curl*3.4*sc,yB+6*sc+bob-curl*3.2*sc+tw2*2],
   [17*sc-curl*2.2*sc+tw2*3,yB+11*sc+bob-curl*1.2*sc+tw2*3]];
- ctx.strokeStyle='#7d828b';ctx.lineWidth=4.4*sc;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(trunk[0][0],trunk[0][1]);
- for(let i=1;i<trunk.length;i++)ctx.lineTo(trunk[i][0],trunk[i][1]);ctx.stroke();
+  ctx.strokeStyle='#7d828b';ctx.lineWidth=4.4*sc;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(trunk[0][0],trunk[0][1]);
+  for(let i=1;i<trunk.length;i++)ctx.lineTo(trunk[i][0],trunk[i][1]);ctx.stroke();
+  if(qIdx>=2){
+   // Nostril at the trunk tip, opening as the trunk swings, plus a sheen on the shoulder
+   ctx.fillStyle='#4c5058';
+   ctx.beginPath();ctx.ellipse(trunk[3][0],trunk[3][1]+0.6*sc,1.7*sc,1.1*sc,-0.4,0,7);ctx.fill();
+   ctx.fillStyle='rgba(255,255,255,0.14)';
+   ctx.beginPath();ctx.arc(trunk[1][0]-1*sc,trunk[1][1]-1.2*sc,1.2*sc,0,7);ctx.fill();
+  }
  // ears: flap outward on the swing, pinned flat while the trunk is curled
  ctx.fillStyle='#949aa4';
  for(const s2 of [-1,1]){
@@ -4499,8 +4679,10 @@ function drawElephant(u,TC,ph,ap){
   ctx.rotate(-0.25*curl+slam*0.55);
   ctx.beginPath();ctx.moveTo(0,-3.4*sc);
   ctx.quadraticCurveTo(-4.6*sc,1*sc,-1.6*sc,5.2*sc);
-  ctx.quadraticCurveTo(2.4*sc,2*sc,0,-3.4*sc);ctx.fill();
-  ctx.restore();
+   ctx.quadraticCurveTo(2.4*sc,2*sc,0,-3.4*sc);ctx.fill();
+   ctx.fillStyle='rgba(122,84,84,0.34)';
+   ctx.beginPath();ctx.ellipse(-1.8*sc,0.8*sc,1.5*sc,2.4*sc,0.12,0,7);ctx.fill();
+   ctx.restore();
  }
  ctx.fillStyle='#f7f3e6';
  for(const s2 of [-1,1]){
@@ -4535,13 +4717,26 @@ function drawCannonRig(u,TC,ph,ap){
    ctx.beginPath();ctx.moveTo(ox,yB+wr*0.55);
    ctx.lineTo(ox+Math.cos(a)*wr*0.9,yB+wr*0.55+Math.sin(a)*wr*0.9);ctx.stroke()}
  }
- const bg=ctx.createLinearGradient(0,yB-8*sc,0,yB-1*sc);
- bg.addColorStop(0,'#a3a9b3');bg.addColorStop(0.35,'#6b7079');bg.addColorStop(1,'#2b2e34');
+  // Wooden cart bed with a stack of cannonballs at the rear
+  ctx.fillStyle='#5b3a10';ctx.fillRect(-18*sc,yB-1.6*sc,10*sc,2.6*sc);
+  ctx.fillStyle='#3a2410';ctx.fillRect(-18*sc,yB+0.4*sc,10*sc,1.2*sc);
+  for(const [cx2,cy2] of [[-16*sc,yB-2.6*sc],[-11*sc,yB-2.6*sc],[-13.5*sc,yB-5*sc]]){
+   ctx.fillStyle='#2b2e34';ctx.beginPath();ctx.arc(cx2,cy2,2*sc,0,7);ctx.fill();
+   ctx.fillStyle='rgba(255,255,255,0.16)';ctx.beginPath();ctx.arc(cx2-0.7*sc,cy2-0.7*sc,0.7*sc,0,7);ctx.fill();
+  }
+  const bg=ctx.createLinearGradient(0,yB-8*sc,0,yB-1*sc);
+  bg.addColorStop(0,'#a3a9b3');bg.addColorStop(0.35,'#6b7079');bg.addColorStop(1,'#2b2e34');
  ctx.save();ctx.translate(-rec-settle*0.5,0);
  ctx.strokeStyle=bg;ctx.lineWidth=5.6*sc;ctx.lineCap='butt';
  ctx.beginPath();ctx.moveTo(-3*sc,yB-4.6*sc);ctx.lineTo(15*sc,yB-4.6*sc);ctx.stroke();
- ctx.fillStyle='#c9a227';ctx.beginPath();ctx.ellipse(15*sc,yB-4.6*sc,1.6*sc,3*sc,0,0,7);ctx.fill();
- ctx.restore();
+  ctx.fillStyle='#c9a227';ctx.beginPath();ctx.ellipse(15*sc,yB-4.6*sc,1.6*sc,3*sc,0,0,7);ctx.fill();
+  ctx.fillStyle='#b8922a';
+  ctx.fillRect(1.5*sc,yB-7.2*sc,1.1*sc,5.2*sc);
+  ctx.fillRect(8.5*sc,yB-7.2*sc,1.1*sc,5.2*sc);
+  ctx.fillStyle='rgba(255,255,255,0.20)';
+  ctx.fillRect(1.5*sc,yB-7.2*sc,0.4*sc,5.2*sc);
+  ctx.fillRect(8.5*sc,yB-7.2*sc,0.4*sc,5.2*sc);
+  ctx.restore();
  // crew: the gunner winds the rammer back, drives it home, then rocks back
  const cP={wph:ph,strideAmp:u.mv?1:0.12,legLen:6.95,crouch:sw?sw.crouch:0.1,hipShift:0,breath:0.5};
  for(const [ox,ph2] of [[-13*sc,0],[4*sc,Math.PI]]){
@@ -5193,11 +5388,28 @@ document.addEventListener('webkitfullscreenerror',()=>{fakeFull(true)});
  let errBannerT=0,errBannerTxt='';
 function loop(){const t0=performance.now();
 requestAnimationFrame(loop);
-try{if(hitStop>0){hitStop--;stepCamera()}else{step();stepCamera()}if(started)draw()}
+try{stepCamera();if(started)draw()}
 catch(err){if(!window.__loopErr||frame-(window.__loopErrF||0)>600){window.__loopErr=err;window.__loopErrF=frame;try{console.error('[loop]',err)}catch(_){}}
 if(!errBannerT)errBannerT=180;try{errBannerTxt=String(err&&err.message||err)}catch(_){}}
 if(lastFrameT>0){const realDt=t0-lastFrameT;fpsAvg=fpsAvg*0.92+(1000/Math.max(1,realDt))*0.08}
 lastFrameT=t0}
+// Wall-clock simulation driver: the world now advances on real time instead of
+// display frames, so the AI and units keep moving while the tab is hidden or the
+// window is minimized (requestAnimationFrame stops firing then). The interval is
+// throttled by the browser in the background but still ticks, and each tick
+// catches the simulation up to real time. Rendering stays on requestAnimationFrame.
+const SIM_FRAME=1000/60;
+let simLast=performance.now();
+function simDriver(){
+  const now=performance.now();
+  const dt=now-simLast;simLast=now;
+  if(!started||paused||gameOver)return;
+  let n=Math.floor(dt/SIM_FRAME);
+  if(n<=0)return;
+  if(n>1000)n=1000;   // bound the burst so a long background gap stays responsive
+  for(let i=0;i<n;i++){if(hitStop>0)hitStop--;else step()}
+}
+setInterval(simDriver,16);
 
 // ============ MENU ============
 document.querySelectorAll('#civBtns .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#civBtns .opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');myCiv=b.dataset.c;S.click()});
